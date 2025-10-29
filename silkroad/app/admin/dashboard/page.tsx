@@ -27,14 +27,26 @@ export default function AdminDashboardPage() {
   const [error, setError] = useState<string | null>(null);
   const [filter, setFilter] = useState<'all' | 'pending' | 'approved' | 'pulled'>('pending');
 
-  // Block if admin is disabled
+  // Check admin authentication (localStorage)
   useEffect(() => {
+    // Block if admin is disabled
     if (CONFIG.DISABLE_ADMIN) {
       router.push('/');
       return;
     }
+
+    // Check localStorage for admin session (TEMPORARY MVP solution)
+    const isAdminAuthenticated = localStorage.getItem('admin_authenticated') === 'true';
+    
+    if (!isAdminAuthenticated) {
+      console.log('❌ No admin session found, redirecting to login...');
+      router.push('/admin');
+      return;
+    }
+
+    console.log('✅ Admin session verified (localStorage)');
     fetchListings();
-  }, []);
+  }, [router]);
 
   const fetchListings = async () => {
     try {
@@ -43,6 +55,9 @@ export default function AdminDashboardPage() {
       setListings(response.data.listings || []);
     } catch (err: any) {
       if (err.response?.status === 401) {
+        // Clear localStorage and redirect to login
+        localStorage.removeItem('admin_authenticated');
+        console.log('❌ Admin session expired, redirecting...');
         router.push('/admin');
       } else {
         setError(err.response?.data?.error || 'Failed to load listings');
@@ -50,6 +65,13 @@ export default function AdminDashboardPage() {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleLogout = () => {
+    // Clear admin session
+    localStorage.removeItem('admin_authenticated');
+    console.log('✅ Admin logged out');
+    router.push('/admin');
   };
 
   const handleApprove = async (id: string) => {
@@ -79,6 +101,17 @@ export default function AdminDashboardPage() {
     }
   };
 
+  const handleRepublish = async (id: string) => {
+    if (confirm('Republish this listing? It will be visible to buyers again.')) {
+      try {
+        await axios.post(`/api/admin/listings/${id}/republish`);
+        fetchListings();
+      } catch (err: any) {
+        alert(err.response?.data?.error || 'Failed to republish listing');
+      }
+    }
+  };
+
   const filteredListings = listings.filter(l => {
     if (filter === 'pending') return l.state === 'in_review' && !l.approved;
     if (filter === 'approved') return l.state === 'on_market' && l.approved;
@@ -90,13 +123,21 @@ export default function AdminDashboardPage() {
     <div className="min-h-screen bg-gradient-to-b from-zinc-50 to-zinc-100 dark:from-zinc-950 dark:to-black py-12 px-4">
       <div className="mx-auto max-w-7xl">
         {/* Header */}
-        <div className="mb-8">
+        <div className="mb-8 flex items-start justify-between">
+          <div>
           <h1 className="text-4xl font-bold text-zinc-900 dark:text-zinc-50 mb-2">
             Admin Dashboard
           </h1>
           <p className="text-lg text-zinc-600 dark:text-zinc-400">
             Review and manage marketplace listings
           </p>
+          </div>
+          <button
+            onClick={handleLogout}
+            className="rounded-lg border border-red-300 px-4 py-2 text-sm font-medium text-red-600 hover:bg-red-50 dark:border-red-900 dark:text-red-400 dark:hover:bg-red-950 transition-colors"
+          >
+            Logout
+          </button>
         </div>
 
         {/* Filters */}
@@ -245,6 +286,26 @@ export default function AdminDashboardPage() {
                             className="text-sm text-red-600 hover:text-red-700 dark:text-red-400"
                           >
                             Pull Listing
+                          </button>
+                        </div>
+                      )}
+
+                      {listing.state === 'pulled' && (
+                        <div className="flex items-center space-x-2">
+                          <span className="text-sm font-medium text-red-600 dark:text-red-400">
+                            ✗ Pulled from marketplace
+                          </span>
+                          <button
+                            onClick={() => handleRepublish(listing._id)}
+                            className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 transition-colors"
+                          >
+                            🔄 Republish
+                          </button>
+                          <button
+                            onClick={() => handleSetRisk(listing._id, listing.riskLevel === 'standard' ? 'high-risk' : 'standard')}
+                            className="rounded-lg border border-zinc-300 px-4 py-2 text-sm font-medium text-zinc-700 hover:bg-zinc-100 dark:border-zinc-700 dark:text-zinc-300 dark:hover:bg-zinc-800 transition-colors"
+                          >
+                            Set as {listing.riskLevel === 'standard' ? 'High-Risk' : 'Standard'}
                           </button>
                         </div>
                       )}

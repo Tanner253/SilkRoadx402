@@ -1,17 +1,16 @@
 /**
- * Database Model Types (Simplified for Mock Mode)
+ * Database Model Types
  * 
- * NOTE: For demo deployment, these are plain interfaces without Mongoose.
- * For production, extend from Mongoose Document types.
+ * TypeScript interfaces for Mongoose models
  */
 
+import { Document } from 'mongoose';
 import type { ListingCategory, RiskLevel, ListingState, TransactionStatus, LogType } from '@/config/constants';
 
 // ============================================
 // Listing
 // ============================================
-export interface IListing {
-  _id?: string;
+export interface IListing extends Document {
   wallet: string;
   title: string;
   description: string;
@@ -33,10 +32,23 @@ export interface IListing {
 }
 
 // ============================================
+// User (for TOS tracking)
+// ============================================
+export interface IUser extends Document {
+  wallet: string;
+  tosAccepted: boolean;
+  tosAcceptedAt?: Date;
+  isTokenGated: boolean;
+  tokenBalance: number;
+  lastSeen?: Date;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+// ============================================
 // Transaction
 // ============================================
-export interface ITransaction {
-  _id?: string;
+export interface ITransaction extends Document {
   listingId: string;
   buyerWallet: string;
   sellerWallet: string;
@@ -48,25 +60,23 @@ export interface ITransaction {
 }
 
 // ============================================
-// Log
-// ============================================
-export interface ILog {
-  _id?: string;
-  type: LogType;
-  message: string;
-  wallet?: string;
-  ip?: string;
-  createdAt: Date;
-}
-
-// ============================================
 // Report
 // ============================================
-export interface IReport {
-  _id?: string;
+export interface IReport extends Document {
   listingId: string;
   reporterWallet: string;
   reason?: string;
   createdAt: Date;
 }
 
+// ============================================
+// Log
+// ============================================
+export interface ILog extends Document {
+  type: LogType;
+  message: string;
+  wallet?: string;
+  ip?: string;
+  metadata?: Record<string, any>;
+  createdAt: Date;
+}

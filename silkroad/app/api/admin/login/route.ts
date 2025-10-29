@@ -1,6 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { CONFIG } from '@/config/constants';
 
+/**
+ * TEMPORARY Admin Login (MVP)
+ * 
+ * Uses simple code verification and returns success.
+ * Frontend uses localStorage for session management.
+ * 
+ * TODO: Replace with proper JWT-based auth for production
+ */
 export async function POST(req: NextRequest) {
   // Block if admin is disabled
   if (CONFIG.DISABLE_ADMIN) {
@@ -22,21 +30,26 @@ export async function POST(req: NextRequest) {
 
     // Verify admin code
     if (code !== CONFIG.ADMIN_CODE) {
+      console.log('❌ Invalid admin code attempt');
       return NextResponse.json(
         { error: 'Invalid admin code' },
         { status: 401 }
       );
     }
 
-    // In mock mode, just return success
-    // In real mode, you'd generate a JWT token here
+    console.log('✅ Admin authenticated successfully (TEMP localStorage mode)');
+
+    // Simple success response
+    // Frontend will set localStorage flag
     const response = NextResponse.json({
       success: true,
+      isAdmin: true,
       _mock: CONFIG.MOCK_MODE,
+      _temp: 'Using localStorage for admin session (MVP only)',
     });
 
-    // Set admin cookie (simple version for mock)
-    response.cookies.set('admin_auth', 'true', {
+    // Set simple cookie as backup
+    response.cookies.set('admin_session', 'active', {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'lax',
@@ -45,7 +58,7 @@ export async function POST(req: NextRequest) {
 
     return response;
   } catch (error: any) {
-    console.error('Admin login error:', error);
+    console.error('❌ Admin login error:', error);
     return NextResponse.json(
       { error: 'Login failed' },
       { status: 500 }

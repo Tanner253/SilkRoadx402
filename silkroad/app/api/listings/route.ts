@@ -15,15 +15,7 @@ export async function GET(req: NextRequest) {
     // ============================================
     // MOCK MODE
     // ============================================
-    console.log('🧪 MOCK_MODE:', CONFIG.MOCK_MODE);
-    console.log('🧪 Environment check:', {
-      NEXT_PUBLIC_MOCK_MODE: process.env.NEXT_PUBLIC_MOCK_MODE,
-      NODE_ENV: process.env.NODE_ENV
-    });
-    
     if (CONFIG.MOCK_MODE) {
-      console.log('🧪 Using MOCK MODE for listings');
-      
       if (wallet) {
         console.log(`🧪 MOCK: Fetching listings for wallet ${wallet.slice(0, 8)}...`);
         const listings = mockStore.getListingsByWallet(wallet);
@@ -36,22 +28,23 @@ export async function GET(req: NextRequest) {
 
       console.log('🧪 MOCK: Fetching approved listings');
       
-      try {
-        // Always seed data on serverless to ensure listings exist
-        console.log('🧪 MOCK: Seeding listings...');
+      // Seed data if empty
+      const listings = mockStore.getApprovedListings();
+      if (listings.length === 0) {
         mockStore.seedListings();
         const seededListings = mockStore.getApprovedListings();
-        console.log(`🧪 MOCK: Found ${seededListings.length} listings`);
-        
         return NextResponse.json({
           success: true,
           listings: seededListings,
           _mock: true,
         });
-      } catch (seedError: any) {
-        console.error('🧪 MOCK: Seed error:', seedError);
-        throw seedError;
       }
+
+      return NextResponse.json({
+        success: true,
+        listings,
+        _mock: true,
+      });
     }
 
     // ============================================
@@ -82,62 +75,33 @@ export async function GET(req: NextRequest) {
     });
   } catch (error: any) {
     console.error('Get listings error:', error);
-    console.error('Error stack:', error.stack);
-    console.error('Error details:', JSON.stringify(error, null, 2));
-    
-    // FALLBACK: Return hardcoded listings if everything fails
-    console.log('🧪 FALLBACK: Returning hardcoded listings');
-    return NextResponse.json({
-      success: true,
-      listings: [
-        {
-          _id: 'fallback_1',
-          wallet: 'demo',
-          title: 'Advanced Trading Bot - MEV Arbitrage',
-          description: 'High-frequency trading bot optimized for Solana DEX arbitrage. Includes advanced MEV strategies, customizable parameters, and detailed profit tracking. Built with Rust for maximum performance.',
-          imageUrl: 'https://images.unsplash.com/photo-1639762681485-074b7f938ba0?w=800&h=600&fit=crop',
-          price: 49.99,
-          category: 'Trading Bot',
-          riskLevel: 'standard',
-          state: 'on_market',
-          approved: true,
-          reportsCount: 0,
-          failedPurchaseCount: 0,
-          createdAt: new Date(),
-          updatedAt: new Date(),
-        },
-        {
-          _id: 'fallback_2',
-          wallet: 'demo',
-          title: 'NFT Sniper Bot - Multi-Marketplace',
-          description: 'Lightning-fast NFT minting and sniping bot supporting Magic Eden, Tensor, and other major Solana marketplaces. Real-time floor tracking and automated bidding.',
-          imageUrl: 'https://images.unsplash.com/photo-1620321023374-d1a68fbc720d?w=800&h=600&fit=crop',
-          price: 29.99,
-          category: 'Trading Bot',
-          riskLevel: 'standard',
-          state: 'on_market',
-          approved: true,
-          reportsCount: 0,
-          failedPurchaseCount: 0,
-          createdAt: new Date(),
-          updatedAt: new Date(),
-        }
-      ],
-      _mock: true,
-      _fallback: true
-    });
+    return NextResponse.json(
+      { error: 'Failed to fetch listings' },
+      { status: 500 }
+    );
   }
 }
 
 // POST - Create new listing
 export async function POST(req: NextRequest) {
   try {
-    const { wallet, title, description, price, category, imageUrl } = await req.json();
+    const { 
+      wallet, 
+      title, 
+      description, 
+      price, 
+      category, 
+      imageUrl, 
+      deliveryUrl,
+      demoVideoUrl,
+      whitepaperUrl,
+      githubUrl 
+    } = await req.json();
 
     // Validation
-    if (!wallet || !title || !description || !price || !category || !imageUrl) {
+    if (!wallet || !title || !description || !price || !category || !imageUrl || !deliveryUrl) {
       return NextResponse.json(
-        { error: 'All fields are required' },
+        { error: 'Required fields: wallet, title, description, price, category, imageUrl, deliveryUrl' },
         { status: 400 }
       );
     }
@@ -185,7 +149,7 @@ export async function POST(req: NextRequest) {
     // MOCK MODE
     // ============================================
     if (CONFIG.MOCK_MODE) {
-      console.log('🧪 MOCK: Creating listing');
+      console.log('🧪 MOCK: Creating listing with delivery URL');
 
       const listing = mockStore.createListing({
         wallet,
@@ -194,7 +158,13 @@ export async function POST(req: NextRequest) {
         price: priceNum,
         category,
         imageUrl,
+        deliveryUrl,
+        demoVideoUrl,
+        whitepaperUrl,
+        githubUrl,
       });
+
+      console.log(`   Delivery URL: ${deliveryUrl}`);
 
       return NextResponse.json({
         success: true,
@@ -215,6 +185,10 @@ export async function POST(req: NextRequest) {
       price: priceNum,
       category,
       imageUrl,
+      deliveryUrl,
+      demoVideoUrl,
+      whitepaperUrl,
+      githubUrl,
       riskLevel: 'standard',
       state: 'in_review',
       approved: false,

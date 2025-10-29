@@ -32,6 +32,11 @@ export default function AdminLoginPage() {
       const response = await axios.post('/api/admin/login', { code });
       
       if (response.data.success) {
+        // Set localStorage flag (TEMPORARY MVP solution)
+        localStorage.setItem('admin_authenticated', 'true');
+        console.log('✅ Admin session started (localStorage)');
+        
+        // Redirect to dashboard
         router.push('/admin/dashboard');
       }
     } catch (err: any) {

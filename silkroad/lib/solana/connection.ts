@@ -1,9 +1,9 @@
 /**
  * Solana RPC Connection Manager
  * 
- * Maintains dual connections:
- * - Mainnet: Token gating only (always mainnet)
- * - Payment: Devnet in dev, mainnet in prod
+ * Maintains mainnet connections for:
+ * - Token gating ($SRx402 balance checks)
+ * - USDC payments (real money transactions)
  */
 
 import { Connection } from '@solana/web3.js';
@@ -13,7 +13,6 @@ import { CONFIG } from '@/config/constants';
 // RPC endpoints from environment config
 const MAINNET_RPC = CONFIG.MAINNET_RPC;
 const DEVNET_RPC = CONFIG.DEVNET_RPC;
-const IS_PRODUCTION = CONFIG.NODE_ENV === 'production';
 
 // Connection configuration
 const CONNECTION_CONFIG = {
@@ -22,7 +21,7 @@ const CONNECTION_CONFIG = {
 };
 
 /**
- * Mainnet Connection (Token Gating Only)
+ * Mainnet Connection (Token Gating)
  * 
  * Always uses mainnet RPC for checking $SRx402 balance
  */
@@ -31,12 +30,9 @@ export const mainnetConnection = new Connection(MAINNET_RPC, CONNECTION_CONFIG);
 /**
  * Payment Connection
  * 
- * Uses devnet in development, mainnet in production
+ * Always uses mainnet for USDC transactions (real money)
  */
-export const paymentConnection = new Connection(
-  IS_PRODUCTION ? MAINNET_RPC : DEVNET_RPC,
-  CONNECTION_CONFIG
-);
+export const paymentConnection = new Connection(MAINNET_RPC, CONNECTION_CONFIG);
 
 /**
  * Get RPC Configuration

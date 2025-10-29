@@ -1,10 +1,42 @@
 /**
- * User Model (Stub for Mock Mode)
+ * User Model
  * 
- * NOTE: For demo deployment, models are not needed (uses mockStore).
- * For production, implement proper Mongoose models.
+ * Mongoose schema for user data (TOS tracking)
  */
 
-// Stub export for mock mode compatibility
-export const User = null as any;
+import mongoose, { Schema } from 'mongoose';
+import type { IUser } from '@/types/database';
+
+const UserSchema = new Schema<IUser>({
+  wallet: {
+    type: String,
+    required: true,
+    unique: true,
+    index: true,
+  },
+  tosAccepted: {
+    type: Boolean,
+    required: true,
+    default: false,
+  },
+  tosAcceptedAt: {
+    type: Date,
+  },
+  isTokenGated: {
+    type: Boolean,
+    default: false,
+  },
+  tokenBalance: {
+    type: Number,
+    default: 0,
+  },
+  lastSeen: {
+    type: Date,
+  },
+}, {
+  timestamps: true,
+});
+
+// Export model
+export const User = mongoose.models.User || mongoose.model<IUser>('User', UserSchema);
 export default User;

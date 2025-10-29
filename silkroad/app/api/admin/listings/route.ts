@@ -4,10 +4,23 @@ import { mockStore } from '@/lib/mockStore';
 import { connectDB } from '@/lib/db';
 import { Listing } from '@/models/Listing';
 
-// Middleware to check admin auth
+/**
+ * TEMPORARY Admin Auth Check (MVP)
+ * 
+ * Simple cookie check - frontend manages session via localStorage
+ * 
+ * TODO: Replace with proper JWT verification for production
+ */
 function checkAdminAuth(req: NextRequest): boolean {
-  const adminAuth = req.cookies.get('admin_auth');
-  return adminAuth?.value === 'true';
+  // Check for admin session cookie
+  const adminSession = req.cookies.get('admin_session');
+  const isAuthenticated = adminSession?.value === 'active';
+  
+  if (!isAuthenticated) {
+    console.log('❌ Admin auth failed: No valid session cookie');
+  }
+  
+  return isAuthenticated;
 }
 
 export async function GET(req: NextRequest) {

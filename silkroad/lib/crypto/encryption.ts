@@ -1,62 +1,62 @@
 /**
- * Encryption Utilities (Simplified for Mock Mode Demo)
+ * Encryption Utilities
  * 
- * NOTE: For demo deployment, encryption is simplified.
- * For production, implement proper AES encryption.
+ * AES encryption/decryption for sensitive data (e.g., deliveryUrl)
  */
 
+import CryptoJS from 'crypto-js';
 import { CONFIG } from '@/config/constants';
 
 /**
- * Encrypt string (Mock mode compatible)
+ * Encrypt string using AES-256
  * 
  * @param plaintext - String to encrypt
- * @returns string - Encrypted ciphertext (or plaintext in mock mode)
+ * @returns string - Encrypted ciphertext
  */
 export function encrypt(plaintext: string): string {
-  // In mock mode, just base64 encode for demo purposes
-  if (CONFIG.MOCK_MODE) {
-    return Buffer.from(plaintext).toString('base64');
+  if (!CONFIG.APP_SECRET) {
+    throw new Error('APP_SECRET not configured');
   }
-  
-  // For production, implement proper AES encryption
-  return plaintext;
-}
 
-/**
- * Decrypt string (Mock mode compatible)
- * 
- * @param ciphertext - Encrypted string
- * @returns string - Decrypted plaintext
- */
-export function decrypt(ciphertext: string): string {
-  // In mock mode, just base64 decode
-  if (CONFIG.MOCK_MODE) {
-    try {
-      return Buffer.from(ciphertext, 'base64').toString('utf-8');
-    } catch {
-      return ciphertext; // Return as-is if not valid base64
-    }
-  }
-  
-  // For production, implement proper AES decryption
+  const ciphertext = CryptoJS.AES.encrypt(plaintext, CONFIG.APP_SECRET).toString();
   return ciphertext;
 }
 
 /**
- * Hash string (Mock mode compatible)
+ * Decrypt string using AES-256
+ * 
+ * @param ciphertext - Encrypted string
+ * @returns string - Decrypted plaintext
+ * @throws Error if decryption fails
+ */
+export function decrypt(ciphertext: string): string {
+  if (!CONFIG.APP_SECRET) {
+    throw new Error('APP_SECRET not configured');
+  }
+
+  try {
+    const bytes = CryptoJS.AES.decrypt(ciphertext, CONFIG.APP_SECRET);
+    const plaintext = bytes.toString(CryptoJS.enc.Utf8);
+    
+    if (!plaintext) {
+      throw new Error('Decryption failed - empty result');
+    }
+    
+    return plaintext;
+  } catch (error) {
+    console.error('Decryption error:', error);
+    throw new Error('Failed to decrypt data');
+  }
+}
+
+/**
+ * Hash string using SHA-256
  * 
  * @param input - String to hash
- * @returns string - Hash (simple for demo)
+ * @returns string - SHA-256 hash
  */
 export function hash(input: string): string {
-  // Mock hash for demo mode
-  if (CONFIG.MOCK_MODE) {
-    return Buffer.from(input).toString('base64');
-  }
-  
-  // For production, implement proper SHA-256 hashing
-  return input;
+  return CryptoJS.SHA256(input).toString();
 }
 
 /**
@@ -66,7 +66,7 @@ export function hash(input: string): string {
  * @returns string - Random hex string
  */
 export function generateNonce(length: number = 16): string {
-  return Math.random().toString(36).substring(2, 2 + length);
+  return CryptoJS.lib.WordArray.random(length).toString();
 }
 
 /**
@@ -91,4 +91,3 @@ export function verifyOTP(inputOTP: string, storedHash: string): boolean {
   const inputHash = hash(inputOTP);
   return inputHash === storedHash;
 }
-

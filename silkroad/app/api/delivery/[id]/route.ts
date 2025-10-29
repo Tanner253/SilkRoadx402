@@ -19,11 +19,17 @@ export async function GET(
       
       const transaction = mockStore.getTransaction(id);
       if (!transaction) {
+        console.error(`❌ Transaction ${id} not found in mockStore`);
+        console.log(`   Available transactions:`, mockStore.getAllTransactions().map(t => t._id));
         return NextResponse.json(
           { error: 'Transaction not found' },
           { status: 404 }
         );
       }
+
+      console.log(`✅ Found transaction ${id}`);
+      console.log(`   Buyer: ${transaction.buyerWallet.slice(0, 8)}...`);
+      console.log(`   Delivery URL: ${transaction.deliveryUrl}`);
 
       return NextResponse.json({
         success: true,

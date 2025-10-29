@@ -44,7 +44,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({
         success: true,
         wallet,
-        hasAcceptedTOS: true,
+        tosAccepted: true,
         _mock: true,
       });
     }
@@ -67,14 +67,14 @@ export async function POST(req: NextRequest) {
     }
 
     // Update TOS acceptance
-    user.hasAcceptedTOS = true;
+    user.tosAccepted = true;
     user.tosAcceptedAt = new Date();
     await user.save();
 
     return NextResponse.json({
       success: true,
       wallet,
-      hasAcceptedTOS: true,
+      tosAccepted: true,
     });
   } catch (error: any) {
     console.error('TOS acceptance error:', error);

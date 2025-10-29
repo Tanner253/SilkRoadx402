@@ -4,9 +4,12 @@ import { mockStore } from '@/lib/mockStore';
 import { connectDB } from '@/lib/db';
 import { Listing } from '@/models/Listing';
 
+/**
+ * TEMPORARY Admin Auth Check (MVP)
+ */
 function checkAdminAuth(req: NextRequest): boolean {
-  const adminAuth = req.cookies.get('admin_auth');
-  return adminAuth?.value === 'true';
+  const adminSession = req.cookies.get('admin_session');
+  return adminSession?.value === 'active';
 }
 
 export async function POST(

@@ -46,13 +46,13 @@ export const CONFIG = {
   NEXT_PUBLIC_APP_URL: process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000',
   
   // Development Mock Mode (bypasses database for testing)
-  // Default to TRUE for demo deployment (only disable if explicitly set to 'false')
-  MOCK_MODE: process.env.NEXT_PUBLIC_MOCK_MODE !== 'false',
-  MOCK_TOKEN_GATING_PASSED: process.env.NEXT_PUBLIC_MOCK_TOKEN_GATING !== 'false',
+  // Only enable if explicitly set to 'true'
+  MOCK_MODE: process.env.NEXT_PUBLIC_MOCK_MODE === 'true',
+  MOCK_TOKEN_GATING_PASSED: process.env.NEXT_PUBLIC_MOCK_TOKEN_GATING === 'true',
   
   // Admin Panel (disable for public demos)
-  // Default to TRUE for demo deployment (only enable if explicitly set to 'false')
-  DISABLE_ADMIN: process.env.NEXT_PUBLIC_DISABLE_ADMIN !== 'false',
+  // Only disable if explicitly set to 'true'
+  DISABLE_ADMIN: process.env.NEXT_PUBLIC_DISABLE_ADMIN === 'true',
 };
 
 // Token Addresses (for backward compatibility)
@@ -129,7 +129,9 @@ export type LogType = typeof LOG_TYPES[keyof typeof LOG_TYPES];
 
 // JWT Configuration
 export const JWT_CONFIG = {
-  EXPIRY: '1h',
+  SECRET: process.env.JWT_SECRET || 'dev-secret-change-in-production',
+  EXPIRY: 3600, // 1 hour in seconds
+  ADMIN_EXPIRY: 28800, // 8 hours in seconds
   COOKIE_NAME: 'srx402_token',
   ADMIN_COOKIE_NAME: 'srx402_admin_token',
 };

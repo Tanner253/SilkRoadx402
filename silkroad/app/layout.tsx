@@ -4,6 +4,7 @@ import "./globals.css";
 import { SolanaWalletProvider } from "@/components/providers/WalletProvider";
 import { AuthProvider } from "@/components/providers/AuthProvider";
 import { Navbar } from "@/components/layout/Navbar";
+import { AppInitializer } from "@/components/providers/AppInitializer";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -29,13 +30,15 @@ export default function RootLayout({
     <html lang="en">
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        suppressHydrationWarning
       >
+        <AppInitializer />
         <SolanaWalletProvider>
           <AuthProvider>
-            <Navbar />
-            <main className="pt-16">
-              {children}
-            </main>
+          <Navbar />
+          <main className="pt-16">
+        {children}
+          </main>
           </AuthProvider>
         </SolanaWalletProvider>
       </body>
