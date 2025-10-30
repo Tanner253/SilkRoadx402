@@ -30,7 +30,6 @@ function BrowsePageContent() {
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [hideMyListings, setHideMyListings] = useState(true);
   const [walletSearch, setWalletSearch] = useState<string>('');
-  const [showWarning, setShowWarning] = useState(false);
 
   // Pre-fill wallet search from URL params (e.g., from leaderboard)
   useEffect(() => {
@@ -121,42 +120,6 @@ function BrowsePageContent() {
             Discover private software, tools, and scripts
           </p>
         </div>
-
-        {/* Warning Toggle Button */}
-        <div className="mb-8">
-          <button
-            onClick={() => setShowWarning(!showWarning)}
-            className="flex items-center space-x-3 rounded-lg border-2 border-red-600 bg-red-600 px-4 py-3 hover:bg-red-700 transition-colors"
-            title="Important Safety Warning"
-          >
-            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-white text-red-600 text-xl font-bold">
-              ⚠️
-            </div>
-            <span className="text-sm font-bold text-white">
-              {showWarning ? 'Hide' : 'Show'} Critical Safety Warning
-            </span>
-          </button>
-        </div>
-
-        {/* Critical Warning Banner (Toggleable) */}
-        {showWarning && (
-          <div className="mb-8 rounded-lg border-2 border-red-600 bg-red-50 p-6 dark:border-red-500 dark:bg-red-950">
-            <div className="flex items-start space-x-4">
-              <div className="flex h-12 w-12 items-center justify-center rounded-full bg-red-600 text-white text-2xl font-bold flex-shrink-0">
-                ⚠️
-              </div>
-              <div>
-                <h2 className="text-lg font-bold text-red-900 dark:text-red-100 mb-2">
-                  CRITICAL WARNING
-                </h2>
-                <p className="text-sm font-semibold text-red-800 dark:text-red-200 leading-relaxed">
-                  DO NOT TRUST VENDORS. DO NOT PURCHASE ANYTHING WITHOUT DOING YOUR RESEARCH. 
-                  YOU SHOULD FIND A VENDOR LISTING VIA WALLET DIRECTLY. SHOP AT YOUR OWN RISK.
-                </p>
-              </div>
-            </div>
-          </div>
-        )}
 
         {/* Filters */}
         <div className="mb-8 space-y-4">
