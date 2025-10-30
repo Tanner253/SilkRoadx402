@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { useWallet } from '@solana/wallet-adapter-react';
 import { useSearchParams } from 'next/navigation';
@@ -19,7 +19,7 @@ interface Listing {
   riskLevel: 'standard' | 'high-risk';
 }
 
-export default function BrowsePage() {
+function BrowsePageContent() {
   const { isConnected, hasAcceptedTOS, isTokenGated, mounted } = useAuth();
   const { publicKey } = useWallet();
   const searchParams = useSearchParams();
@@ -305,6 +305,21 @@ export default function BrowsePage() {
         )}
       </div>
     </div>
+  );
+}
+
+export default function BrowsePage() {
+  return (
+    <Suspense fallback={
+      <div className="flex min-h-screen items-center justify-center bg-gradient-to-b from-zinc-50 to-zinc-100 dark:from-zinc-950 dark:to-black">
+        <div className="text-center">
+          <div className="h-8 w-8 animate-spin rounded-full border-4 border-blue-600 border-t-transparent mx-auto"></div>
+          <p className="mt-4 text-zinc-600 dark:text-zinc-400">Loading...</p>
+        </div>
+      </div>
+    }>
+      <BrowsePageContent />
+    </Suspense>
   );
 }
 

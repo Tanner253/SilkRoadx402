@@ -45,19 +45,22 @@ export async function POST(req: NextRequest) {
     if (paymentHeader) {
       try {
         const payload = decodePaymentPayload(paymentHeader);
-        const buyerWallet = (payload.payload as SolanaExactPayload).from;
         
-        if (buyerWallet) {
-          const rateLimit = await checkRateLimit(buyerWallet, RATE_LIMITS.PURCHASE);
-          if (!rateLimit.allowed) {
-            return NextResponse.json(
-              { 
-                error: rateLimit.message,
-                resetAt: rateLimit.resetAt,
-                remaining: rateLimit.remaining
-              },
-              { status: 429 }
-            );
+        if (payload && payload.payload) {
+          const buyerWallet = (payload.payload as SolanaExactPayload).from;
+          
+          if (buyerWallet) {
+            const rateLimit = await checkRateLimit(buyerWallet, RATE_LIMITS.PURCHASE);
+            if (!rateLimit.allowed) {
+              return NextResponse.json(
+                { 
+                  error: rateLimit.message,
+                  resetAt: rateLimit.resetAt,
+                  remaining: rateLimit.remaining
+                },
+                { status: 429 }
+              );
+            }
           }
         }
       } catch (e) {

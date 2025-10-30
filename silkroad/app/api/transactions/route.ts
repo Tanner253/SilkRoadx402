@@ -79,7 +79,7 @@ export async function GET(req: NextRequest) {
     // Enrich with listing data
     const enrichedTransactions = await Promise.all(
       transactions.map(async (tx) => {
-        const listing = await Listing.findById(tx.listingId).select('title category').lean();
+        const listing = await Listing.findById(tx.listingId).select('title category').lean() as { title: string; category: string } | null;
         return {
           ...tx,
           listingTitle: listing?.title || 'Unknown',
