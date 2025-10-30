@@ -51,7 +51,15 @@ export async function GET(req: NextRequest) {
     // ============================================
     // REAL MODE
     // ============================================
-    await connectDB();
+    try {
+      await connectDB();
+    } catch (dbError: any) {
+      console.error('❌ Database connection failed:', dbError.message);
+      return NextResponse.json(
+        { error: 'Database connection failed', details: dbError.message },
+        { status: 500 }
+      );
+    }
 
     if (wallet) {
       const listings = await Listing.find({ wallet })
@@ -87,16 +95,21 @@ export async function GET(req: NextRequest) {
       state: 'on_market',
     })
       .sort({ createdAt: -1 })
-      .select('-deliveryUrl'); // Never expose delivery URL in list
+      .select('-deliveryUrl') // Never expose delivery URL in list
+      .lean();
 
     return NextResponse.json({
       success: true,
-      listings,
+      listings: listings || [],
     });
   } catch (error: any) {
-    console.error('Get listings error:', error);
+    console.error('❌ Get listings error:', error);
     return NextResponse.json(
-      { error: 'Failed to fetch listings' },
+      { 
+        error: 'Failed to fetch listings', 
+        details: error.message,
+        stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
+      },
       { status: 500 }
     );
   }
