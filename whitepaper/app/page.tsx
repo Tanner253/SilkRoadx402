@@ -92,6 +92,14 @@ export default function Home() {
           </div>
           <div className="flex items-center gap-4">
             <a 
+              href="https://www.silkroadx402.com/" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="px-6 py-2 bg-gradient-to-r from-green-500 to-cyan-500 text-black font-bold hover:from-green-400 hover:to-cyan-400 transition-all rounded shadow-lg"
+            >
+              🚀 Launch App
+            </a>
+            <a 
               href="https://github.com/Tanner253" 
               target="_blank" 
               rel="noopener noreferrer"
@@ -106,9 +114,9 @@ export default function Home() {
               href="https://x.com/i/communities/1982622474983637154" 
               target="_blank" 
               rel="noopener noreferrer"
-              className="px-6 py-2 bg-green-500/10 border border-green-500/30 text-green-400 hover:bg-green-500/20 transition-all inline-block"
+              className="px-6 py-2 bg-green-500/10 border border-green-500/30 text-green-400 hover:bg-green-500/20 transition-all inline-block rounded"
             >
-              Join X Community →
+              Join Community →
             </a>
           </div>
         </div>
@@ -117,7 +125,7 @@ export default function Home() {
       {/* Hero */}
       <section className="max-w-6xl mx-auto px-4 py-20 text-center">
         <div className="inline-block mb-6 px-4 py-2 bg-green-500/10 border border-green-500/30 rounded-full">
-          <span className="text-green-400 font-bold text-sm">✅ PLATFORM OPERATIONAL</span>
+          <span className="text-green-400 font-bold text-sm">🟢 LIVE NOW AT SILKROADX402.COM</span>
         </div>
         <h1 className="text-5xl md:text-7xl font-bold mb-6 leading-tight">
           The <span className="gradient-text">Anonymous</span> Marketplace<br />
@@ -127,9 +135,29 @@ export default function Home() {
           Sell your private tools, bots, and software to the world—no identity required. 
           Get paid instantly in USDC on Solana with x402 payments.
         </p>
-        <p className="text-lg text-green-400 max-w-2xl mx-auto mb-12 font-semibold">
-          🚀 Core functionality complete. Sellers are receiving real USDC payments today.
+        <p className="text-lg text-green-400 max-w-2xl mx-auto mb-8 font-semibold">
+          🚀 Platform is LIVE! Real sellers earning USDC on Solana today.
         </p>
+        
+        {/* HERO CTA */}
+        <div className="flex flex-col sm:flex-row gap-4 justify-center mb-12">
+          <a 
+            href="https://www.silkroadx402.com/browse" 
+            target="_blank" 
+            rel="noopener noreferrer"
+            className="inline-block px-12 py-4 bg-gradient-to-r from-green-500 to-cyan-500 text-black font-bold text-lg rounded hover:from-green-400 hover:to-cyan-400 transition-all shadow-lg"
+          >
+            🛍️ Browse Marketplace →
+          </a>
+          <a 
+            href="https://www.silkroadx402.com/listings/new" 
+            target="_blank" 
+            rel="noopener noreferrer"
+            className="inline-block px-12 py-4 bg-gradient-to-r from-purple-500 to-pink-500 text-white font-bold text-lg rounded hover:from-purple-600 hover:to-pink-600 transition-all shadow-lg"
+          >
+            💰 Start Selling →
+          </a>
+        </div>
         <div className="flex flex-wrap gap-4 justify-center text-sm text-gray-500">
           <div className="flex items-center gap-2">
             <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
@@ -339,6 +367,21 @@ export default function Home() {
               * Revenue potential varies by software quality, market demand, and pricing strategy. No guarantees.
             </p>
           </div>
+
+          {/* CTA: Start Earning */}
+          <div className="mt-12 text-center">
+            <a 
+              href="https://www.silkroadx402.com/listings/new" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="inline-block px-12 py-4 bg-gradient-to-r from-green-500 to-cyan-500 text-black font-bold text-lg rounded hover:from-green-400 hover:to-cyan-400 transition-all shadow-lg"
+            >
+              🚀 List Your Software Now →
+            </a>
+            <p className="text-xs text-gray-500 mt-3">
+              Platform is LIVE. Start earning USDC today.
+            </p>
+          </div>
         </div>
       </section>
 
@@ -372,6 +415,21 @@ export default function Home() {
               SilkRoadx402 strictly prohibits the sale of any illegal software, malware, hacking tools intended for 
               unauthorized access, or software that violates United States regulations. All listings must comply with 
               applicable laws. Violators will be permanently banned and reported to authorities.
+            </p>
+          </div>
+
+          {/* CTA: Browse What's For Sale */}
+          <div className="mt-12 text-center">
+            <a 
+              href="https://www.silkroadx402.com/browse" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="inline-block px-12 py-4 bg-gradient-to-r from-cyan-500 to-purple-500 text-white font-bold text-lg rounded hover:from-cyan-400 hover:to-purple-400 transition-all shadow-lg"
+            >
+              🔍 Explore Available Software →
+            </a>
+            <p className="text-xs text-gray-500 mt-3">
+              Browse live listings from verified sellers
             </p>
           </div>
         </div>
@@ -458,16 +516,26 @@ export default function Home() {
               </ul>
             </div>
 
-            <div className="mt-8 text-center">
-              <a 
-                href="https://dexscreener.com/solana/4dqugrpzcjskmshtifagpugumfy37ywknmnbg4f54fnw" 
-                target="_blank" 
-                rel="noopener noreferrer"
-                className="inline-block px-8 py-3 bg-gradient-to-r from-green-500 to-cyan-500 text-black font-bold text-lg rounded hover:from-green-400 hover:to-cyan-400 transition-all"
-              >
-                Buy $SRx402 to Get Access →
-              </a>
-              <p className="text-xs text-gray-600 mt-3">
+            <div className="mt-8 text-center space-y-4">
+              <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                <a 
+                  href="https://dexscreener.com/solana/4dqugrpzcjskmshtifagpugumfy37ywknmnbg4f54fnw" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="inline-block px-8 py-3 bg-gradient-to-r from-green-500 to-cyan-500 text-black font-bold text-lg rounded hover:from-green-400 hover:to-cyan-400 transition-all shadow-lg"
+                >
+                  💰 Buy $SRx402 →
+                </a>
+                <a 
+                  href="https://www.silkroadx402.com/" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="inline-block px-8 py-3 bg-gradient-to-r from-purple-500 to-pink-500 text-white font-bold text-lg rounded hover:from-purple-600 hover:to-pink-600 transition-all shadow-lg"
+                >
+                  🚀 Enter Marketplace →
+                </a>
+              </div>
+              <p className="text-xs text-gray-600">
                 Minimum 50,000 tokens required for marketplace access
               </p>
             </div>
@@ -582,12 +650,22 @@ export default function Home() {
       <section className="border-t border-gray-800 bg-gradient-to-b from-gray-950 to-black">
         <div className="max-w-6xl mx-auto px-4 py-20">
           <h2 className="text-4xl font-bold mb-4 text-center">
-            <span className="gradient-text">Development</span> Progress
+            <span className="gradient-text">Development</span> Status
           </h2>
-          <p className="text-gray-400 text-center mb-12 max-w-2xl mx-auto">
-            Platform is <strong className="text-green-400">OPERATIONAL</strong> with full x402 payment flows. 
-            Sellers are receiving USDC payments from buyers today.
-          </p>
+          <div className="text-center mb-8">
+            <a 
+              href="https://www.silkroadx402.com/" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="inline-block px-8 py-3 bg-green-500 text-black font-bold text-xl rounded hover:bg-green-400 transition-all shadow-lg mb-4"
+            >
+              🟢 LIVE AT SILKROADX402.COM
+            </a>
+            <p className="text-gray-400 max-w-2xl mx-auto">
+              Platform is <strong className="text-green-400">FULLY OPERATIONAL</strong> with real x402 payment flows. 
+              Sellers are receiving USDC payments from buyers today.
+            </p>
+          </div>
 
           <div className="grid md:grid-cols-2 gap-8 mb-12">
             {/* Completed */}
@@ -632,36 +710,44 @@ export default function Home() {
               </ul>
             </div>
 
-            {/* In Progress */}
-            <div className="bg-yellow-900/10 border border-yellow-500/30 rounded-lg p-6">
+            {/* Beta Features - LIVE NOW */}
+            <div className="bg-cyan-900/10 border border-cyan-500/30 rounded-lg p-6">
               <div className="flex items-center gap-3 mb-4">
-                <div className="text-4xl">⏳</div>
-                <h3 className="text-2xl font-bold text-yellow-400">Remaining Work</h3>
+                <div className="text-4xl">🚀</div>
+                <h3 className="text-2xl font-bold text-cyan-400">Live Features (BETA)</h3>
               </div>
               <ul className="space-y-2 text-gray-300 text-sm">
                 <li className="flex gap-2">
-                  <span className="text-yellow-500">⏳</span>
-                  <span><strong>Production Deploy:</strong> MongoDB Atlas, domain, SSL setup</span>
+                  <span className="text-green-500">✓</span>
+                  <span><strong>Production Deploy:</strong> Live on Vercel with MongoDB Atlas</span>
                 </li>
                 <li className="flex gap-2">
-                  <span className="text-yellow-500">⏳</span>
-                  <span><strong>Mainnet Testing:</strong> End-to-end transaction validation</span>
+                  <span className="text-green-500">✓</span>
+                  <span><strong>Rate Limiting:</strong> 3 listings/hour, 10 purchases/hour, 5 uploads/10min</span>
                 </li>
                 <li className="flex gap-2">
-                  <span className="text-yellow-500">⏳</span>
-                  <span><strong>Rate Limiting:</strong> Spam prevention implementation</span>
+                  <span className="text-green-500">✓</span>
+                  <span><strong>Revenue Tracking:</strong> Per-listing earnings and sales analytics</span>
                 </li>
                 <li className="flex gap-2">
-                  <span className="text-yellow-500">⏳</span>
-                  <span><strong>Security Audit:</strong> Smart contract interaction review</span>
+                  <span className="text-green-500">✓</span>
+                  <span><strong>Leaderboard:</strong> Top sellers ranked by revenue</span>
                 </li>
                 <li className="flex gap-2">
-                  <span className="text-yellow-500">⏳</span>
-                  <span><strong>Load Testing:</strong> Concurrent user handling</span>
+                  <span className="text-green-500">✓</span>
+                  <span><strong>Profile Analytics:</strong> Dedicated dashboard for users</span>
                 </li>
-                <li className="flex gap-2 opacity-50">
-                  <span className="text-gray-600">○</span>
-                  <span className="text-gray-500"><strong>Future:</strong> Search, reputation, seller profiles</span>
+                <li className="flex gap-2">
+                  <span className="text-green-500">✓</span>
+                  <span><strong>Rich Media:</strong> YouTube embeds, Cloudinary images</span>
+                </li>
+                <li className="flex gap-2">
+                  <span className="text-green-500">✓</span>
+                  <span><strong>Listing Management:</strong> Deactivate/reactivate with admin approval</span>
+                </li>
+                <li className="flex gap-2 opacity-70">
+                  <span className="text-cyan-500">⏳</span>
+                  <span className="text-gray-400"><strong>Coming Soon:</strong> Direct file delivery, advanced search, reputation system</span>
                 </li>
               </ul>
             </div>
@@ -685,17 +771,25 @@ export default function Home() {
               </div>
             </div>
             <p className="text-center text-gray-400 text-sm mt-6">
-              Built on <strong className="text-cyan-400">Next.js 15</strong>, <strong className="text-purple-400">Solana Web3.js</strong>, 
+              Built on <strong className="text-cyan-400">Next.js 16</strong>, <strong className="text-purple-400">Solana Web3.js</strong>, 
               and custom <strong className="text-green-400">x402 protocol</strong> implementation
             </p>
           </div>
 
-          {/* Launch Timeline */}
+          {/* Launch Status */}
           <div className="mt-12 text-center">
-            <div className="inline-block bg-black/50 border border-gray-800 rounded-lg px-8 py-4">
-              <div className="text-sm text-gray-500 mb-1">Target Launch</div>
-              <div className="text-3xl font-bold text-green-400">Q4 2025</div>
-              <div className="text-xs text-gray-600 mt-1">Final testing & security audits in progress</div>
+            <div className="inline-block bg-green-900/20 border border-green-500/50 rounded-lg px-8 py-6 mb-6">
+              <div className="text-sm text-gray-400 mb-1">Platform Status</div>
+              <div className="text-3xl font-bold text-green-400 mb-2">✅ LIVE NOW</div>
+              <div className="text-sm text-gray-500 mb-4">Currently in BETA with real transactions</div>
+              <a 
+                href="https://www.silkroadx402.com/" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="inline-block px-6 py-2 bg-green-500 text-black font-bold rounded hover:bg-green-400 transition-all"
+              >
+                Visit Marketplace →
+              </a>
             </div>
           </div>
         </div>
@@ -704,9 +798,13 @@ export default function Home() {
       {/* CTA */}
       <section className="border-t border-gray-800 bg-gradient-to-b from-black to-gray-950">
         <div className="max-w-4xl mx-auto px-4 py-20 text-center">
-          <h2 className="text-5xl font-bold mb-6">Ready to Start <span className="gradient-text">Selling</span>?</h2>
-          <p className="text-xl text-gray-400 mb-4">
-            Join the future of anonymous software commerce. Turn your code into cash.
+          <div className="inline-block mb-6 px-6 py-3 bg-green-500/20 border border-green-500/50 rounded-full">
+            <span className="text-green-400 font-bold">🟢 PLATFORM IS LIVE</span>
+          </div>
+          
+          <h2 className="text-5xl font-bold mb-6">Ready to Start <span className="gradient-text">Earning</span>?</h2>
+          <p className="text-xl text-gray-400 mb-8">
+            The future of anonymous software commerce is here. Turn your code into cash today.
           </p>
           
           <div className="bg-cyan-900/20 border border-cyan-500/30 rounded-lg p-4 max-w-2xl mx-auto mb-10">
@@ -715,27 +813,71 @@ export default function Home() {
             </p>
           </div>
 
+          {/* PRIMARY CTA: Enter Marketplace */}
+          <div className="mb-8">
+            <a 
+              href="https://www.silkroadx402.com/" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="inline-block px-16 py-5 bg-gradient-to-r from-green-400 via-cyan-400 to-purple-500 text-black font-bold text-2xl rounded-lg hover:from-green-300 hover:via-cyan-300 hover:to-purple-400 transition-all shadow-2xl animate-pulse"
+            >
+              🚀 ENTER MARKETPLACE NOW →
+            </a>
+            <p className="text-xs text-gray-500 mt-3">
+              Real sellers. Real USDC. Live on Solana.
+            </p>
+          </div>
+
+          {/* SECONDARY CTAs */}
+          <div className="flex flex-col sm:flex-row gap-4 justify-center mb-8">
+            <a 
+              href="https://www.silkroadx402.com/browse" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="inline-block px-10 py-3 bg-cyan-500/20 border border-cyan-500/50 text-cyan-400 font-bold text-lg rounded hover:bg-cyan-500/30 transition-all"
+            >
+              🛍️ Browse Listings
+            </a>
+            <a 
+              href="https://www.silkroadx402.com/listings/new" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="inline-block px-10 py-3 bg-purple-500/20 border border-purple-500/50 text-purple-400 font-bold text-lg rounded hover:bg-purple-500/30 transition-all"
+            >
+              💰 Start Selling
+            </a>
+            <a 
+              href="https://www.silkroadx402.com/leaderboard" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="inline-block px-10 py-3 bg-yellow-500/20 border border-yellow-500/50 text-yellow-400 font-bold text-lg rounded hover:bg-yellow-500/30 transition-all"
+            >
+              🏆 Leaderboard
+            </a>
+          </div>
+
+          {/* Token & Community CTAs */}
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <a 
               href="https://dexscreener.com/solana/4dqugrpzcjskmshtifagpugumfy37ywknmnbg4f54fnw" 
               target="_blank" 
               rel="noopener noreferrer"
-              className="inline-block px-12 py-4 bg-gradient-to-r from-purple-500 to-pink-500 text-white font-bold text-lg rounded hover:from-purple-600 hover:to-pink-600 transition-all"
+              className="inline-block px-10 py-3 bg-gradient-to-r from-purple-500 to-pink-500 text-white font-bold text-lg rounded hover:from-purple-600 hover:to-pink-600 transition-all"
             >
-              Buy $SRx402 →
+              💎 Buy $SRx402
             </a>
-          <a 
-            href="https://x.com/i/communities/1982622474983637154" 
-            target="_blank" 
-            rel="noopener noreferrer"
-            className="inline-block px-12 py-4 bg-green-500 text-black font-bold text-lg rounded hover:bg-green-400 transition-all border-glow"
-          >
-              Join Community →
-          </a>
+            <a 
+              href="https://x.com/i/communities/1982622474983637154" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="inline-block px-10 py-3 bg-green-500 text-black font-bold text-lg rounded hover:bg-green-400 transition-all"
+            >
+              💬 Join Community
+            </a>
           </div>
 
-          <p className="text-sm text-gray-600 mt-6">
-            Core platform complete. Launch Q4 2025.
+          <p className="text-sm text-gray-600 mt-8">
+            Platform is LIVE in BETA. Earn USDC on Solana today.
           </p>
         </div>
       </section>

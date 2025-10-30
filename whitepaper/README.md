@@ -159,7 +159,7 @@ The 50k token requirement creates **constant buying pressure** for $SRx402 while
 ### Frontend
 - **Next.js 16** (App Router + Turbopack)
 - **React 19** + TypeScript
-- **Tailwind CSS v3**
+- **Tailwind CSS v3.4**
 - **Solana Wallet Adapter**
 
 ### Backend
