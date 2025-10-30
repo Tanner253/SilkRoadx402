@@ -52,7 +52,7 @@ export async function GET(req: NextRequest) {
     // REAL MODE
     // ============================================
     try {
-      await connectDB();
+    await connectDB();
     } catch (dbError: any) {
       console.error('❌ Database connection failed:', dbError.message);
       return NextResponse.json(

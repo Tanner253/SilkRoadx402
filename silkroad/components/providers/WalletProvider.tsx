@@ -3,7 +3,10 @@
 import { useMemo } from 'react';
 import { ConnectionProvider, WalletProvider } from '@solana/wallet-adapter-react';
 import { WalletModalProvider } from '@solana/wallet-adapter-react-ui';
-import { PhantomWalletAdapter } from '@solana/wallet-adapter-wallets';
+import { 
+  PhantomWalletAdapter,
+  SolflareWalletAdapter,
+} from '@solana/wallet-adapter-wallets';
 import { CONFIG } from '@/config/constants';
 
 // Import wallet adapter styles
@@ -13,10 +16,11 @@ export function SolanaWalletProvider({ children }: { children: React.ReactNode }
   // Use devnet RPC for wallet connection (payments use paymentConnection)
   const endpoint = useMemo(() => CONFIG.DEVNET_RPC, []);
 
-  // Only support Phantom for MVP
+  // Support Phantom and Solflare wallets
   const wallets = useMemo(
     () => [
       new PhantomWalletAdapter(),
+      new SolflareWalletAdapter(),
     ],
     []
   );

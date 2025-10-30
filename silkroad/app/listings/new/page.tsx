@@ -7,6 +7,8 @@ import { useRouter } from 'next/navigation';
 import axios from 'axios';
 import Link from 'next/link';
 import { ProtectedContent } from '@/components/auth/ProtectedContent';
+import { Connection, PublicKey } from '@solana/web3.js';
+import { getAssociatedTokenAddress } from '@solana/spl-token';
 
 function NewListingPageContent() {
   const { isConnected, hasAcceptedTOS, isTokenGated, mounted } = useAuth();
@@ -126,6 +128,45 @@ function NewListingPageContent() {
     try {
       setLoading(true);
 
+      // ====================================
+      // VALIDATE: Check if seller has USDC account
+      // ====================================
+      console.log('🔍 Validating seller can receive USDC payments...');
+      
+      const rpcUrl = process.env.NEXT_PUBLIC_SOLANA_MAINNET_RPC || 'https://api.mainnet-beta.solana.com';
+      const connection = new Connection(rpcUrl, 'confirmed');
+      
+      // USDC mainnet mint
+      const usdcMint = new PublicKey('EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v');
+      
+      // Get seller's USDC token account
+      const sellerUsdcAccount = await getAssociatedTokenAddress(
+        usdcMint,
+        publicKey
+      );
+      
+      console.log(`📤 Checking USDC account: ${sellerUsdcAccount.toBase58()}`);
+      
+      // Check if account exists
+      const accountInfo = await connection.getAccountInfo(sellerUsdcAccount);
+      
+      if (!accountInfo) {
+        console.error('❌ Seller does not have a USDC token account');
+        setError(
+          '❌ Your wallet cannot receive USDC payments. You need to create a USDC token account first. ' +
+          'Solution: Open Phantom wallet → Add a small amount of USDC (even $0.01) to create your account, ' +
+          'or use a different wallet like Phantom that automatically creates token accounts. ' +
+          'This is a one-time setup to enable receiving payments.'
+        );
+        setLoading(false);
+        return;
+      }
+      
+      console.log('✅ Seller has a valid USDC account');
+
+      // ====================================
+      // CREATE LISTING
+      // ====================================
       const response = await axios.post('/api/listings', {
         wallet: publicKey.toBase58(),
         title: formData.title,

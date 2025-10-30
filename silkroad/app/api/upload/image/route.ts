@@ -84,11 +84,11 @@ export async function POST(req: NextRequest) {
         cloudinary_url: CONFIG.CLOUDINARY_URL,
       });
     } else {
-      cloudinary.config({
-        cloud_name: CONFIG.CLOUDINARY_CLOUD_NAME,
-        api_key: CONFIG.CLOUDINARY_API_KEY,
-        api_secret: CONFIG.CLOUDINARY_API_SECRET,
-      });
+    cloudinary.config({
+      cloud_name: CONFIG.CLOUDINARY_CLOUD_NAME,
+      api_key: CONFIG.CLOUDINARY_API_KEY,
+      api_secret: CONFIG.CLOUDINARY_API_SECRET,
+    });
     }
 
     const bytes = await image.arrayBuffer();

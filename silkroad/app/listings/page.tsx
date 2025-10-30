@@ -114,19 +114,19 @@ function ListingsPageContent() {
         <div className="mb-8 space-y-4">
           {/* Top Row: Category Filter */}
           <div className="flex flex-wrap gap-2">
-            {categories.map((category) => (
-              <button
-                key={category}
-                onClick={() => setSelectedCategory(category)}
-                className={`rounded-full px-4 py-2 text-sm font-medium transition-colors ${
-                  selectedCategory === category
-                    ? 'bg-blue-600 text-white'
-                    : 'bg-white text-zinc-700 hover:bg-zinc-100 dark:bg-zinc-900 dark:text-zinc-300 dark:hover:bg-zinc-800'
-                }`}
-              >
-                {category === 'all' ? 'All' : category}
-              </button>
-            ))}
+          {categories.map((category) => (
+            <button
+              key={category}
+              onClick={() => setSelectedCategory(category)}
+              className={`rounded-full px-4 py-2 text-sm font-medium transition-colors ${
+                selectedCategory === category
+                  ? 'bg-blue-600 text-white'
+                  : 'bg-white text-zinc-700 hover:bg-zinc-100 dark:bg-zinc-900 dark:text-zinc-300 dark:hover:bg-zinc-800'
+              }`}
+            >
+              {category === 'all' ? 'All' : category}
+            </button>
+          ))}
           </div>
 
           {/* Bottom Row: Search and Toggle */}
