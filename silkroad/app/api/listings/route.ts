@@ -62,8 +62,12 @@ export async function GET(req: NextRequest) {
     }
 
     if (wallet) {
+      console.log('📝 Fetching listings for wallet:', wallet);
       const listings = await Listing.find({ wallet })
-        .sort({ createdAt: -1 });
+        .sort({ createdAt: -1 })
+        .lean();
+      
+      console.log(`✅ Found ${listings.length} listings for wallet`);
       
       // Calculate revenue for each listing
       const listingsWithRevenue = await Promise.all(
@@ -77,7 +81,7 @@ export async function GET(req: NextRequest) {
           const salesCount = transactions.length;
           
           return {
-            ...listing.toObject(),
+            ...listing,
             revenue,
             salesCount,
           };
@@ -90,6 +94,7 @@ export async function GET(req: NextRequest) {
       });
     }
 
+    console.log('📝 Fetching all approved listings');
     const listings = await Listing.find({
       approved: true,
       state: 'on_market',
@@ -97,6 +102,8 @@ export async function GET(req: NextRequest) {
       .sort({ createdAt: -1 })
       .select('-deliveryUrl') // Never expose delivery URL in list
       .lean();
+
+    console.log(`✅ Found ${listings?.length || 0} approved listings`);
 
     return NextResponse.json({
       success: true,
