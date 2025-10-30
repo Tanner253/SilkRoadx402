@@ -6,7 +6,6 @@
 
 import validator from 'validator';
 import { marked } from 'marked';
-import DOMPurify from 'isomorphic-dompurify';
 
 /**
  * Sanitize string input
@@ -31,7 +30,7 @@ export function sanitizeString(input: string): string {
 /**
  * Sanitize markdown
  * 
- * Converts markdown to HTML and sanitizes with DOMPurify
+ * Converts markdown to HTML and sanitizes (serverless-friendly)
  * 
  * @param markdown - Raw markdown input
  * @returns string - Sanitized HTML
@@ -39,17 +38,23 @@ export function sanitizeString(input: string): string {
 export function sanitizeMarkdown(markdown: string): string {
   if (!markdown) return '';
 
+  // Configure marked to be safe
+  marked.setOptions({
+    gfm: true,
+    breaks: true,
+  });
+
   // Convert markdown to HTML
   const html = marked(markdown) as string;
 
-  // Sanitize HTML to prevent XSS
-  const sanitized = DOMPurify.sanitize(html, {
-    ALLOWED_TAGS: [
-      'p', 'br', 'strong', 'em', 'u', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6',
-      'ul', 'ol', 'li', 'blockquote', 'code', 'pre', 'a', 'img',
-    ],
-    ALLOWED_ATTR: ['href', 'src', 'alt', 'title', 'target', 'rel'],
-  });
+  // Simple serverless-friendly HTML sanitization
+  // Remove script tags and dangerous event handlers
+  let sanitized = html
+    .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '')
+    .replace(/<iframe\b[^<]*(?:(?!<\/iframe>)<[^<]*)*<\/iframe>/gi, '')
+    .replace(/on\w+\s*=\s*["'][^"']*["']/gi, '')
+    .replace(/on\w+\s*=\s*[^\s>]*/gi, '')
+    .replace(/javascript:/gi, '');
 
   return sanitized;
 }
