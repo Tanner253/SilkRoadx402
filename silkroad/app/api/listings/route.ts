@@ -71,7 +71,7 @@ export async function GET(req: NextRequest) {
       
       // Calculate revenue for each listing
       const listingsWithRevenue = await Promise.all(
-        listings.map(async (listing) => {
+        listings.map(async (listing: any) => {
           const transactions = await Transaction.find({
             listingId: listing._id.toString(),
             status: 'success',
