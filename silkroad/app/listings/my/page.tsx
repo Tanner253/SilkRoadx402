@@ -20,6 +20,8 @@ interface Listing {
   approved: boolean;
   createdAt: Date;
   updatedAt: Date;
+  revenue?: number;
+  salesCount?: number;
 }
 
 function MyListingsPageContent() {
@@ -29,6 +31,7 @@ function MyListingsPageContent() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [updatingId, setUpdatingId] = useState<string | null>(null);
 
   useEffect(() => {
     if (mounted && isConnected && hasAcceptedTOS && publicKey) {
@@ -63,6 +66,41 @@ function MyListingsPageContent() {
       alert(err.response?.data?.error || 'Failed to delete listing');
     } finally {
       setDeletingId(null);
+    }
+  };
+
+  const handleDeactivate = async (id: string) => {
+    if (!confirm('Take this listing off the market? You can reactivate it later.')) {
+      return;
+    }
+
+    try {
+      setUpdatingId(id);
+      await axios.patch(`/api/listings/${id}`, { state: 'pulled' });
+      await fetchMyListings(); // Refresh list
+    } catch (err: any) {
+      alert(err.response?.data?.error || 'Failed to deactivate listing');
+    } finally {
+      setUpdatingId(null);
+    }
+  };
+
+  const handleReactivate = async (id: string) => {
+    if (!confirm('Reactivate this listing? It will need admin approval again.')) {
+      return;
+    }
+
+    try {
+      setUpdatingId(id);
+      await axios.patch(`/api/listings/${id}`, { 
+        state: 'in_review',
+        approved: false 
+      });
+      await fetchMyListings(); // Refresh list
+    } catch (err: any) {
+      alert(err.response?.data?.error || 'Failed to reactivate listing');
+    } finally {
+      setUpdatingId(null);
     }
   };
 
@@ -181,6 +219,9 @@ function MyListingsPageContent() {
                     Price
                   </th>
                   <th className="px-6 py-4 text-left text-xs font-medium uppercase text-zinc-600 dark:text-zinc-400">
+                    Revenue
+                  </th>
+                  <th className="px-6 py-4 text-left text-xs font-medium uppercase text-zinc-600 dark:text-zinc-400">
                     Status
                   </th>
                   <th className="px-6 py-4 text-left text-xs font-medium uppercase text-zinc-600 dark:text-zinc-400">
@@ -220,6 +261,14 @@ function MyListingsPageContent() {
                       </div>
                     </td>
                     <td className="px-6 py-4">
+                      <div className="text-sm font-medium text-green-600 dark:text-green-400">
+                        ${(listing.revenue || 0).toFixed(2)} USDC
+                      </div>
+                      <div className="text-xs text-zinc-500 dark:text-zinc-400">
+                        {listing.salesCount || 0} {listing.salesCount === 1 ? 'sale' : 'sales'}
+                      </div>
+                    </td>
+                    <td className="px-6 py-4">
                       <span className={`inline-flex rounded-full px-2.5 py-0.5 text-xs font-medium ${getStateColor(listing.state, listing.approved)}`}>
                         {getStateText(listing.state, listing.approved)}
                       </span>
@@ -237,6 +286,24 @@ function MyListingsPageContent() {
                         >
                           View
                         </Link>
+                        {listing.state === 'on_market' && listing.approved && (
+                          <button
+                            onClick={() => handleDeactivate(listing._id)}
+                            disabled={updatingId === listing._id}
+                            className="text-sm text-orange-600 hover:text-orange-700 disabled:opacity-50 dark:text-orange-400 dark:hover:text-orange-300"
+                          >
+                            {updatingId === listing._id ? 'Updating...' : 'Deactivate'}
+                          </button>
+                        )}
+                        {listing.state === 'pulled' && (
+                          <button
+                            onClick={() => handleReactivate(listing._id)}
+                            disabled={updatingId === listing._id}
+                            className="text-sm text-green-600 hover:text-green-700 disabled:opacity-50 dark:text-green-400 dark:hover:text-green-300"
+                          >
+                            {updatingId === listing._id ? 'Updating...' : 'Reactivate'}
+                          </button>
+                        )}
                         <button
                           onClick={() => handleDelete(listing._id)}
                           disabled={deletingId === listing._id}

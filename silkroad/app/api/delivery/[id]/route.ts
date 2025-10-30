@@ -3,6 +3,7 @@ import { CONFIG } from '@/config/constants';
 import { mockStore } from '@/lib/mockStore';
 import { connectDB } from '@/lib/db';
 import { Transaction } from '@/models/Transaction';
+import { safeDecrypt } from '@/lib/crypto/encryption';
 
 export async function GET(
   req: NextRequest,
@@ -27,13 +28,16 @@ export async function GET(
         );
       }
 
-      console.log(`✅ Found transaction ${id}`);
-      console.log(`   Buyer: ${transaction.buyerWallet.slice(0, 8)}...`);
-      console.log(`   Delivery URL: ${transaction.deliveryUrl}`);
+      // Decrypt delivery URL before sending to client
+      // safeDecrypt handles legacy unencrypted data without errors
+      const decryptedUrl = safeDecrypt(transaction.deliveryUrl);
 
       return NextResponse.json({
         success: true,
-        transaction,
+        transaction: {
+          ...transaction,
+          deliveryUrl: decryptedUrl,
+        },
         _mock: true,
       });
     }
@@ -51,12 +55,16 @@ export async function GET(
       );
     }
 
-    // Decrypt delivery URL (in real implementation)
-    // const decryptedUrl = decrypt(transaction.deliveryUrl);
+    // Decrypt delivery URL
+    // safeDecrypt handles legacy unencrypted data without errors
+    const decryptedUrl = safeDecrypt(transaction.deliveryUrl);
 
     return NextResponse.json({
       success: true,
-      transaction,
+      transaction: {
+        ...transaction.toObject(),
+        deliveryUrl: decryptedUrl,
+      },
     });
   } catch (error: any) {
     console.error('Get delivery error:', error);

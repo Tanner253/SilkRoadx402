@@ -4,7 +4,10 @@ import { CONFIG } from '@/config/constants';
 import { mockStore } from '@/lib/mockStore';
 import { connectDB } from '@/lib/db';
 import { Listing } from '@/models/Listing';
+import { Transaction } from '@/models/Transaction';
 import { sanitizeString } from '@/lib/validation/sanitization';
+import { encrypt } from '@/lib/crypto/encryption';
+import { checkRateLimit, RATE_LIMITS } from '@/lib/rateLimit';
 
 // GET - Fetch all approved listings or user's listings
 export async function GET(req: NextRequest) {
@@ -17,7 +20,6 @@ export async function GET(req: NextRequest) {
     // ============================================
     if (CONFIG.MOCK_MODE) {
       if (wallet) {
-        console.log(`🧪 MOCK: Fetching listings for wallet ${wallet.slice(0, 8)}...`);
         const listings = mockStore.getListingsByWallet(wallet);
         return NextResponse.json({
           success: true,
@@ -26,7 +28,6 @@ export async function GET(req: NextRequest) {
         });
       }
 
-      console.log('🧪 MOCK: Fetching approved listings');
       
       // Seed data if empty
       const listings = mockStore.getApprovedListings();
@@ -56,9 +57,28 @@ export async function GET(req: NextRequest) {
       const listings = await Listing.find({ wallet })
         .sort({ createdAt: -1 });
       
+      // Calculate revenue for each listing
+      const listingsWithRevenue = await Promise.all(
+        listings.map(async (listing) => {
+          const transactions = await Transaction.find({
+            listingId: listing._id.toString(),
+            status: 'success',
+          });
+          
+          const revenue = transactions.reduce((sum, txn) => sum + txn.amount, 0);
+          const salesCount = transactions.length;
+          
+          return {
+            ...listing.toObject(),
+            revenue,
+            salesCount,
+          };
+        })
+      );
+      
       return NextResponse.json({
         success: true,
-        listings,
+        listings: listingsWithRevenue,
       });
     }
 
@@ -141,6 +161,36 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    // ANTI-SPAM: Rate limiting (3 listings per hour)
+    const rateLimit = await checkRateLimit(wallet, RATE_LIMITS.CREATE_LISTING);
+    if (!rateLimit.allowed) {
+      return NextResponse.json(
+        { 
+          error: rateLimit.message,
+          resetAt: rateLimit.resetAt,
+          remaining: rateLimit.remaining
+        },
+        { status: 429 }
+      );
+    }
+
+    // ANTI-SPAM: Check listing count (max 3 per wallet)
+    const existingListingsCount = await Listing.countDocuments({
+      wallet,
+      state: { $in: ['in_review', 'on_market'] } // Only count active listings
+    });
+
+    if (existingListingsCount >= 3) {
+      return NextResponse.json(
+        { 
+          error: 'Maximum 3 active listings allowed per wallet. Delete or deactivate existing listings to create new ones.',
+          currentCount: existingListingsCount,
+          limit: 3
+        },
+        { status: 429 } // Too Many Requests
+      );
+    }
+
     // Sanitize inputs
     const sanitizedTitle = sanitizeString(title);
     const sanitizedDescription = sanitizeString(description);
@@ -149,7 +199,22 @@ export async function POST(req: NextRequest) {
     // MOCK MODE
     // ============================================
     if (CONFIG.MOCK_MODE) {
-      console.log('🧪 MOCK: Creating listing with delivery URL');
+      // ANTI-SPAM: Check listing count (max 3 per wallet)
+      const existingListings = mockStore.getListingsByWallet(wallet);
+      const activeListings = existingListings.filter((l: any) => 
+        l.state === 'in_review' || l.state === 'on_market'
+      );
+
+      if (activeListings.length >= 3) {
+        return NextResponse.json(
+          { 
+            error: 'Maximum 3 active listings allowed per wallet. Delete or deactivate existing listings to create new ones.',
+            currentCount: activeListings.length,
+            limit: 3
+          },
+          { status: 429 }
+        );
+      }
 
       const listing = mockStore.createListing({
         wallet,
@@ -164,7 +229,6 @@ export async function POST(req: NextRequest) {
         githubUrl,
       });
 
-      console.log(`   Delivery URL: ${deliveryUrl}`);
 
       return NextResponse.json({
         success: true,
@@ -178,6 +242,9 @@ export async function POST(req: NextRequest) {
     // ============================================
     await connectDB();
 
+    // Encrypt delivery URL before storing
+    const encryptedDeliveryUrl = encrypt(deliveryUrl);
+
     const listing = await Listing.create({
       wallet,
       title: sanitizedTitle,
@@ -185,7 +252,7 @@ export async function POST(req: NextRequest) {
       price: priceNum,
       category,
       imageUrl,
-      deliveryUrl,
+      deliveryUrl: encryptedDeliveryUrl,  // Store encrypted
       demoVideoUrl,
       whitepaperUrl,
       githubUrl,

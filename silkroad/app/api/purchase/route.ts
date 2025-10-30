@@ -15,7 +15,7 @@ import { mockStore } from '@/lib/mockStore';
 import { connectDB } from '@/lib/db';
 import { Transaction } from '@/models/Transaction';
 import { Listing } from '@/models/Listing';
-import { encrypt } from '@/lib/crypto/encryption';
+import { safeDecrypt } from '@/lib/crypto/encryption';
 import {
   createPaymentRequired,
   extractPaymentHeader,
@@ -25,6 +25,7 @@ import {
 } from '@/lib/x402/utils';
 import { verifyPayment, settlePayment } from '@/lib/x402/facilitator';
 import type { SolanaExactPayload } from '@/types/x402';
+import { checkRateLimit, RATE_LIMITS } from '@/lib/rateLimit';
 
 export async function POST(req: NextRequest) {
   try {
@@ -35,6 +36,33 @@ export async function POST(req: NextRequest) {
         { error: 'Listing ID is required' },
         { status: 400 }
       );
+    }
+
+    // Check for payment header (indicates this is an actual purchase attempt)
+    const paymentHeader = extractPaymentHeader(req.headers);
+    
+    // ANTI-SPAM: Rate limit purchase attempts
+    if (paymentHeader) {
+      try {
+        const payload = decodePaymentPayload(paymentHeader);
+        const buyerWallet = (payload.payload as SolanaExactPayload).from;
+        
+        if (buyerWallet) {
+          const rateLimit = await checkRateLimit(buyerWallet, RATE_LIMITS.PURCHASE);
+          if (!rateLimit.allowed) {
+            return NextResponse.json(
+              { 
+                error: rateLimit.message,
+                resetAt: rateLimit.resetAt,
+                remaining: rateLimit.remaining
+              },
+              { status: 429 }
+            );
+          }
+        }
+      } catch (e) {
+        // Continue if rate limit check fails (fail open)
+      }
     }
 
     // ============================================
@@ -66,8 +94,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Check for X-PAYMENT header
-    const paymentHeader = extractPaymentHeader(req.headers);
+    // Note: paymentHeader already extracted above for rate limiting
 
     // ============================================
     // STEP 1: No payment header → Return 402 Payment Required
@@ -160,8 +187,8 @@ export async function POST(req: NextRequest) {
     // Extract transaction details
     const solanaPayload = paymentPayload.payload as SolanaExactPayload;
 
-    // Encrypt delivery URL before storing
-    const encryptedDeliveryUrl = encrypt(listing.deliveryUrl);
+    // Listing delivery URL is already encrypted, just copy it
+    // (Encryption happens when listing is created)
 
     // Create transaction record
     const transaction = await Transaction.create({
@@ -170,18 +197,20 @@ export async function POST(req: NextRequest) {
       sellerWallet: listing.wallet,
       amount: listing.price,
       txnHash: solanaPayload.signature,
-      deliveryUrl: encryptedDeliveryUrl,  // Store encrypted
+      deliveryUrl: listing.deliveryUrl,  // Already encrypted from listing
       status: 'success',
     });
 
-    console.log(`✅ Purchase successful: ${transaction._id}`);
+    // Decrypt delivery URL for buyer (ephemeral, shown once)
+    // safeDecrypt handles legacy unencrypted data without errors
+    const decryptedDeliveryUrl = safeDecrypt(listing.deliveryUrl);
 
     // Create payment response headers
     const responseHeaders = createPaymentResponseHeaders({
       success: true,
       txHash: settleResult.txHash!,
       networkId: settleResult.networkId!,
-      deliveryUrl: listing.deliveryUrl,  // Send unencrypted to buyer (ephemeral)
+      deliveryUrl: decryptedDeliveryUrl,  // Send decrypted to buyer (ephemeral)
     });
 
     // Return success with deliveryUrl
@@ -189,7 +218,7 @@ export async function POST(req: NextRequest) {
       {
         success: true,
         transactionId: transaction._id.toString(),
-        deliveryUrl: listing.deliveryUrl,  // Ephemeral delivery (no recovery)
+        deliveryUrl: decryptedDeliveryUrl,  // Ephemeral delivery (no recovery)
         txHash: settleResult.txHash,
       },
       {
@@ -210,7 +239,6 @@ export async function POST(req: NextRequest) {
  * Handle mock purchase (for development without blockchain)
  */
 async function handleMockPurchase(req: NextRequest, listingId: string) {
-  console.log(`🧪 MOCK: Processing purchase for listing ${listingId}`);
   
   // Get listing
   const listing = mockStore.getListing(listingId);
@@ -265,7 +293,6 @@ async function handleMockPurchase(req: NextRequest, listingId: string) {
   const buyerWallet = solanaPayload.from || 'MockBuyer_Unknown';
   const mockTxHash = solanaPayload.signature || `mock_tx_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
 
-  console.log(`🧪 MOCK: Processing purchase from buyer: ${buyerWallet.slice(0, 8)}...`);
 
   // Create mock transaction with real buyer wallet
   const transaction = mockStore.createTransaction({
@@ -278,9 +305,6 @@ async function handleMockPurchase(req: NextRequest, listingId: string) {
     status: 'success',
   });
 
-  console.log(`✅ MOCK: Purchase successful - ${transaction._id}`);
-  console.log(`   Buyer: ${buyerWallet.slice(0, 8)}...`);
-  console.log(`   Delivery URL: ${listing.deliveryUrl}`);
 
   // Return success with transactionId
   return NextResponse.json(

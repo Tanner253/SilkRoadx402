@@ -1,13 +1,32 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { CONFIG } from '@/config/constants';
+import { checkRateLimit, RATE_LIMITS } from '@/lib/rateLimit';
 
 export async function POST(req: NextRequest) {
   try {
+    // Get wallet from query params (frontend should pass this)
+    const { searchParams } = new URL(req.url);
+    const wallet = searchParams.get('wallet');
+
+    if (wallet) {
+      // ANTI-SPAM: Rate limit uploads (5 per 10 minutes)
+      const rateLimit = await checkRateLimit(wallet, RATE_LIMITS.IMAGE_UPLOAD);
+      if (!rateLimit.allowed) {
+        return NextResponse.json(
+          { 
+            error: rateLimit.message,
+            resetAt: rateLimit.resetAt,
+            remaining: rateLimit.remaining
+          },
+          { status: 429 }
+        );
+      }
+    }
+
     // ============================================
     // MOCK MODE (return placeholder image)
     // ============================================
     if (CONFIG.MOCK_MODE) {
-      console.log('🧪 MOCK: Image upload (returning placeholder)');
       
       // Return a random unsplash image
       const mockImages = [
@@ -58,11 +77,19 @@ export async function POST(req: NextRequest) {
 
     // Upload to Cloudinary
     const cloudinary = require('cloudinary').v2;
-    cloudinary.config({
-      cloud_name: CONFIG.CLOUDINARY_CLOUD_NAME,
-      api_key: CONFIG.CLOUDINARY_API_KEY,
-      api_secret: CONFIG.CLOUDINARY_API_SECRET,
-    });
+    
+    // Use CLOUDINARY_URL if set, otherwise use individual variables
+    if (CONFIG.CLOUDINARY_URL) {
+      cloudinary.config({
+        cloudinary_url: CONFIG.CLOUDINARY_URL,
+      });
+    } else {
+      cloudinary.config({
+        cloud_name: CONFIG.CLOUDINARY_CLOUD_NAME,
+        api_key: CONFIG.CLOUDINARY_API_KEY,
+        api_secret: CONFIG.CLOUDINARY_API_SECRET,
+      });
+    }
 
     const bytes = await image.arrayBuffer();
     const buffer = Buffer.from(bytes);

@@ -32,14 +32,11 @@ export async function POST(req: NextRequest) {
     // MOCK MODE (for testing without database)
     // ============================================
     if (CONFIG.MOCK_MODE) {
-      console.log('🧪 MOCK MODE: Using in-memory data store');
-      
       // Get or create mock user first (to get TOS status)
       const mockUser = mockStore.getUser(wallet, true); // Pass true initially
       
       // If frontend requests to skip token check (using cached balance)
       if (skipTokenCheck) {
-        console.log('⚡ Skipping token balance check (using cached value)');
         return NextResponse.json({
           success: true,
           wallet,
@@ -54,16 +51,13 @@ export async function POST(req: NextRequest) {
 
       // Check if we should bypass token gating or check real balance
       if (CONFIG.MOCK_TOKEN_GATING_PASSED) {
-        console.log('⚠️  MOCK TOKEN GATING: All wallets bypass token check');
         tokenGatingPassed = true;
         tokenBalance = 50000; // Fake balance for display
       } else {
-        console.log('🔒 REAL TOKEN GATING: Checking mainnet balance...');
         // Check actual token balance on mainnet
         const balanceResult = await checkTokenBalance(wallet);
         tokenGatingPassed = balanceResult.meetsRequirement;
         tokenBalance = balanceResult.total;
-        console.log(`✅ Balance check: ${tokenBalance} tokens (required: ${balanceResult.required})`);
       }
 
       // Update mock user with token gating status
@@ -91,7 +85,6 @@ export async function POST(req: NextRequest) {
     
     // If frontend requests to skip token check (using cached balance)
     if (skipTokenCheck && user) {
-      console.log('⚡ Skipping token balance check (using cached value)');
       return NextResponse.json({
         success: true,
         wallet,
@@ -101,10 +94,8 @@ export async function POST(req: NextRequest) {
     }
 
     // Check token balance for gating (mainnet)
-    console.log('🔒 REAL TOKEN GATING: Checking mainnet balance...');
     const balanceResult = await checkTokenBalance(wallet);
     const tokenGatingPassed = balanceResult.meetsRequirement;
-    console.log(`✅ Balance check: ${balanceResult.total} tokens (required: ${balanceResult.required})`);
 
     // Check if user has accepted TOS
     const hasAcceptedTOS = user?.tosAccepted || false;

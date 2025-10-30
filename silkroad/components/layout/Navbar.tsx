@@ -5,13 +5,11 @@ import { useWallet } from '@solana/wallet-adapter-react';
 import { WalletMultiButton } from '@solana/wallet-adapter-react-ui';
 import Link from 'next/link';
 import { useUSDCBalance } from '@/hooks/useUSDCBalance';
-import { ProfileModal } from '@/components/modals/ProfileModal';
 
 export function Navbar() {
   const { publicKey } = useWallet();
   const { balance, loading } = useUSDCBalance();
   const [mounted, setMounted] = useState(false);
-  const [showProfileModal, setShowProfileModal] = useState(false);
 
   // Prevent hydration mismatch
   useEffect(() => {
@@ -22,10 +20,13 @@ export function Navbar() {
     <nav className="fixed top-0 z-50 w-full border-b border-zinc-200 bg-white/80 backdrop-blur-sm dark:border-zinc-800 dark:bg-black/80">
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
         {/* Logo */}
-        <Link href="/" className="flex items-center space-x-2">
+        <Link href="/" className="flex items-center space-x-3">
           <div className="text-xl font-bold tracking-tight text-zinc-900 dark:text-zinc-50">
             SilkRoad<span className="text-blue-600">x402</span>
           </div>
+          <span className="text-lg font-bold bg-gradient-to-r from-pink-500 to-purple-600 bg-clip-text text-transparent animate-pulse" style={{ fontFamily: 'Comic Sans MS, cursive' }}>
+            Beta!
+          </span>
         </Link>
 
         {/* Navigation Links (show when wallet connected) */}
@@ -36,6 +37,13 @@ export function Navbar() {
               className="text-sm font-medium text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-50 transition-colors"
             >
               Browse
+            </Link>
+            <Link 
+              href="/leaderboard" 
+              className="text-sm font-medium text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-50 transition-colors flex items-center gap-1"
+            >
+              <span>🏆</span>
+              Leaderboard
             </Link>
             <Link 
               href="/sell" 
@@ -88,15 +96,15 @@ export function Navbar() {
 
           {/* Profile Button */}
           {mounted && publicKey && (
-            <button
-              onClick={() => setShowProfileModal(true)}
+            <Link
+              href="/profile"
               className="flex items-center gap-2 rounded-lg border border-zinc-200 bg-white px-3 py-2 hover:bg-zinc-50 dark:border-zinc-800 dark:bg-zinc-900 dark:hover:bg-zinc-800 transition-colors"
-              title="View Profile & Transaction History"
+              title="View Profile & Analytics"
             >
               <svg className="h-5 w-5 text-zinc-600 dark:text-zinc-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
               </svg>
-            </button>
+            </Link>
         )}
 
         {/* Wallet Button */}
@@ -105,12 +113,6 @@ export function Navbar() {
           )}
         </div>
       </div>
-
-      {/* Profile Modal */}
-      <ProfileModal 
-        isOpen={showProfileModal} 
-        onClose={() => setShowProfileModal(false)} 
-      />
     </nav>
   );
 }

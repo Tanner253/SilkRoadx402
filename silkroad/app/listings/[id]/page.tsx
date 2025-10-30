@@ -32,6 +32,9 @@ interface Listing {
   state: string;
   approved: boolean;
   createdAt: Date;
+  demoVideoUrl?: string;
+  whitepaperUrl?: string;
+  githubUrl?: string;
 }
 
 function ListingDetail({ params }: { params: Promise<{ id: string }> }) {
@@ -62,6 +65,25 @@ function ListingDetail({ params }: { params: Promise<{ id: string }> }) {
     } finally {
       setLoading(false);
     }
+  };
+
+  // Utility to extract YouTube video ID from various URL formats
+  const getYouTubeVideoId = (url: string): string | null => {
+    if (!url) return null;
+    
+    // Handle youtube.com/watch?v=VIDEO_ID
+    const watchMatch = url.match(/[?&]v=([^&]+)/);
+    if (watchMatch) return watchMatch[1];
+    
+    // Handle youtu.be/VIDEO_ID
+    const shortMatch = url.match(/youtu\.be\/([^?]+)/);
+    if (shortMatch) return shortMatch[1];
+    
+    // Handle youtube.com/embed/VIDEO_ID
+    const embedMatch = url.match(/youtube\.com\/embed\/([^?]+)/);
+    if (embedMatch) return embedMatch[1];
+    
+    return null;
   };
 
   const handlePurchase = async () => {
@@ -408,6 +430,83 @@ function ListingDetail({ params }: { params: Promise<{ id: string }> }) {
             </div>
           </div>
         </div>
+
+        {/* Demo Video Section */}
+        {listing.demoVideoUrl && getYouTubeVideoId(listing.demoVideoUrl) && (
+          <div className="mt-8">
+            <h2 className="text-2xl font-bold text-zinc-900 dark:text-zinc-50 mb-4">
+              🎥 Demo Video
+            </h2>
+            <div className="relative w-full overflow-hidden rounded-lg border border-zinc-200 bg-zinc-100 dark:border-zinc-800 dark:bg-zinc-800" style={{ paddingBottom: '56.25%' }}>
+              <iframe
+                className="absolute top-0 left-0 h-full w-full"
+                src={`https://www.youtube.com/embed/${getYouTubeVideoId(listing.demoVideoUrl)}?autoplay=1&mute=1&rel=0`}
+                title="Demo Video"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowFullScreen
+              />
+            </div>
+          </div>
+        )}
+
+        {/* Additional Resources Section */}
+        {(listing.whitepaperUrl || listing.githubUrl) && (
+          <div className="mt-8">
+            <h2 className="text-2xl font-bold text-zinc-900 dark:text-zinc-50 mb-4">
+              📚 Additional Resources
+            </h2>
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+
+              {listing.whitepaperUrl && (
+                <a
+                  href={listing.whitepaperUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center justify-between rounded-lg border border-zinc-200 bg-white p-4 hover:border-blue-600 hover:bg-blue-50 transition-colors dark:border-zinc-800 dark:bg-zinc-900 dark:hover:border-blue-600 dark:hover:bg-blue-950"
+                >
+                  <div className="flex items-center space-x-3">
+                    <div className="flex h-10 w-10 items-center justify-center rounded-full bg-purple-100 dark:bg-purple-900">
+                      <span className="text-xl">📄</span>
+                    </div>
+                    <div>
+                      <div className="text-sm font-medium text-zinc-900 dark:text-zinc-50">
+                        Whitepaper
+                      </div>
+                      <div className="text-xs text-zinc-500 dark:text-zinc-400">
+                        Read documentation
+                      </div>
+                    </div>
+                  </div>
+                  <span className="text-zinc-400">→</span>
+                </a>
+              )}
+
+              {listing.githubUrl && (
+                <a
+                  href={listing.githubUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center justify-between rounded-lg border border-zinc-200 bg-white p-4 hover:border-blue-600 hover:bg-blue-50 transition-colors dark:border-zinc-800 dark:bg-zinc-900 dark:hover:border-blue-600 dark:hover:bg-blue-950"
+                >
+                  <div className="flex items-center space-x-3">
+                    <div className="flex h-10 w-10 items-center justify-center rounded-full bg-zinc-100 dark:bg-zinc-800">
+                      <span className="text-xl">💻</span>
+                    </div>
+                    <div>
+                      <div className="text-sm font-medium text-zinc-900 dark:text-zinc-50">
+                        GitHub
+                      </div>
+                      <div className="text-xs text-zinc-500 dark:text-zinc-400">
+                        View repository
+                      </div>
+                    </div>
+                  </div>
+                  <span className="text-zinc-400">→</span>
+                </a>
+              )}
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

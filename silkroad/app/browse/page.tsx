@@ -2,12 +2,15 @@
 
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/hooks/useAuth';
+import { useWallet } from '@solana/wallet-adapter-react';
+import { useSearchParams } from 'next/navigation';
 import axios from 'axios';
 import Link from 'next/link';
 import Image from 'next/image';
 
 interface Listing {
   _id: string;
+  wallet: string;
   title: string;
   description: string;
   imageUrl: string;
@@ -18,10 +21,25 @@ interface Listing {
 
 export default function BrowsePage() {
   const { isConnected, hasAcceptedTOS, isTokenGated, mounted } = useAuth();
+  const { publicKey } = useWallet();
+  const searchParams = useSearchParams();
+  
   const [listings, setListings] = useState<Listing[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
+  const [hideMyListings, setHideMyListings] = useState(true);
+  const [walletSearch, setWalletSearch] = useState<string>('');
+  const [showWarning, setShowWarning] = useState(false);
+
+  // Pre-fill wallet search from URL params (e.g., from leaderboard)
+  useEffect(() => {
+    const walletParam = searchParams.get('wallet');
+    if (walletParam) {
+      setWalletSearch(walletParam);
+      setHideMyListings(false); // Show all listings when searching by wallet
+    }
+  }, [searchParams]);
 
   useEffect(() => {
     if (mounted && isConnected && hasAcceptedTOS) {
@@ -67,9 +85,29 @@ export default function BrowsePage() {
   }
 
   const categories = ['all', 'Trading Bot', 'API Tool', 'Script', 'Custom'];
-  const filteredListings = selectedCategory === 'all' 
+  
+  // Filter by category
+  let filteredListings = selectedCategory === 'all' 
     ? listings 
     : listings.filter(l => l.category === selectedCategory);
+  
+  // Filter out user's own listings if toggle is enabled
+  if (hideMyListings && publicKey) {
+    filteredListings = filteredListings.filter(l => l.wallet !== publicKey.toBase58());
+  }
+  
+  // Filter by wallet search
+  if (walletSearch.trim()) {
+    filteredListings = filteredListings.filter(l => 
+      l.wallet.toLowerCase().includes(walletSearch.toLowerCase().trim())
+    );
+  }
+
+  // Utility to truncate wallet address
+  const truncateWallet = (wallet: string) => {
+    if (wallet.length <= 12) return wallet;
+    return `${wallet.slice(0, 4)}...${wallet.slice(-4)}`;
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-zinc-50 to-zinc-100 dark:from-zinc-950 dark:to-black py-12 px-4">
@@ -84,21 +122,90 @@ export default function BrowsePage() {
           </p>
         </div>
 
-        {/* Category Filter */}
-        <div className="mb-8 flex flex-wrap gap-2">
-          {categories.map((category) => (
-            <button
-              key={category}
-              onClick={() => setSelectedCategory(category)}
-              className={`rounded-full px-4 py-2 text-sm font-medium transition-colors ${
-                selectedCategory === category
-                  ? 'bg-blue-600 text-white'
-                  : 'bg-white text-zinc-700 hover:bg-zinc-100 dark:bg-zinc-900 dark:text-zinc-300 dark:hover:bg-zinc-800'
-              }`}
-            >
-              {category === 'all' ? 'All' : category}
-            </button>
-          ))}
+        {/* Warning Toggle Button */}
+        <div className="mb-8">
+          <button
+            onClick={() => setShowWarning(!showWarning)}
+            className="flex items-center space-x-3 rounded-lg border-2 border-red-600 bg-red-600 px-4 py-3 hover:bg-red-700 transition-colors"
+            title="Important Safety Warning"
+          >
+            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-white text-red-600 text-xl font-bold">
+              ⚠️
+            </div>
+            <span className="text-sm font-bold text-white">
+              {showWarning ? 'Hide' : 'Show'} Critical Safety Warning
+            </span>
+          </button>
+        </div>
+
+        {/* Critical Warning Banner (Toggleable) */}
+        {showWarning && (
+          <div className="mb-8 rounded-lg border-2 border-red-600 bg-red-50 p-6 dark:border-red-500 dark:bg-red-950">
+            <div className="flex items-start space-x-4">
+              <div className="flex h-12 w-12 items-center justify-center rounded-full bg-red-600 text-white text-2xl font-bold flex-shrink-0">
+                ⚠️
+              </div>
+              <div>
+                <h2 className="text-lg font-bold text-red-900 dark:text-red-100 mb-2">
+                  CRITICAL WARNING
+                </h2>
+                <p className="text-sm font-semibold text-red-800 dark:text-red-200 leading-relaxed">
+                  DO NOT TRUST VENDORS. DO NOT PURCHASE ANYTHING WITHOUT DOING YOUR RESEARCH. 
+                  YOU SHOULD FIND A VENDOR LISTING VIA WALLET DIRECTLY. SHOP AT YOUR OWN RISK.
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Filters */}
+        <div className="mb-8 space-y-4">
+          {/* Top Row: Category Filter */}
+          <div className="flex flex-wrap gap-2">
+            {categories.map((category) => (
+              <button
+                key={category}
+                onClick={() => setSelectedCategory(category)}
+                className={`rounded-full px-4 py-2 text-sm font-medium transition-colors ${
+                  selectedCategory === category
+                    ? 'bg-blue-600 text-white'
+                    : 'bg-white text-zinc-700 hover:bg-zinc-100 dark:bg-zinc-900 dark:text-zinc-300 dark:hover:bg-zinc-800'
+                }`}
+              >
+                {category === 'all' ? 'All' : category}
+              </button>
+            ))}
+          </div>
+
+          {/* Bottom Row: Search and Toggle */}
+          <div className="flex flex-col sm:flex-row gap-4 sm:items-center sm:justify-between">
+            {/* Wallet Search */}
+            <div className="flex-1 max-w-md">
+              <input
+                type="text"
+                placeholder="Search by vendor wallet address (e.g., 8KTD...GeMm or full address)"
+                value={walletSearch}
+                onChange={(e) => setWalletSearch(e.target.value)}
+                className="w-full rounded-lg border border-zinc-300 bg-white px-4 py-2 text-sm text-zinc-900 placeholder-zinc-400 focus:border-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-600 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-50 dark:placeholder-zinc-500"
+              />
+            </div>
+
+            {/* Hide My Listings Toggle */}
+            <div className="flex items-center space-x-2">
+              <label className="relative inline-flex items-center cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={hideMyListings}
+                  onChange={(e) => setHideMyListings(e.target.checked)}
+                  className="sr-only peer"
+                />
+                <div className="w-11 h-6 bg-zinc-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-zinc-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-zinc-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-zinc-600 peer-checked:bg-blue-600"></div>
+                <span className="ms-3 text-sm font-medium text-zinc-700 dark:text-zinc-300 whitespace-nowrap">
+                  Hide my listings
+                </span>
+              </label>
+            </div>
+          </div>
         </div>
 
         {/* Token Gating Warning */}
@@ -181,9 +288,12 @@ export default function BrowsePage() {
                         </Link>
                       </div>
 
-                      <div className="mt-3 pt-3 border-t border-zinc-200 dark:border-zinc-800">
+                      <div className="mt-3 pt-3 border-t border-zinc-200 dark:border-zinc-800 flex items-center justify-between">
                         <span className="inline-flex items-center rounded-full bg-zinc-100 px-2.5 py-0.5 text-xs font-medium text-zinc-800 dark:bg-zinc-800 dark:text-zinc-200">
                           {listing.category}
+                        </span>
+                        <span className="text-xs text-zinc-500 dark:text-zinc-400 font-mono">
+                          {truncateWallet(listing.wallet)}
                         </span>
                       </div>
                     </div>

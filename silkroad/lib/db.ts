@@ -18,6 +18,8 @@ interface CachedConnection {
 declare global {
   // eslint-disable-next-line no-var
   var mongooseCache: CachedConnection | undefined;
+  // eslint-disable-next-line no-var
+  var dbInitLogged: boolean | undefined;
 }
 
 let cached: CachedConnection = global.mongooseCache || {
@@ -27,6 +29,18 @@ let cached: CachedConnection = global.mongooseCache || {
 
 if (!global.mongooseCache) {
   global.mongooseCache = cached;
+}
+
+// Log database configuration on startup (only once)
+if (!global.dbInitLogged) {
+  if (CONFIG.MOCK_MODE) {
+    console.log('🧪 MOCK MODE: Using file-based persistence');
+  } else if (CONFIG.MONGODB_URI) {
+    console.log('✅ Database configured');
+  } else {
+    console.warn('⚠️  MONGODB_URI not configured!');
+  }
+  global.dbInitLogged = true;
 }
 
 /**
@@ -39,13 +53,11 @@ if (!global.mongooseCache) {
 async function connectDB(): Promise<typeof mongoose> {
   // Return cached connection if exists
   if (cached.conn) {
-    console.log('✅ Using cached MongoDB connection');
     return cached.conn;
   }
 
   // Return pending connection promise if exists
   if (cached.promise) {
-    console.log('⏳ Awaiting existing MongoDB connection...');
     cached.conn = await cached.promise;
     return cached.conn;
   }
@@ -56,8 +68,6 @@ async function connectDB(): Promise<typeof mongoose> {
   }
 
   // Create new connection
-  console.log('🔌 Connecting to MongoDB...');
-  
   cached.promise = mongoose.connect(CONFIG.MONGODB_URI, {
     bufferCommands: false,
     maxPoolSize: 10,
@@ -65,10 +75,10 @@ async function connectDB(): Promise<typeof mongoose> {
     socketTimeoutMS: 45000,
     serverSelectionTimeoutMS: 5000,
   }).then((mongoose) => {
-    console.log('✅ MongoDB connected successfully');
+    console.log('✅ Database connected');
     return mongoose;
   }).catch((error) => {
-    console.error('❌ MongoDB connection error:', error);
+    console.error('❌ Database connection error:', error.message);
     cached.promise = null;
     throw error;
   });
@@ -87,7 +97,7 @@ async function disconnectDB(): Promise<void> {
     await mongoose.disconnect();
     cached.conn = null;
     cached.promise = null;
-    console.log('✅ MongoDB disconnected');
+    console.log('✅ Database disconnected');
   }
 }
 

@@ -61,13 +61,27 @@ function NewListingPageContent() {
       const formData = new FormData();
       formData.append('image', file);
 
-      const response = await axios.post('/api/upload/image', formData, {
+      // Include wallet for rate limiting
+      const wallet = publicKey?.toBase58() || '';
+      const uploadUrl = `/api/upload/image${wallet ? `?wallet=${wallet}` : ''}`;
+
+      const response = await axios.post(uploadUrl, formData, {
         headers: { 'Content-Type': 'multipart/form-data' },
       });
 
       setFormData(prev => ({ ...prev, imageUrl: response.data.imageUrl }));
     } catch (err: any) {
-      setError(err.response?.data?.error || 'Failed to upload image');
+      const errorMsg = err.response?.data?.error || 'Failed to upload image';
+      setError(errorMsg);
+      
+      // Show rate limit info if available
+      if (err.response?.status === 429) {
+        const resetAt = err.response?.data?.resetAt;
+        if (resetAt) {
+          const resetTime = new Date(resetAt).toLocaleTimeString();
+          setError(`${errorMsg} Try again after ${resetTime}.`);
+        }
+      }
     } finally {
       setUploadingImage(false);
     }
@@ -128,7 +142,22 @@ function NewListingPageContent() {
       // Redirect to my-listings
       router.push('/listings/my');
     } catch (err: any) {
-      setError(err.response?.data?.error || 'Failed to create listing');
+      const errorMsg = err.response?.data?.error || 'Failed to create listing';
+      setError(errorMsg);
+
+      // Show additional info for rate limits (429 status)
+      if (err.response?.status === 429) {
+        const resetAt = err.response?.data?.resetAt;
+        const currentCount = err.response?.data?.currentCount;
+        const limit = err.response?.data?.limit;
+
+        if (resetAt) {
+          const resetTime = new Date(resetAt).toLocaleTimeString();
+          setError(`${errorMsg} Try again after ${resetTime}.`);
+        } else if (currentCount !== undefined && limit !== undefined) {
+          setError(`${errorMsg} (${currentCount}/${limit} listings)`);
+        }
+      }
     } finally {
       setLoading(false);
     }
@@ -291,78 +320,99 @@ function NewListingPageContent() {
             </div>
           </div>
 
-          {/* Delivery URL - REQUIRED */}
-          <div className="mb-6">
-            <label className="mb-2 block text-sm font-medium text-zinc-900 dark:text-zinc-50">
-              Delivery URL <span className="text-red-600">*</span>
-            </label>
+          {/* Private Delivery URL Section */}
+          <div className="mb-6 rounded-lg border-2 border-red-200 bg-red-50 p-4 dark:border-red-900 dark:bg-red-950">
+            <div className="flex items-start space-x-3 mb-4">
+              <div className="flex h-8 w-8 items-center justify-center rounded-full bg-red-600 text-white font-bold flex-shrink-0">
+                🔒
+              </div>
+              <div>
+                <h3 className="text-sm font-bold text-red-900 dark:text-red-100 mb-1">
+                  Private Delivery URL <span className="text-red-600">*</span>
+                </h3>
+                <p className="text-xs text-red-800 dark:text-red-200">
+                  ⚠️ <strong>ENCRYPTED & PRIVATE:</strong> Only shown to buyers after successful payment. Never displayed publicly.
+                </p>
+              </div>
+            </div>
+            
             <input
               type="url"
               value={formData.deliveryUrl}
               onChange={(e) => setFormData({ ...formData, deliveryUrl: e.target.value })}
               placeholder="https://github.com/yourrepo/releases/v1.0.0/software.zip"
-              className="w-full rounded-lg border border-zinc-300 bg-white px-4 py-2 text-zinc-900 placeholder-zinc-400 focus:border-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-600 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-50 dark:placeholder-zinc-500"
+              className="w-full rounded-lg border border-red-300 bg-white px-4 py-2 text-zinc-900 placeholder-zinc-400 focus:border-red-600 focus:outline-none focus:ring-2 focus:ring-red-600 dark:border-red-700 dark:bg-zinc-800 dark:text-zinc-50 dark:placeholder-zinc-500"
               required
             />
-            <p className="mt-1 text-xs text-zinc-500">
-              🔗 The download link buyers will receive after purchase (GitHub release, Dropbox, Google Drive, etc.)
+            <p className="mt-2 text-xs text-red-700 dark:text-red-300">
+              The download link buyers receive after purchase (GitHub release, Dropbox, Google Drive, etc.)
             </p>
           </div>
 
-          {/* Optional Fields Section */}
-          <div className="mb-6 rounded-lg border border-zinc-200 bg-zinc-50 p-4 dark:border-zinc-800 dark:bg-zinc-900">
-            <h3 className="text-sm font-medium text-zinc-900 dark:text-zinc-50 mb-4">
-              Optional Information
-            </h3>
+          {/* Public Information Section */}
+          <div className="mb-6 rounded-lg border-2 border-green-200 bg-green-50 p-4 dark:border-green-900 dark:bg-green-950">
+            <div className="flex items-start space-x-3 mb-4">
+              <div className="flex h-8 w-8 items-center justify-center rounded-full bg-green-600 text-white font-bold flex-shrink-0">
+                👁️
+              </div>
+              <div>
+                <h3 className="text-sm font-bold text-green-900 dark:text-green-100 mb-1">
+                  Public Resources (Optional)
+                </h3>
+                <p className="text-xs text-green-800 dark:text-green-200">
+                  ✅ <strong>PUBLICLY VISIBLE:</strong> Shown on your listing page to help buyers make informed decisions.
+                </p>
+              </div>
+            </div>
 
             {/* Demo Video URL */}
             <div className="mb-4">
-              <label className="mb-2 block text-sm font-medium text-zinc-700 dark:text-zinc-300">
-                Demo Video URL
+              <label className="mb-2 block text-sm font-medium text-zinc-900 dark:text-zinc-50">
+                🎥 Demo Video URL (YouTube)
               </label>
               <input
                 type="url"
                 value={formData.demoVideoUrl}
                 onChange={(e) => setFormData({ ...formData, demoVideoUrl: e.target.value })}
-                placeholder="https://youtube.com/watch?v=..."
-                className="w-full rounded-lg border border-zinc-300 bg-white px-4 py-2 text-zinc-900 placeholder-zinc-400 focus:border-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-600 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-50 dark:placeholder-zinc-500"
+                placeholder="https://youtube.com/watch?v=dQw4w9WgXcQ or https://youtu.be/dQw4w9WgXcQ"
+                className="w-full rounded-lg border border-green-300 bg-white px-4 py-2 text-zinc-900 placeholder-zinc-400 focus:border-green-600 focus:outline-none focus:ring-2 focus:ring-green-600 dark:border-green-700 dark:bg-zinc-800 dark:text-zinc-50 dark:placeholder-zinc-500"
               />
-              <p className="mt-1 text-xs text-zinc-500">
-                Link to a video demonstration (YouTube, Vimeo, etc.)
+              <p className="mt-1 text-xs text-green-700 dark:text-green-300">
+                YouTube video that will auto-play (muted) on your listing page
               </p>
             </div>
 
             {/* Whitepaper URL */}
             <div className="mb-4">
-              <label className="mb-2 block text-sm font-medium text-zinc-700 dark:text-zinc-300">
-                Whitepaper URL
+              <label className="mb-2 block text-sm font-medium text-zinc-900 dark:text-zinc-50">
+                📄 Whitepaper URL
               </label>
               <input
                 type="url"
                 value={formData.whitepaperUrl}
                 onChange={(e) => setFormData({ ...formData, whitepaperUrl: e.target.value })}
                 placeholder="https://docs.google.com/document/..."
-                className="w-full rounded-lg border border-zinc-300 bg-white px-4 py-2 text-zinc-900 placeholder-zinc-400 focus:border-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-600 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-50 dark:placeholder-zinc-500"
+                className="w-full rounded-lg border border-green-300 bg-white px-4 py-2 text-zinc-900 placeholder-zinc-400 focus:border-green-600 focus:outline-none focus:ring-2 focus:ring-green-600 dark:border-green-700 dark:bg-zinc-800 dark:text-zinc-50 dark:placeholder-zinc-500"
               />
-              <p className="mt-1 text-xs text-zinc-500">
-                Link to technical documentation or whitepaper
+              <p className="mt-1 text-xs text-green-700 dark:text-green-300">
+                Public technical documentation or whitepaper shown on your listing page
               </p>
             </div>
 
             {/* GitHub URL */}
             <div>
-              <label className="mb-2 block text-sm font-medium text-zinc-700 dark:text-zinc-300">
-                GitHub URL (Public Repo)
+              <label className="mb-2 block text-sm font-medium text-zinc-900 dark:text-zinc-50">
+                💻 GitHub URL (Public Repo)
               </label>
               <input
                 type="url"
                 value={formData.githubUrl}
                 onChange={(e) => setFormData({ ...formData, githubUrl: e.target.value })}
                 placeholder="https://github.com/username/repo"
-                className="w-full rounded-lg border border-zinc-300 bg-white px-4 py-2 text-zinc-900 placeholder-zinc-400 focus:border-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-600 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-50 dark:placeholder-zinc-500"
+                className="w-full rounded-lg border border-green-300 bg-white px-4 py-2 text-zinc-900 placeholder-zinc-400 focus:border-green-600 focus:outline-none focus:ring-2 focus:ring-green-600 dark:border-green-700 dark:bg-zinc-800 dark:text-zinc-50 dark:placeholder-zinc-500"
               />
-              <p className="mt-1 text-xs text-zinc-500">
-                Link to public GitHub repository (if applicable)
+              <p className="mt-1 text-xs text-green-700 dark:text-green-300">
+                Public GitHub repository link shown on your listing page
               </p>
             </div>
           </div>

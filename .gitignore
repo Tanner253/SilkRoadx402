@@ -9,7 +9,6 @@ QUICK_STRUCTURE.md
 **/PROJECT_SPEC.md
 **/STRUCTURE.md
 **/QUICK_STRUCTURE.md
-
 # ============================================
 # Dependencies
 # ============================================
@@ -123,6 +122,12 @@ temp_uploads/
 # ============================================
 mongodb-data/
 dump/
+
+# ============================================
+# Mock Data (Testing)
+# ============================================
+.mock-data.json
+silkroad/.mock-data.json
 
 # ============================================
 # Private Keys (Extra Safety)

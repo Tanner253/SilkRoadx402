@@ -50,6 +50,37 @@ export function decrypt(ciphertext: string): string {
 }
 
 /**
+ * Safely decrypt a string with fallback for legacy unencrypted data
+ * 
+ * Used for backward compatibility with data that was stored before encryption.
+ * Attempts decryption and returns the original string if it fails (no error logging).
+ * 
+ * @param potentialCiphertext - String that may or may not be encrypted
+ * @returns string - Decrypted plaintext or original string if not encrypted
+ */
+export function safeDecrypt(potentialCiphertext: string): string {
+  if (!CONFIG.APP_SECRET) {
+    return potentialCiphertext;
+  }
+
+  try {
+    const bytes = CryptoJS.AES.decrypt(potentialCiphertext, CONFIG.APP_SECRET);
+    const plaintext = bytes.toString(CryptoJS.enc.Utf8);
+
+    // If decryption produced valid UTF-8, return it
+    if (plaintext && plaintext.length > 0) {
+      return plaintext;
+    }
+
+    // Empty result = not encrypted, return original
+    return potentialCiphertext;
+  } catch (error) {
+    // Decryption failed (malformed UTF-8) = not encrypted, return original
+    return potentialCiphertext;
+  }
+}
+
+/**
  * Hash string using SHA-256
  * 
  * @param input - String to hash
