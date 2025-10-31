@@ -39,6 +39,58 @@ export default function Home() {
             </p>
           </div>
 
+          {/* 🎉 LIMITED TIME PROMOTIONAL BANNER */}
+          <div className="mb-8 overflow-hidden rounded-2xl border-4 border-purple-500 bg-gradient-to-r from-purple-600 via-pink-600 to-orange-500 p-1 shadow-2xl animate-pulse">
+            <div className="rounded-xl bg-white dark:bg-zinc-900 p-6 sm:p-8">
+              <div className="text-center">
+                {/* Emoji Header */}
+                <div className="mb-4 text-5xl sm:text-6xl">
+                  🎉 💰 🚀
+                </div>
+                
+                {/* Main Heading */}
+                <h2 className="mb-3 text-3xl sm:text-4xl font-black bg-gradient-to-r from-purple-600 via-pink-600 to-orange-500 bg-clip-text text-transparent">
+                  LIMITED TIME LAUNCH BONUS!
+                </h2>
+                
+                {/* Subheading */}
+                <p className="mb-4 text-xl sm:text-2xl font-bold text-zinc-900 dark:text-zinc-50">
+                  ALL Listings Below <span className="text-green-600 dark:text-green-400">$11 USDC</span> Get a
+                </p>
+                
+                {/* Guaranteed Badge */}
+                <div className="mb-4 inline-flex items-center space-x-3 rounded-full bg-gradient-to-r from-green-500 to-emerald-600 px-8 py-4 shadow-lg">
+                  <span className="text-3xl">✅</span>
+                  <span className="text-2xl sm:text-3xl font-black text-white uppercase tracking-wider">
+                    GUARANTEED FIRST SALE
+                  </span>
+                  <span className="text-3xl">✅</span>
+                </div>
+                
+                {/* Description */}
+                <p className="mx-auto max-w-2xl text-base sm:text-lg text-zinc-700 dark:text-zinc-300 mb-4">
+                  List your software for <strong>under $11 USDC</strong> and we'll purchase it ourselves! 
+                  <span className="block mt-2 font-semibold text-purple-600 dark:text-purple-400">
+                    Every listing is guaranteed to get at least 1 sale. No exceptions.
+                  </span>
+                </p>
+                
+                {/* CTA */}
+                <div className="flex flex-col sm:flex-row items-center justify-center space-y-3 sm:space-y-0 sm:space-x-4">
+                  <Link
+                    href="/listings/new"
+                    className="inline-flex items-center justify-center rounded-full bg-gradient-to-r from-purple-600 to-pink-600 px-8 py-4 text-lg font-bold text-white shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-200"
+                  >
+                    🎁 Create Listing & Claim Bonus
+                  </Link>
+                  <p className="text-sm text-zinc-500 dark:text-zinc-400 font-medium">
+                    ⏰ Limited time offer - Act fast!
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+
           {/* BETA Information Panel */}
           <div className="mb-12 rounded-lg border-2 border-orange-500 bg-gradient-to-br from-orange-50 to-red-50 shadow-xl dark:from-orange-950 dark:to-red-950 text-left overflow-hidden">
             {/* BETA Badge with Toggle */}
