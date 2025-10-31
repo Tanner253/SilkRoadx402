@@ -42,11 +42,23 @@ export async function GET(req: NextRequest) {
 
     // Enrich with listing data if attached
     const enrichedMessages = await Promise.all(
-      messages.map(async (msg) => {
+      messages.map(async (msg: any) => {
+        // Convert reactions Map to plain object (handle both Map and POJO)
+        let reactions = {};
+        if (msg.reactions) {
+          if (msg.reactions instanceof Map) {
+            reactions = Object.fromEntries(msg.reactions);
+          } else if (typeof msg.reactions === 'object') {
+            // Already a plain object from MongoDB
+            reactions = msg.reactions;
+          }
+        }
+        
         if (msg.listingId) {
           const listing = await Listing.findById(msg.listingId).lean() as { _id: any; title: string; price: number; imageUrl: string } | null;
           return {
             ...msg,
+            reactions,
             listing: listing ? {
               _id: listing._id.toString(),
               title: listing.title,
@@ -55,7 +67,10 @@ export async function GET(req: NextRequest) {
             } : null,
           };
         }
-        return msg;
+        return {
+          ...msg,
+          reactions,
+        };
       })
     );
 

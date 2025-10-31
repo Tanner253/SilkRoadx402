@@ -19,6 +19,7 @@ interface ChatMessage {
     price: number;
     imageUrl: string;
   };
+  reactions?: Record<string, string[]>; // emoji -> array of wallet addresses
   createdAt: Date;
 }
 
@@ -39,6 +40,7 @@ export function PublicChat() {
   const [sending, setSending] = useState(false);
   const [cooldown, setCooldown] = useState(0);
   const [error, setError] = useState('');
+  const [showReactionsFor, setShowReactionsFor] = useState<string | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   // Fetch messages every 10 seconds
@@ -69,6 +71,20 @@ export function PublicChat() {
       return () => clearTimeout(timer);
     }
   }, [cooldown]);
+
+  // Close reaction picker when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (showReactionsFor) {
+        setShowReactionsFor(null);
+      }
+    };
+
+    if (showReactionsFor) {
+      document.addEventListener('click', handleClickOutside);
+      return () => document.removeEventListener('click', handleClickOutside);
+    }
+  }, [showReactionsFor]);
 
   const fetchMessages = async () => {
     try {
@@ -144,6 +160,36 @@ export function PublicChat() {
     return `${wallet.slice(0, 4)}`;
   };
 
+  const handleReaction = async (messageId: string, emoji: string) => {
+    if (!publicKey) return;
+
+    try {
+      await axios.post(`/api/chat/${messageId}/react`, {
+        wallet: publicKey.toBase58(),
+        emoji,
+      });
+      
+      // Close the reaction menu
+      setShowReactionsFor(null);
+      
+      // Refresh messages to show updated reactions
+      await fetchMessages();
+    } catch (err) {
+      console.error('Failed to react:', err);
+    }
+  };
+
+  const hasUserReacted = (reactions: Record<string, string[]> | undefined, emoji: string) => {
+    if (!reactions || !publicKey) return false;
+    const reactors = reactions[emoji] || [];
+    return reactors.includes(publicKey.toBase58());
+  };
+
+  const getReactionCount = (reactions: Record<string, string[]> | undefined, emoji: string) => {
+    if (!reactions) return 0;
+    return (reactions[emoji] || []).length;
+  };
+
   if (!isOpen) {
     return (
       <button
@@ -217,6 +263,75 @@ export function PublicChat() {
                   <span className="text-amber-500">→</span>
                 </Link>
               )}
+
+              {/* Reactions */}
+              <div className="mt-1 ml-6 flex items-center space-x-1 flex-wrap">
+                {/* Show existing reactions with counts */}
+                {msg.reactions && Object.entries(msg.reactions).map(([emoji, wallets]) => {
+                  if (wallets.length === 0) return null;
+                  const userReacted = hasUserReacted(msg.reactions, emoji);
+                  
+                  return (
+                    <button
+                      key={emoji}
+                      onClick={() => handleReaction(msg._id, emoji)}
+                      disabled={!isConnected || !isTokenGated}
+                      className={`
+                        flex items-center space-x-1 rounded px-1.5 py-0.5 text-xs transition-all
+                        ${userReacted 
+                          ? 'bg-amber-700 border border-amber-600' 
+                          : 'bg-zinc-800 border border-zinc-700 hover:bg-zinc-700'
+                        }
+                        ${!isConnected || !isTokenGated ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}
+                      `}
+                      title={userReacted ? 'Remove reaction' : 'React'}
+                    >
+                      <span>{emoji}</span>
+                      <span className={`font-bold ${userReacted ? 'text-yellow-200' : 'text-zinc-400'}`}>
+                        {wallets.length}
+                      </span>
+                    </button>
+                  );
+                })}
+
+                {/* Add reaction button */}
+                <div className="relative">
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setShowReactionsFor(showReactionsFor === msg._id ? null : msg._id);
+                    }}
+                    disabled={!isConnected || !isTokenGated}
+                    className={`
+                      flex items-center justify-center w-6 h-6 rounded text-xs transition-all
+                      bg-zinc-800 border border-zinc-700 hover:bg-zinc-700 hover:border-amber-600
+                      ${!isConnected || !isTokenGated ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}
+                    `}
+                    title="Add reaction"
+                  >
+                    <span className="text-zinc-400 font-bold">+</span>
+                  </button>
+
+                  {/* Reaction picker dropdown */}
+                  {showReactionsFor === msg._id && (
+                    <div 
+                      className="absolute bottom-full left-0 mb-1 flex space-x-1 bg-zinc-800 border border-amber-700 rounded p-1 shadow-lg z-10"
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      {['❤️', '👍', '👎', '👀'].map((emoji) => (
+                        <button
+                          key={emoji}
+                          onClick={() => handleReaction(msg._id, emoji)}
+                          className="hover:bg-zinc-700 rounded px-2 py-1 text-sm transition-colors"
+                          title={`React with ${emoji}`}
+                        >
+                          {emoji}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
             </div>
           ))
         )}

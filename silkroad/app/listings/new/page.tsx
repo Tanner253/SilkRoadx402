@@ -399,7 +399,7 @@ function NewListingPageContent() {
               <div>
                 <h3 className="text-sm font-bold text-green-900 dark:text-green-100 mb-1">
                   Public Resources (Optional)
-                </h3>
+            </h3>
                 <p className="text-xs text-green-800 dark:text-green-200">
                   ✅ <strong>PUBLICLY VISIBLE:</strong> Shown on your listing page to help buyers make informed decisions.
                 </p>

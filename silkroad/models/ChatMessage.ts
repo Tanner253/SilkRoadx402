@@ -5,6 +5,7 @@ export interface IChatMessage extends Document {
   message: string;
   messageType: 'selling' | 'buying' | 'general';
   listingId?: string; // Optional listing to shill
+  reactions: Map<string, string[]>; // emoji -> array of wallet addresses
   createdAt: Date;
 }
 
@@ -28,6 +29,11 @@ const ChatMessageSchema = new Schema<IChatMessage>(
     listingId: {
       type: String,
       required: false, // Optional - can attach a listing
+    },
+    reactions: {
+      type: Map,
+      of: [String], // Map of emoji -> array of wallet addresses
+      default: new Map(),
     },
   },
   {
