@@ -62,7 +62,7 @@ export function Navbar() {
           {/* Logo */}
           <Link href="/" className="flex items-center space-x-2 sm:space-x-3">
             <div className="text-lg sm:text-xl font-bold tracking-tight text-zinc-900 dark:text-zinc-50">
-              SilkRoad<span className="text-blue-600">x402</span>
+              SilkRoad<span className="text-green-500">x402</span>
             </div>
           </Link>
 
