@@ -5,11 +5,13 @@ import { useWallet } from '@solana/wallet-adapter-react';
 import { WalletMultiButton } from '@solana/wallet-adapter-react-ui';
 import Link from 'next/link';
 import { useUSDCBalance } from '@/hooks/useUSDCBalance';
+import { useActiveUsers } from '@/hooks/useActiveUsers';
 import { usePathname } from 'next/navigation';
 
 export function Navbar() {
   const { publicKey } = useWallet();
   const { balance, loading } = useUSDCBalance();
+  const activeUsers = useActiveUsers();
   const [mounted, setMounted] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const pathname = usePathname();
@@ -103,8 +105,21 @@ export function Navbar() {
           )}
         </div>
 
-          {/* Right Side: USDC Balance + Profile + Wallet Button */}
+          {/* Right Side: Active Users + USDC Balance + Profile + Wallet Button */}
           <div className="flex items-center gap-2 sm:gap-3">
+            {/* Active Users Counter - Hidden on mobile (shown in hamburger menu) */}
+            {mounted && (
+              <div className="hidden md:flex items-center gap-1.5 rounded-lg border border-zinc-200 bg-zinc-50 px-2 sm:px-3 py-2 dark:border-zinc-800 dark:bg-zinc-900">
+                <span className="text-green-500 text-xs sm:text-sm">🟢</span>
+                <span className="text-xs sm:text-sm font-semibold text-zinc-900 dark:text-zinc-50">
+                  {activeUsers}
+                </span>
+                <span className="hidden sm:inline text-xs text-zinc-500 dark:text-zinc-400">
+                  online
+                </span>
+              </div>
+            )}
+
             {/* USDC Balance - Hidden on mobile when connected */}
             {mounted && publicKey && (
               <div className="hidden sm:flex items-center gap-2 rounded-lg border border-zinc-200 bg-zinc-50 px-3 py-2 dark:border-zinc-800 dark:bg-zinc-900">
@@ -170,6 +185,17 @@ export function Navbar() {
           {/* Menu Panel */}
           <div className="fixed top-16 left-0 right-0 bottom-0 z-40 bg-white dark:bg-zinc-900 md:hidden overflow-y-auto">
             <div className="flex flex-col p-6 space-y-6">
+              {/* Active Users on Mobile - Always visible */}
+              <div className="flex items-center gap-3 rounded-lg border border-zinc-200 bg-zinc-50 p-4 dark:border-zinc-800 dark:bg-zinc-800">
+                <span className="text-2xl">🟢</span>
+                <div className="flex flex-col">
+                  <span className="text-sm text-zinc-500 dark:text-zinc-400">Active Users</span>
+                  <span className="text-lg font-semibold text-zinc-900 dark:text-zinc-50">
+                    {activeUsers} online
+                  </span>
+                </div>
+              </div>
+
               {/* USDC Balance on Mobile - Only show when wallet connected */}
               {publicKey && (
                 <div className="flex items-center gap-3 rounded-lg border border-zinc-200 bg-zinc-50 p-4 dark:border-zinc-800 dark:bg-zinc-800">
