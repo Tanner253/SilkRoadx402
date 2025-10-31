@@ -745,6 +745,18 @@ export default function Home() {
                   <span className="text-green-500">✓</span>
                   <span><strong>Listing Management:</strong> Deactivate/reactivate with admin approval</span>
                 </li>
+                <li className="flex gap-2">
+                  <span className="text-green-500">✓</span>
+                  <span><strong>Public Chat:</strong> RuneScape-style marketplace chat with listing shilling</span>
+                </li>
+                <li className="flex gap-2">
+                  <span className="text-green-500">✓</span>
+                  <span><strong>Reviews System:</strong> Verified buyer reviews and reporting</span>
+                </li>
+                <li className="flex gap-2">
+                  <span className="text-green-500">✓</span>
+                  <span><strong>Admin Logs:</strong> Real-time activity tracking and auto-refresh dashboard</span>
+                </li>
                 <li className="flex gap-2 opacity-70">
                   <span className="text-cyan-500">⏳</span>
                   <span className="text-gray-400"><strong>Coming Soon:</strong> Direct file delivery, advanced search, reputation system</span>

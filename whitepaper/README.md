@@ -115,6 +115,28 @@ Sell your trading bots, private tools, scripts, and software anonymously. Buy ex
 - ✅ **Active Listings** - Current products per seller
 - ✅ **Vendor Discovery** - Find top sellers easily
 
+### 💬 **Community Features** (NEW - v0.4.0)
+- ✅ **RuneScape-Style Chat** - Public marketplace chat for trading
+- ✅ **Listing Shilling** - Optional product attachments in chat
+- ✅ **Color-Coded Messages** - 🟢 Selling, 🔵 Buying, 🟡 General
+- ✅ **Advanced Filtering** - URLs blocked, profanity filtered, spam detection
+- ✅ **Rate Limited** - 60-second cooldown per message
+- ✅ **Retro Aesthetic** - Pixelated font, nostalgic design
+
+### ⭐ **Reviews & Trust** (NEW - v0.3.0)
+- ✅ **Verified Buyer Reviews** - Only actual buyers can comment
+- ✅ **One Review Per Purchase** - Prevents spam
+- ✅ **Public Visibility** - All reviews shown on listings
+- ✅ **Reporting System** - Flag suspicious listings
+- ✅ **Admin Moderation** - Track reports with greyed-out flag icon
+
+### 📊 **Admin Monitoring** (NEW - v0.3.0)
+- ✅ **Activity Logs** - Track all platform events in real-time
+- ✅ **Auto-Refresh** - Dashboard updates every 30 seconds
+- ✅ **Event Types** - Listings created/approved/rejected, purchases, comments, reports
+- ✅ **IP Tracking** - Monitor suspicious activity
+- ✅ **Isolated Polling** - Smooth UI without full page re-renders
+
 ---
 
 ## 🎯 **WHY THIS MATTERS**

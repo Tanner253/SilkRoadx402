@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import { Footer } from "@/components/Footer";
 
 export const metadata: Metadata = {
   title: "SilkRoadx402 - Anonymous Software Marketplace",
@@ -18,8 +19,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className="antialiased bg-black text-gray-100" suppressHydrationWarning>
+      <body className="antialiased bg-black text-gray-100 pb-16" suppressHydrationWarning>
         {children}
+        <Footer />
       </body>
     </html>
   );

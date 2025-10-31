@@ -8,6 +8,7 @@ import { Transaction } from '@/models/Transaction';
 import { sanitizeString } from '@/lib/validation/sanitization';
 import { encrypt } from '@/lib/crypto/encryption';
 import { checkRateLimit, RATE_LIMITS } from '@/lib/rateLimit';
+import { createLog, getIpFromRequest } from '@/lib/logger';
 
 // GET - Fetch all approved listings or user's listings
 export async function GET(req: NextRequest) {
@@ -249,6 +250,13 @@ export async function POST(req: NextRequest) {
         githubUrl,
       });
 
+      // Log listing creation
+      await createLog(
+        'listing_created',
+        `New listing created: "${sanitizedTitle}" by ${wallet.slice(0, 8)}...`,
+        wallet,
+        getIpFromRequest(req)
+      );
 
       return NextResponse.json({
         success: true,
@@ -280,6 +288,14 @@ export async function POST(req: NextRequest) {
       state: 'in_review',
       approved: false,
     });
+
+    // Log listing creation
+    await createLog(
+      'listing_created',
+      `New listing created: "${sanitizedTitle}" ($${priceNum}) by ${wallet.slice(0, 8)}...`,
+      wallet,
+      getIpFromRequest(req)
+    );
 
     return NextResponse.json({
       success: true,

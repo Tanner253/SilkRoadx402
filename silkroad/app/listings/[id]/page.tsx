@@ -49,12 +49,27 @@ function ListingDetail({ params }: { params: Promise<{ id: string }> }) {
   const [purchasing, setPurchasing] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [showWarning, setShowWarning] = useState(false);
+  const [reporting, setReporting] = useState(false);
+  const [reportReason, setReportReason] = useState('');
+  const [showReportForm, setShowReportForm] = useState(false);
+  const [comments, setComments] = useState<any[]>([]);
+  const [newComment, setNewComment] = useState('');
+  const [submittingComment, setSubmittingComment] = useState(false);
+  const [hasPurchased, setHasPurchased] = useState(false);
+  const [hasCommented, setHasCommented] = useState(false);
 
   useEffect(() => {
     if (mounted && id) {
       fetchListing();
+      fetchComments();
     }
   }, [mounted, id]);
+
+  useEffect(() => {
+    if (mounted && id && publicKey) {
+      checkPurchaseStatus();
+    }
+  }, [mounted, id, publicKey]);
 
   const fetchListing = async () => {
     try {
@@ -65,6 +80,62 @@ function ListingDetail({ params }: { params: Promise<{ id: string }> }) {
       setError(err.response?.data?.error || 'Failed to load listing');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchComments = async () => {
+    try {
+      const response = await axios.get(`/api/listings/${id}/comments`);
+      setComments(response.data.comments || []);
+    } catch (err: any) {
+      console.error('Failed to fetch comments:', err);
+    }
+  };
+
+  const checkPurchaseStatus = async () => {
+    if (!publicKey) return;
+    
+    try {
+      const response = await axios.get('/api/transactions', {
+        params: {
+          wallet: publicKey.toBase58(),
+          type: 'purchases',
+        },
+      });
+      
+      const purchases = response.data.transactions || [];
+      const purchased = purchases.some((tx: any) => tx.listingId === id && tx.status === 'success');
+      setHasPurchased(purchased);
+      
+      // Check if already commented
+      const commented = comments.some((c: any) => c.buyerWallet === publicKey.toBase58());
+      setHasCommented(commented);
+    } catch (err: any) {
+      console.error('Failed to check purchase status:', err);
+    }
+  };
+
+  const handleSubmitComment = async () => {
+    if (!publicKey || !newComment.trim()) return;
+
+    try {
+      setSubmittingComment(true);
+      await axios.post(`/api/listings/${id}/comments`, {
+        wallet: publicKey.toBase58(),
+        comment: newComment.trim(),
+      });
+      
+      alert('✅ Review submitted successfully!');
+      setNewComment('');
+      setHasCommented(true);
+      
+      // Refresh comments
+      await fetchComments();
+    } catch (err: any) {
+      const errorMsg = err.response?.data?.error || 'Failed to submit review';
+      alert(`❌ ${errorMsg}`);
+    } finally {
+      setSubmittingComment(false);
     }
   };
 
@@ -85,6 +156,34 @@ function ListingDetail({ params }: { params: Promise<{ id: string }> }) {
     if (embedMatch) return embedMatch[1];
     
     return null;
+  };
+
+  const handleReport = async () => {
+    if (!publicKey || !listing) return;
+
+    if (!isConnected || !hasAcceptedTOS) {
+      alert('Please connect your wallet and accept TOS first');
+      router.push('/');
+      return;
+    }
+
+    if (confirm('Report this listing? This will be reviewed by administrators.')) {
+      try {
+        setReporting(true);
+        await axios.post('/api/reports', {
+          listingId: listing._id,
+          wallet: publicKey.toBase58(),
+          reason: reportReason.trim() || undefined,
+        });
+        alert('✅ Report submitted successfully. Thank you for helping keep the marketplace safe!');
+        setReportReason('');
+      } catch (err: any) {
+        const errorMsg = err.response?.data?.error || 'Failed to submit report';
+        alert(`❌ ${errorMsg}`);
+      } finally {
+        setReporting(false);
+      }
+    }
   };
 
   const handlePurchase = async () => {
@@ -340,21 +439,6 @@ function ListingDetail({ params }: { params: Promise<{ id: string }> }) {
           ← Back to Browse
         </Link>
 
-        {/* Warning Toggle Button */}
-        <div className="mb-6">
-          <button
-            onClick={() => setShowWarning(!showWarning)}
-            className="flex items-center space-x-3 rounded-lg border-2 border-red-600 bg-red-600 px-4 py-3 hover:bg-red-700 transition-colors"
-            title="Important Safety Warning"
-          >
-            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-white text-red-600 text-xl font-bold">
-              ⚠️
-            </div>
-            <span className="text-sm font-bold text-white">
-              {showWarning ? 'Hide' : 'Show'} Critical Safety Warning
-            </span>
-          </button>
-        </div>
 
         {/* Critical Warning Banner (Toggleable) */}
         {showWarning && (
@@ -394,11 +478,33 @@ function ListingDetail({ params }: { params: Promise<{ id: string }> }) {
 
           {/* Details */}
           <div>
-            <div className="mb-6">
+            <div className="mb-6 relative">
               <span className="inline-flex items-center rounded-full bg-zinc-100 px-3 py-1 text-xs font-medium text-zinc-800 dark:bg-zinc-800 dark:text-zinc-200 mb-3">
                 {listing.category}
               </span>
-              <h1 className="text-4xl font-bold text-zinc-900 dark:text-zinc-50 mb-4">
+              
+              {/* Icon Buttons - Top Right */}
+              <div className="absolute top-0 right-0 flex items-center space-x-2">
+                {/* Warning Icon */}
+                <button
+                  onClick={() => setShowWarning(!showWarning)}
+                  className="text-2xl hover:scale-110 transition-transform"
+                  title={showWarning ? 'Hide Critical Safety Warning' : 'Show Critical Safety Warning'}
+                >
+                  ⚠️
+                </button>
+                
+                {/* Flag Icon - Greyed Out */}
+                <button
+                  onClick={() => setShowReportForm(!showReportForm)}
+                  className="text-2xl opacity-40 hover:opacity-100 hover:scale-110 transition-all grayscale"
+                  title={showReportForm ? 'Close report form' : 'Report this listing'}
+                >
+                  🚩
+                </button>
+              </div>
+
+              <h1 className="text-4xl font-bold text-zinc-900 dark:text-zinc-50 mb-4 pr-20">
                 {listing.title}
               </h1>
               <p className="text-zinc-600 dark:text-zinc-400 whitespace-pre-wrap">
@@ -544,6 +650,144 @@ function ListingDetail({ params }: { params: Promise<{ id: string }> }) {
             </div>
           </div>
         )}
+
+        {/* Report Listing Section (Collapsible) */}
+        {showReportForm && (
+          <div className="mt-8 rounded-lg border-2 border-red-600 bg-red-50 p-6 dark:border-red-500 dark:bg-red-950 animate-in fade-in slide-in-from-top-4 duration-300">
+            <div className="flex items-start justify-between mb-4">
+              <h3 className="text-lg font-bold text-red-900 dark:text-red-100 flex items-center">
+                <span className="text-xl mr-2">🚨</span>
+                Report This Listing
+              </h3>
+              <button
+                onClick={() => setShowReportForm(false)}
+                className="text-red-600 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 font-bold"
+                title="Close"
+              >
+                ✕
+              </button>
+            </div>
+            <p className="text-sm text-red-800 dark:text-red-200 mb-4">
+              Found a problem? Report this listing if it contains malware, scams, or violates our terms.
+            </p>
+            <textarea
+              value={reportReason}
+              onChange={(e) => setReportReason(e.target.value)}
+              placeholder="Optional: Describe the issue (max 100 characters)"
+              maxLength={100}
+              rows={2}
+              className="w-full rounded-lg border border-red-300 bg-white px-4 py-2 text-sm text-zinc-900 placeholder-zinc-400 focus:border-red-600 focus:outline-none focus:ring-2 focus:ring-red-600 dark:border-red-700 dark:bg-zinc-800 dark:text-zinc-50 dark:placeholder-zinc-500 mb-3"
+            />
+            <div className="flex items-center space-x-3">
+              <button
+                onClick={handleReport}
+                disabled={reporting || !isConnected}
+                className="rounded-lg bg-red-600 px-6 py-2 text-sm font-medium text-white hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-50 transition-colors"
+              >
+                {reporting ? 'Submitting...' : '🚨 Submit Report'}
+              </button>
+              {!isConnected && (
+                <p className="text-xs text-red-700 dark:text-red-300">
+                  Connect your wallet to report
+                </p>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* Reviews/Comments Section */}
+        <div className="mt-8">
+          <h2 className="text-2xl font-bold text-zinc-900 dark:text-zinc-50 mb-4">
+            📝 Reviews ({comments.length})
+          </h2>
+
+          {/* Comments List */}
+          {comments.length === 0 ? (
+            <div className="rounded-lg border border-zinc-200 bg-zinc-50 p-8 text-center dark:border-zinc-800 dark:bg-zinc-900">
+              <p className="text-zinc-600 dark:text-zinc-400">
+                No reviews yet. Be the first to review!
+              </p>
+            </div>
+          ) : (
+            <div className="space-y-4 mb-6">
+              {comments.map((comment: any) => {
+                const wallet = comment.buyerWallet;
+                const truncatedWallet = `${wallet.slice(0, 4)}...${wallet.slice(-4)}`;
+                
+                // Calculate time ago
+                const timeAgo = () => {
+                  const now = new Date();
+                  const created = new Date(comment.createdAt);
+                  const diffMs = now.getTime() - created.getTime();
+                  const diffSecs = Math.floor(diffMs / 1000);
+                  const diffMins = Math.floor(diffSecs / 60);
+                  const diffHours = Math.floor(diffMins / 60);
+                  const diffDays = Math.floor(diffHours / 24);
+                  const diffMonths = Math.floor(diffDays / 30);
+                  
+                  if (diffSecs < 60) return 'Just now';
+                  if (diffMins < 60) return `${diffMins}m ago`;
+                  if (diffHours < 24) return `${diffHours}h ago`;
+                  if (diffDays < 30) return `${diffDays}d ago`;
+                  return `${diffMonths}mo ago`;
+                };
+
+                return (
+                  <div
+                    key={comment._id}
+                    className="rounded-lg border border-zinc-200 bg-white p-4 dark:border-zinc-800 dark:bg-zinc-900"
+                  >
+                    <div className="flex items-center justify-between mb-2">
+                      <div className="flex items-center space-x-2">
+                        <div className="flex h-8 w-8 items-center justify-center rounded-full bg-blue-100 dark:bg-blue-900">
+                          <span className="text-sm">👤</span>
+                        </div>
+                        <span className="text-sm font-mono text-zinc-700 dark:text-zinc-300">
+                          {truncatedWallet}
+                        </span>
+                      </div>
+                      <span className="text-xs text-zinc-500 dark:text-zinc-400">
+                        {timeAgo()}
+                      </span>
+                    </div>
+                    <p className="text-sm text-zinc-800 dark:text-zinc-200">
+                      {comment.comment}
+                    </p>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+
+          {/* Review Input (Only for buyers who haven't reviewed) */}
+          {isConnected && hasPurchased && !hasCommented && (
+            <div className="mt-6 rounded-lg border-2 border-blue-200 bg-blue-50 p-6 dark:border-blue-900 dark:bg-blue-950">
+              <h3 className="text-lg font-bold text-blue-900 dark:text-blue-100 mb-3">
+                Leave a Review
+              </h3>
+              <textarea
+                value={newComment}
+                onChange={(e) => setNewComment(e.target.value)}
+                placeholder="Share your experience with this product... (5-500 characters)"
+                maxLength={500}
+                rows={3}
+                className="w-full rounded-lg border border-blue-300 bg-white px-4 py-2 text-sm text-zinc-900 placeholder-zinc-400 focus:border-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-600 dark:border-blue-700 dark:bg-zinc-800 dark:text-zinc-50 dark:placeholder-zinc-500 mb-3"
+              />
+              <div className="flex items-center justify-between">
+                <span className="text-xs text-blue-700 dark:text-blue-300">
+                  {newComment.length}/500 characters
+                </span>
+                <button
+                  onClick={handleSubmitComment}
+                  disabled={submittingComment || newComment.trim().length < 5}
+                  className="rounded-lg bg-blue-600 px-6 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50 transition-colors"
+                >
+                  {submittingComment ? 'Submitting...' : '📝 Post Review'}
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );

@@ -26,6 +26,7 @@ import {
 import { verifyPayment, settlePayment } from '@/lib/x402/facilitator';
 import type { SolanaExactPayload } from '@/types/x402';
 import { checkRateLimit, RATE_LIMITS } from '@/lib/rateLimit';
+import { createLog, getIpFromRequest } from '@/lib/logger';
 
 export async function POST(req: NextRequest) {
   try {
@@ -203,6 +204,14 @@ export async function POST(req: NextRequest) {
       deliveryUrl: listing.deliveryUrl,  // Already encrypted from listing
       status: 'success',
     });
+
+    // Log successful purchase
+    await createLog(
+      'listing_purchased',
+      `Listing "${listing.title}" purchased for $${listing.price} by ${solanaPayload.from.slice(0, 8)}...`,
+      solanaPayload.from,
+      getIpFromRequest(req)
+    );
 
     // Decrypt delivery URL for buyer (ephemeral, shown once)
     // safeDecrypt handles legacy unencrypted data without errors

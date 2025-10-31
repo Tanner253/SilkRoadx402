@@ -5,6 +5,7 @@ import axios from 'axios';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { CONFIG } from '@/config/constants';
+import { LogsPanel } from './LogsPanel';
 
 interface Listing {
   _id: string;
@@ -22,10 +23,13 @@ interface Listing {
 
 export default function AdminDashboardPage() {
   const router = useRouter();
+  const [activeTab, setActiveTab] = useState<'listings' | 'logs'>('listings');
   const [listings, setListings] = useState<Listing[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [filter, setFilter] = useState<'all' | 'pending' | 'approved' | 'pulled'>('pending');
+  const [lastUpdated, setLastUpdated] = useState<Date>(new Date());
+  const [autoRefresh, setAutoRefresh] = useState(true);
 
   // Check admin authentication (localStorage)
   useEffect(() => {
@@ -48,11 +52,32 @@ export default function AdminDashboardPage() {
     fetchListings();
   }, [router]);
 
+  // Fetch listings when tab changes
+  useEffect(() => {
+    if (activeTab === 'listings') {
+      fetchListings();
+    }
+  }, [activeTab]);
+
+  // Auto-refresh listings every 30 seconds (logs handle their own refresh)
+  useEffect(() => {
+    if (!autoRefresh || activeTab !== 'listings') return;
+
+    const interval = setInterval(() => {
+      console.log('🔄 Auto-refreshing listings...');
+      fetchListings();
+    }, 30000); // 30 seconds
+
+    return () => clearInterval(interval);
+  }, [autoRefresh, activeTab]);
+
   const fetchListings = async () => {
     try {
       setLoading(true);
+      setError(null);
       const response = await axios.get('/api/admin/listings');
       setListings(response.data.listings || []);
+      setLastUpdated(new Date());
     } catch (err: any) {
       if (err.response?.status === 401) {
         // Clear localStorage and redirect to login
@@ -65,6 +90,28 @@ export default function AdminDashboardPage() {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleManualRefresh = () => {
+    console.log('🔄 Manual refresh triggered');
+    if (activeTab === 'listings') {
+      fetchListings();
+    } else {
+      // Logs panel handles its own refresh via lastUpdated trigger
+      setLastUpdated(new Date());
+    }
+  };
+
+  // Calculate time since last update
+  const getTimeSinceUpdate = () => {
+    const now = new Date();
+    const diffMs = now.getTime() - lastUpdated.getTime();
+    const diffSecs = Math.floor(diffMs / 1000);
+    
+    if (diffSecs < 10) return 'Just now';
+    if (diffSecs < 60) return `${diffSecs}s ago`;
+    const diffMins = Math.floor(diffSecs / 60);
+    return `${diffMins}m ago`;
   };
 
   const handleLogout = () => {
@@ -125,12 +172,34 @@ export default function AdminDashboardPage() {
         {/* Header */}
         <div className="mb-8 flex items-start justify-between">
           <div>
-          <h1 className="text-4xl font-bold text-zinc-900 dark:text-zinc-50 mb-2">
-            Admin Dashboard
-          </h1>
-          <p className="text-lg text-zinc-600 dark:text-zinc-400">
-            Review and manage marketplace listings
-          </p>
+            <h1 className="text-4xl font-bold text-zinc-900 dark:text-zinc-50 mb-2">
+              Admin Dashboard
+            </h1>
+            <p className="text-lg text-zinc-600 dark:text-zinc-400">
+              Review and manage marketplace {activeTab === 'listings' ? 'listings' : 'system logs'}
+            </p>
+            <div className="mt-2 flex items-center space-x-3">
+              <span className="text-xs text-zinc-500 dark:text-zinc-400">
+                Last updated: {getTimeSinceUpdate()}
+              </span>
+              <button
+                onClick={handleManualRefresh}
+                disabled={loading}
+                className="text-xs text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                🔄 Refresh Now
+              </button>
+              <button
+                onClick={() => setAutoRefresh(!autoRefresh)}
+                className={`text-xs font-medium px-2 py-1 rounded ${
+                  autoRefresh
+                    ? 'bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300'
+                    : 'bg-zinc-200 text-zinc-600 dark:bg-zinc-800 dark:text-zinc-400'
+                }`}
+              >
+                {autoRefresh ? '✓ Auto-refresh: ON' : 'Auto-refresh: OFF'}
+              </button>
+            </div>
           </div>
           <button
             onClick={handleLogout}
@@ -140,49 +209,76 @@ export default function AdminDashboardPage() {
           </button>
         </div>
 
-        {/* Filters */}
-        <div className="mb-6 flex flex-wrap gap-2">
+        {/* Tabs */}
+        <div className="mb-6 flex space-x-2 border-b border-zinc-200 dark:border-zinc-800">
           <button
-            onClick={() => setFilter('all')}
-            className={`rounded-full px-4 py-2 text-sm font-medium transition-colors ${
-              filter === 'all'
-                ? 'bg-blue-600 text-white'
-                : 'bg-white text-zinc-700 hover:bg-zinc-100 dark:bg-zinc-900 dark:text-zinc-300 dark:hover:bg-zinc-800'
+            onClick={() => setActiveTab('listings')}
+            className={`px-4 py-2 text-sm font-medium transition-colors border-b-2 ${
+              activeTab === 'listings'
+                ? 'border-blue-600 text-blue-600 dark:text-blue-400'
+                : 'border-transparent text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-200'
             }`}
           >
-            All ({listings.length})
+            📦 Listings
           </button>
           <button
-            onClick={() => setFilter('pending')}
-            className={`rounded-full px-4 py-2 text-sm font-medium transition-colors ${
-              filter === 'pending'
-                ? 'bg-yellow-600 text-white'
-                : 'bg-white text-zinc-700 hover:bg-zinc-100 dark:bg-zinc-900 dark:text-zinc-300 dark:hover:bg-zinc-800'
+            onClick={() => setActiveTab('logs')}
+            className={`px-4 py-2 text-sm font-medium transition-colors border-b-2 ${
+              activeTab === 'logs'
+                ? 'border-blue-600 text-blue-600 dark:text-blue-400'
+                : 'border-transparent text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-200'
             }`}
           >
-            Pending ({listings.filter(l => l.state === 'in_review' && !l.approved).length})
-          </button>
-          <button
-            onClick={() => setFilter('approved')}
-            className={`rounded-full px-4 py-2 text-sm font-medium transition-colors ${
-              filter === 'approved'
-                ? 'bg-green-600 text-white'
-                : 'bg-white text-zinc-700 hover:bg-zinc-100 dark:bg-zinc-900 dark:text-zinc-300 dark:hover:bg-zinc-800'
-            }`}
-          >
-            Approved ({listings.filter(l => l.state === 'on_market' && l.approved).length})
-          </button>
-          <button
-            onClick={() => setFilter('pulled')}
-            className={`rounded-full px-4 py-2 text-sm font-medium transition-colors ${
-              filter === 'pulled'
-                ? 'bg-red-600 text-white'
-                : 'bg-white text-zinc-700 hover:bg-zinc-100 dark:bg-zinc-900 dark:text-zinc-300 dark:hover:bg-zinc-800'
-            }`}
-          >
-            Pulled ({listings.filter(l => l.state === 'pulled').length})
+            📝 Logs
           </button>
         </div>
+
+        {/* Listing Filters */}
+        {activeTab === 'listings' && (
+          <div className="mb-6 flex flex-wrap gap-2">
+            <button
+              onClick={() => setFilter('all')}
+              className={`rounded-full px-4 py-2 text-sm font-medium transition-colors ${
+                filter === 'all'
+                  ? 'bg-blue-600 text-white'
+                  : 'bg-white text-zinc-700 hover:bg-zinc-100 dark:bg-zinc-900 dark:text-zinc-300 dark:hover:bg-zinc-800'
+              }`}
+            >
+              All ({listings.length})
+            </button>
+            <button
+              onClick={() => setFilter('pending')}
+              className={`rounded-full px-4 py-2 text-sm font-medium transition-colors ${
+                filter === 'pending'
+                  ? 'bg-yellow-600 text-white'
+                  : 'bg-white text-zinc-700 hover:bg-zinc-100 dark:bg-zinc-900 dark:text-zinc-300 dark:hover:bg-zinc-800'
+              }`}
+            >
+              Pending ({listings.filter(l => l.state === 'in_review' && !l.approved).length})
+            </button>
+            <button
+              onClick={() => setFilter('approved')}
+              className={`rounded-full px-4 py-2 text-sm font-medium transition-colors ${
+                filter === 'approved'
+                  ? 'bg-green-600 text-white'
+                  : 'bg-white text-zinc-700 hover:bg-zinc-100 dark:bg-zinc-900 dark:text-zinc-300 dark:hover:bg-zinc-800'
+              }`}
+            >
+              Approved ({listings.filter(l => l.state === 'on_market' && l.approved).length})
+            </button>
+            <button
+              onClick={() => setFilter('pulled')}
+              className={`rounded-full px-4 py-2 text-sm font-medium transition-colors ${
+                filter === 'pulled'
+                  ? 'bg-red-600 text-white'
+                  : 'bg-white text-zinc-700 hover:bg-zinc-100 dark:bg-zinc-900 dark:text-zinc-300 dark:hover:bg-zinc-800'
+              }`}
+            >
+              Pulled ({listings.filter(l => l.state === 'pulled').length})
+            </button>
+          </div>
+        )}
+
 
         {/* Loading */}
         {loading && (
@@ -198,8 +294,8 @@ export default function AdminDashboardPage() {
           </div>
         )}
 
-        {/* Listings */}
-        {!loading && !error && (
+        {/* Listings View */}
+        {activeTab === 'listings' && !loading && !error && (
           <div className="space-y-4">
             {filteredListings.length === 0 ? (
               <div className="text-center py-12 text-zinc-600 dark:text-zinc-400">
@@ -315,6 +411,15 @@ export default function AdminDashboardPage() {
               ))
             )}
           </div>
+        )}
+
+        {/* Logs View - Isolated Component */}
+        {activeTab === 'logs' && (
+          <LogsPanel 
+            autoRefresh={autoRefresh}
+            lastUpdated={lastUpdated}
+            onUpdate={() => setLastUpdated(new Date())}
+          />
         )}
       </div>
     </div>

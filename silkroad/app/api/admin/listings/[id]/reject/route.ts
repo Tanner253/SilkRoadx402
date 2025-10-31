@@ -3,6 +3,7 @@ import { CONFIG } from '@/config/constants';
 import { mockStore } from '@/lib/mockStore';
 import { connectDB } from '@/lib/db';
 import { Listing } from '@/models/Listing';
+import { createLog, getIpFromRequest } from '@/lib/logger';
 
 /**
  * TEMPORARY Admin Auth Check (MVP)
@@ -52,6 +53,14 @@ export async function POST(
         );
       }
 
+      // Log admin rejection
+      await createLog(
+        'listing_rejected',
+        `Admin rejected listing: "${listing.title}" (ID: ${id})`,
+        undefined,
+        getIpFromRequest(req)
+      );
+
       return NextResponse.json({
         success: true,
         listing,
@@ -80,6 +89,14 @@ export async function POST(
         { status: 404 }
       );
     }
+
+    // Log admin rejection
+    await createLog(
+      'listing_rejected',
+      `Admin rejected listing: "${listing.title}" ($${listing.price})`,
+      undefined,
+      getIpFromRequest(req)
+    );
 
     return NextResponse.json({
       success: true,
