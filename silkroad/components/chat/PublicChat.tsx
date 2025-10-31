@@ -194,18 +194,18 @@ export function PublicChat() {
     return (
       <button
         onClick={() => setIsOpen(true)}
-        className="fixed bottom-20 right-6 z-50 flex items-center space-x-2 rounded-lg bg-amber-600 px-4 py-3 text-sm font-bold text-white shadow-lg hover:bg-amber-700 transition-all hover:scale-105 border-2 border-amber-800"
+        className="fixed bottom-16 sm:bottom-20 right-3 sm:right-6 z-50 flex items-center space-x-2 rounded-lg bg-amber-600 px-3 sm:px-4 py-2 sm:py-3 text-xs sm:text-sm font-bold text-white shadow-lg hover:bg-amber-700 transition-all hover:scale-105 border-2 border-amber-800"
         title="Open Public Chat"
         style={{ fontFamily: 'monospace' }}
       >
-        <span className="text-lg">💬</span>
-        <span>Public Chat</span>
+        <span className="text-base sm:text-lg">💬</span>
+        <span className="hidden sm:inline">Public Chat</span>
       </button>
     );
   }
 
   return (
-    <div className="fixed bottom-20 right-6 z-50 w-96 rounded-lg border-4 border-amber-900 bg-zinc-900 shadow-2xl" style={{ fontFamily: 'monospace' }}>
+    <div className="fixed bottom-16 sm:bottom-20 right-3 sm:right-6 left-3 sm:left-auto z-50 sm:w-96 rounded-lg border-4 border-amber-900 bg-zinc-900 shadow-2xl" style={{ fontFamily: 'monospace' }}>
       {/* Header */}
       <div className="flex items-center justify-between bg-gradient-to-r from-amber-800 to-amber-900 px-4 py-2 border-b-2 border-amber-950">
         <div className="flex items-center space-x-2">
