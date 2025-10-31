@@ -93,7 +93,7 @@ export function LogsPanel({ autoRefresh, lastUpdated, onUpdate }: LogsPanelProps
         return 'text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-950';
       case 'listing_approved':
       case 'admin_action':
-        return 'text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-950';
+        return 'text-green-600 dark:text-green-400 bg-green-50 dark:bg-green-950';
       case 'listing_created':
       case 'listing_purchased':
       case 'comment_posted':
@@ -130,7 +130,7 @@ export function LogsPanel({ autoRefresh, lastUpdated, onUpdate }: LogsPanelProps
             onClick={() => setLogTypeFilter(type)}
             className={`rounded-full px-4 py-2 text-sm font-medium transition-colors ${
               logTypeFilter === type
-                ? 'bg-blue-600 text-white'
+                  ? 'bg-green-600 text-white'
                 : 'bg-white text-zinc-700 hover:bg-zinc-100 dark:bg-zinc-900 dark:text-zinc-300 dark:hover:bg-zinc-800'
             }`}
           >
@@ -142,7 +142,7 @@ export function LogsPanel({ autoRefresh, lastUpdated, onUpdate }: LogsPanelProps
       {/* Loading State */}
       {loading && (
         <div className="flex justify-center py-12">
-          <div className="h-8 w-8 animate-spin rounded-full border-4 border-blue-600 border-t-transparent"></div>
+          <div className="h-8 w-8 animate-spin rounded-full border-4 border-green-600 border-t-transparent"></div>
         </div>
       )}
 

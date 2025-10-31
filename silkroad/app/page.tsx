@@ -31,7 +31,7 @@ export default function Home() {
           </h1>
             <p className="mx-auto max-w-2xl text-lg text-zinc-600 dark:text-zinc-400">
               Peer-to-peer marketplace for private software using{' '}
-              <span className="font-semibold text-blue-600">x402 micropayments</span> on Solana.
+              <span className="font-semibold text-green-600">x402 micropayments</span> on Solana.
               No KYC. No middlemen. Just code.
             </p>
           </div>
@@ -43,7 +43,7 @@ export default function Home() {
               {isLoading && (
                 <div className="rounded-lg border border-zinc-200 bg-white p-6 shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
                   <div className="flex items-center justify-center space-x-2">
-                    <div className="h-4 w-4 animate-spin rounded-full border-2 border-blue-600 border-t-transparent"></div>
+                    <div className="h-4 w-4 animate-spin rounded-full border-2 border-green-600 border-t-transparent"></div>
                     <p className="text-sm text-zinc-600 dark:text-zinc-400">Checking authentication...</p>
                   </div>
                 </div>
@@ -88,7 +88,7 @@ export default function Home() {
                   <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
                     <Link
                       href="/browse"
-                      className="rounded-lg border border-zinc-200 bg-white p-6 shadow-sm transition-all hover:border-blue-500 hover:shadow-md dark:border-zinc-800 dark:bg-zinc-900 dark:hover:border-blue-500"
+                      className="rounded-lg border border-zinc-200 bg-white p-6 shadow-sm transition-all hover:border-green-500 hover:shadow-md dark:border-zinc-800 dark:bg-zinc-900 dark:hover:border-green-500"
                     >
                       <div className="text-3xl mb-2">🔍</div>
                       <h3 className="font-semibold text-zinc-900 dark:text-zinc-50">Browse</h3>
@@ -97,7 +97,7 @@ export default function Home() {
 
                     <Link
                       href="/sell"
-                      className="rounded-lg border border-zinc-200 bg-white p-6 shadow-sm transition-all hover:border-blue-500 hover:shadow-md dark:border-zinc-800 dark:bg-zinc-900 dark:hover:border-blue-500"
+                      className="rounded-lg border border-zinc-200 bg-white p-6 shadow-sm transition-all hover:border-green-500 hover:shadow-md dark:border-zinc-800 dark:bg-zinc-900 dark:hover:border-green-500"
                     >
                       <div className="text-3xl mb-2">💼</div>
                       <h3 className="font-semibold text-zinc-900 dark:text-zinc-50">Sell</h3>
@@ -106,7 +106,7 @@ export default function Home() {
 
                     <Link
                       href="/my-listings"
-                      className="rounded-lg border border-zinc-200 bg-white p-6 shadow-sm transition-all hover:border-blue-500 hover:shadow-md dark:border-zinc-800 dark:bg-zinc-900 dark:hover:border-blue-500"
+                      className="rounded-lg border border-zinc-200 bg-white p-6 shadow-sm transition-all hover:border-green-500 hover:shadow-md dark:border-zinc-800 dark:bg-zinc-900 dark:hover:border-green-500"
                     >
                       <div className="text-3xl mb-2">📦</div>
                       <h3 className="font-semibold text-zinc-900 dark:text-zinc-50">My Listings</h3>
@@ -121,7 +121,7 @@ export default function Home() {
             <div className="mb-8">
               <div className="rounded-lg border border-zinc-200 bg-white p-8 shadow-lg dark:border-zinc-800 dark:bg-zinc-900">
                 <div className="mb-6">
-                  <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-blue-100 dark:bg-blue-900">
+                  <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-green-100 dark:bg-green-900">
                     <span className="text-3xl">🔐</span>
                   </div>
                   <h2 className="mb-2 text-xl font-semibold text-zinc-900 dark:text-zinc-50">
@@ -131,7 +131,7 @@ export default function Home() {
                     Connect your Solana wallet to get started. You'll need Phantom installed.
                   </p>
                 </div>
-                <WalletMultiButton className="!bg-blue-600 hover:!bg-blue-700 !rounded-lg !h-12 !w-full !text-base !font-medium transition-colors" />
+                <WalletMultiButton className="!bg-green-600 hover:!bg-green-700 !rounded-lg !h-12 !w-full !text-base !font-medium transition-colors" />
               </div>
             </div>
           )}

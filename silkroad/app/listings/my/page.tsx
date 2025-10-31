@@ -120,7 +120,7 @@ function MyListingsPageContent() {
           </p>
           <Link
             href="/"
-            className="inline-flex items-center justify-center rounded-lg bg-blue-600 px-6 py-3 text-sm font-medium text-white hover:bg-blue-700 transition-colors"
+            className="inline-flex items-center justify-center rounded-lg bg-green-600 px-6 py-3 text-sm font-medium text-white hover:bg-green-700 transition-colors"
           >
             Go to Homepage
           </Link>
@@ -176,7 +176,7 @@ function MyListingsPageContent() {
         {/* Loading State */}
         {loading && (
           <div className="flex justify-center py-12">
-            <div className="h-8 w-8 animate-spin rounded-full border-4 border-blue-600 border-t-transparent"></div>
+            <div className="h-8 w-8 animate-spin rounded-full border-4 border-green-600 border-t-transparent"></div>
           </div>
         )}
 
@@ -199,7 +199,7 @@ function MyListingsPageContent() {
             </p>
             <Link
               href="/listings/new"
-              className="inline-flex items-center justify-center rounded-lg bg-blue-600 px-6 py-3 text-sm font-medium text-white hover:bg-blue-700 transition-colors"
+              className="inline-flex items-center justify-center rounded-lg bg-green-600 px-6 py-3 text-sm font-medium text-white hover:bg-green-700 transition-colors"
             >
               Create Listing
             </Link>

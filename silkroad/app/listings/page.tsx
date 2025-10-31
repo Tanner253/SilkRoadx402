@@ -28,6 +28,7 @@ function ListingsPageContent() {
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [hideMyListings, setHideMyListings] = useState(true);
   const [walletSearch, setWalletSearch] = useState<string>('');
+  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
 
   useEffect(() => {
     if (mounted && isConnected && hasAcceptedTOS) {
@@ -63,7 +64,7 @@ function ListingsPageContent() {
           </p>
           <Link
             href="/"
-            className="inline-flex items-center justify-center rounded-lg bg-blue-600 px-6 py-3 text-sm font-medium text-white hover:bg-blue-700 transition-colors"
+            className="inline-flex items-center justify-center rounded-lg bg-green-600 px-6 py-3 text-sm font-medium text-white hover:bg-green-700 transition-colors"
           >
             Go to Homepage
           </Link>
@@ -138,24 +139,52 @@ function ListingsPageContent() {
                 placeholder="Search by vendor wallet address (e.g., 8KTD...GeMm or full address)"
                 value={walletSearch}
                 onChange={(e) => setWalletSearch(e.target.value)}
-                className="w-full rounded-lg border border-zinc-300 bg-white px-4 py-2 text-sm text-zinc-900 placeholder-zinc-400 focus:border-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-600 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-50 dark:placeholder-zinc-500"
+                className="w-full rounded-lg border border-zinc-300 bg-white px-4 py-2 text-sm text-zinc-900 placeholder-zinc-400 focus:border-green-600 focus:outline-none focus:ring-2 focus:ring-green-600 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-50 dark:placeholder-zinc-500"
               />
             </div>
 
-            {/* Hide My Listings Toggle */}
-            <div className="flex items-center space-x-2">
-              <label className="relative inline-flex items-center cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={hideMyListings}
-                  onChange={(e) => setHideMyListings(e.target.checked)}
-                  className="sr-only peer"
-                />
-                <div className="w-11 h-6 bg-zinc-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-zinc-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-zinc-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-zinc-600 peer-checked:bg-blue-600"></div>
-                <span className="ms-3 text-sm font-medium text-zinc-700 dark:text-zinc-300 whitespace-nowrap">
-                  Hide my listings
-                </span>
-              </label>
+            <div className="flex items-center gap-4">
+              {/* View Mode Toggle */}
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => setViewMode('grid')}
+                  className={`rounded-lg px-3 py-2 text-sm font-medium transition-colors ${
+                    viewMode === 'grid'
+                      ? 'bg-green-600 text-white'
+                      : 'bg-zinc-100 text-zinc-700 hover:bg-zinc-200 dark:bg-zinc-800 dark:text-zinc-300 dark:hover:bg-zinc-700'
+                  }`}
+                  title="Grid View"
+                >
+                  ⊞
+                </button>
+                <button
+                  onClick={() => setViewMode('list')}
+                  className={`rounded-lg px-3 py-2 text-sm font-medium transition-colors ${
+                    viewMode === 'list'
+                      ? 'bg-green-600 text-white'
+                      : 'bg-zinc-100 text-zinc-700 hover:bg-zinc-200 dark:bg-zinc-800 dark:text-zinc-300 dark:hover:bg-zinc-700'
+                  }`}
+                  title="List View"
+                >
+                  ☰
+                </button>
+              </div>
+
+              {/* Hide My Listings Toggle */}
+              <div className="flex items-center space-x-2">
+                <label className="relative inline-flex items-center cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={hideMyListings}
+                    onChange={(e) => setHideMyListings(e.target.checked)}
+                    className="sr-only peer"
+                  />
+                    <div className="w-11 h-6 bg-zinc-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-green-300 dark:peer-focus:ring-green-800 rounded-full peer dark:bg-zinc-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-zinc-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-zinc-600 peer-checked:bg-green-600"></div>
+                  <span className="ms-3 text-sm font-medium text-zinc-700 dark:text-zinc-300 whitespace-nowrap">
+                    Hide my listings
+                  </span>
+                </label>
+              </div>
             </div>
           </div>
         </div>
@@ -172,7 +201,7 @@ function ListingsPageContent() {
         {/* Loading State */}
         {loading && (
           <div className="flex justify-center py-12">
-            <div className="h-8 w-8 animate-spin rounded-full border-4 border-blue-600 border-t-transparent"></div>
+            <div className="h-8 w-8 animate-spin rounded-full border-4 border-green-600 border-t-transparent"></div>
           </div>
         )}
 
@@ -183,14 +212,15 @@ function ListingsPageContent() {
           </div>
         )}
 
-        {/* Listings Grid */}
+        {/* Listings Grid/List */}
         {!loading && !error && (
           <>
             {filteredListings.length === 0 ? (
               <div className="text-center py-12">
                 <p className="text-zinc-600 dark:text-zinc-400">No listings found in this category</p>
               </div>
-            ) : (
+            ) : viewMode === 'grid' ? (
+              // Grid View
               <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
                 {filteredListings.map((listing) => (
                   <div
@@ -234,7 +264,7 @@ function ListingsPageContent() {
 
                         <Link
                           href={`/listings/${listing._id}`}
-                          className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 transition-colors"
+                          className="rounded-lg bg-green-600 px-4 py-2 text-sm font-medium text-white hover:bg-green-700 transition-colors"
                         >
                           View Details
                         </Link>
@@ -247,6 +277,70 @@ function ListingsPageContent() {
                         <span className="text-xs text-zinc-500 dark:text-zinc-400 font-mono">
                           {truncateWallet(listing.wallet)}
                         </span>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              // List View
+              <div className="space-y-2">
+                {filteredListings.map((listing) => (
+                  <div
+                    key={listing._id}
+                    className="group overflow-hidden rounded-lg border border-zinc-200 bg-white shadow-sm transition-all hover:shadow-md dark:border-zinc-800 dark:bg-zinc-900"
+                  >
+                    <div className="flex flex-col sm:flex-row">
+                      {/* Image */}
+                      <div className="relative h-32 sm:h-24 sm:w-40 flex-shrink-0 overflow-hidden bg-zinc-100 dark:bg-zinc-800">
+                        <Image
+                          src={listing.imageUrl}
+                          alt={listing.title}
+                          fill
+                          className="object-cover transition-transform group-hover:scale-105"
+                        />
+                        {listing.riskLevel === 'high-risk' && (
+                          <div className="absolute top-1 right-1 rounded-full bg-red-600 px-2 py-0.5 text-xs font-medium text-white">
+                            High Risk
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Content */}
+                      <div className="flex flex-1 items-center justify-between p-3 sm:p-4">
+                        <div className="flex-1 min-w-0">
+                          <h3 className="text-base font-semibold text-zinc-900 dark:text-zinc-50 line-clamp-1 mb-1">
+                            {listing.title}
+                          </h3>
+
+                          <p className="text-sm text-zinc-600 dark:text-zinc-400 line-clamp-1 mb-2">
+                            {listing.description}
+                          </p>
+
+                          <div className="flex items-center gap-2">
+                            <span className="inline-flex items-center rounded-full bg-zinc-100 px-2 py-0.5 text-xs font-medium text-zinc-800 dark:bg-zinc-800 dark:text-zinc-200">
+                              {listing.category}
+                            </span>
+                            <span className="text-xs text-zinc-500 dark:text-zinc-400 font-mono">
+                              {truncateWallet(listing.wallet)}
+                            </span>
+                          </div>
+                        </div>
+
+                        <div className="flex items-center gap-4 ml-4">
+                          <div className="text-right">
+                            <p className="text-lg font-bold text-zinc-900 dark:text-zinc-50 whitespace-nowrap">
+                              ${listing.price.toFixed(2)}
+                            </p>
+                            <span className="text-xs text-zinc-500 dark:text-zinc-400">USDC</span>
+                          </div>
+                          <Link
+                            href={`/listings/${listing._id}`}
+                            className="rounded-lg bg-green-600 px-4 py-2 text-sm font-medium text-white hover:bg-green-700 transition-colors whitespace-nowrap"
+                          >
+                            View
+                          </Link>
+                        </div>
                       </div>
                     </div>
                   </div>

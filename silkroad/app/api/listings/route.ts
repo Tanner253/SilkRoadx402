@@ -96,15 +96,38 @@ export async function GET(req: NextRequest) {
     }
 
     console.log('📝 Fetching all approved listings');
-    const listings = await Listing.find({
+    const rawListings = await Listing.find({
       approved: true,
       state: 'on_market',
     })
-      .sort({ createdAt: -1 })
       .select('-deliveryUrl') // Never expose delivery URL in list
       .lean();
 
+    // Sort listings: pinned first (by pinnedAt desc), then unpinned (by createdAt desc)
+    const listings = rawListings.sort((a: any, b: any) => {
+      const aPinned = a.pinned === true;
+      const bPinned = b.pinned === true;
+      
+      // Pinned listings come first
+      if (aPinned && !bPinned) return -1;
+      if (!aPinned && bPinned) return 1;
+      
+      // Both pinned: sort by pinnedAt (most recent first)
+      if (aPinned && bPinned) {
+        const aTime = a.pinnedAt ? new Date(a.pinnedAt).getTime() : 0;
+        const bTime = b.pinnedAt ? new Date(b.pinnedAt).getTime() : 0;
+        return bTime - aTime;
+      }
+      
+      // Both unpinned: sort by createdAt (most recent first)
+      const aCreated = new Date(a.createdAt).getTime();
+      const bCreated = new Date(b.createdAt).getTime();
+      return bCreated - aCreated;
+    });
+
     console.log(`✅ Found ${listings?.length || 0} approved listings`);
+    const pinnedCount = listings.filter((l: any) => l.pinned === true).length;
+    console.log(`   📌 ${pinnedCount} pinned, ${listings.length - pinnedCount} unpinned`);
 
     return NextResponse.json({
       success: true,

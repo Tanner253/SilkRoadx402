@@ -8,7 +8,7 @@
 const PROFANITY_LIST = [
   'fuck', 'shit', 'ass', 'bitch', 'damn', 'hell', 'crap',
   'bastard', 'piss', 'dick', 'cock', 'pussy', 'whore', 'slut',
-  'nigger', 'nigga', 'fag', 'faggot', 'retard', 'cunt',
+  'nigger', 'nigga', 'fag', 'faggot', 'retard', 'cunt', 'CP', 'Cheese pizza', 'child'
 ];
 
 /**

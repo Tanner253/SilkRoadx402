@@ -24,6 +24,8 @@ export interface IListing extends Document {
   riskLevel: RiskLevel;
   state: ListingState;
   approved: boolean;
+  pinned: boolean;
+  pinnedAt?: Date;
   reportsCount: number;
   failedPurchaseCount: number;
   lastFailureAt?: Date;

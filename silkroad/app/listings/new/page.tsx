@@ -220,7 +220,7 @@ function NewListingPageContent() {
           </p>
           <Link
             href="/"
-            className="inline-flex items-center justify-center rounded-lg bg-blue-600 px-6 py-3 text-sm font-medium text-white hover:bg-blue-700 transition-colors"
+            className="inline-flex items-center justify-center rounded-lg bg-green-600 px-6 py-3 text-sm font-medium text-white hover:bg-green-700 transition-colors"
           >
             Go to Homepage
           </Link>
@@ -270,7 +270,7 @@ function NewListingPageContent() {
               value={formData.title}
               onChange={(e) => setFormData({ ...formData, title: e.target.value })}
               placeholder="e.g. Advanced Trading Bot - MEV Arbitrage"
-              className="w-full rounded-lg border border-zinc-300 bg-white px-4 py-2 text-zinc-900 placeholder-zinc-400 focus:border-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-600 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-50 dark:placeholder-zinc-500"
+              className="w-full rounded-lg border border-zinc-300 bg-white px-4 py-2 text-zinc-900 placeholder-zinc-400 focus:border-green-600 focus:outline-none focus:ring-2 focus:ring-green-600 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-50 dark:placeholder-zinc-500"
               maxLength={100}
               required
             />
@@ -287,7 +287,7 @@ function NewListingPageContent() {
               onChange={(e) => setFormData({ ...formData, description: e.target.value })}
               placeholder="Describe your software in detail. What does it do? What are the key features? Who is it for?"
               rows={6}
-              className="w-full rounded-lg border border-zinc-300 bg-white px-4 py-2 text-zinc-900 placeholder-zinc-400 focus:border-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-600 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-50 dark:placeholder-zinc-500"
+              className="w-full rounded-lg border border-zinc-300 bg-white px-4 py-2 text-zinc-900 placeholder-zinc-400 focus:border-green-600 focus:outline-none focus:ring-2 focus:ring-green-600 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-50 dark:placeholder-zinc-500"
               maxLength={2000}
               required
             />
@@ -308,7 +308,7 @@ function NewListingPageContent() {
                 value={formData.price}
                 onChange={(e) => setFormData({ ...formData, price: e.target.value })}
                 placeholder="0.00"
-                className="w-full rounded-lg border border-zinc-300 bg-white px-4 py-2 pl-8 text-zinc-900 placeholder-zinc-400 focus:border-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-600 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-50 dark:placeholder-zinc-500"
+                className="w-full rounded-lg border border-zinc-300 bg-white px-4 py-2 pl-8 text-zinc-900 placeholder-zinc-400 focus:border-green-600 focus:outline-none focus:ring-2 focus:ring-green-600 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-50 dark:placeholder-zinc-500"
                 required
               />
             </div>
@@ -323,7 +323,7 @@ function NewListingPageContent() {
             <select
               value={formData.category}
               onChange={(e) => setFormData({ ...formData, category: e.target.value })}
-              className="w-full rounded-lg border border-zinc-300 bg-white px-4 py-2 text-zinc-900 focus:border-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-600 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-50"
+              className="w-full rounded-lg border border-zinc-300 bg-white px-4 py-2 text-zinc-900 focus:border-green-600 focus:outline-none focus:ring-2 focus:ring-green-600 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-50"
               required
             >
               <option value="Trading Bot">Trading Bot</option>
@@ -349,13 +349,13 @@ function NewListingPageContent() {
                   type="file"
                   accept="image/jpeg,image/png,image/webp"
                   onChange={handleImageChange}
-                  className="block w-full text-sm text-zinc-500 file:mr-4 file:rounded-lg file:border-0 file:bg-blue-600 file:px-4 file:py-2 file:text-sm file:font-medium file:text-white hover:file:bg-blue-700 dark:text-zinc-400"
+                  className="block w-full text-sm text-zinc-500 file:mr-4 file:rounded-lg file:border-0 file:bg-green-600 file:px-4 file:py-2 file:text-sm file:font-medium file:text-white hover:file:bg-green-700 dark:text-zinc-400"
                 />
                 <p className="mt-2 text-xs text-zinc-500">
                   JPEG, PNG, or WebP. Max 5MB. Recommended 800x600px
                 </p>
                 {uploadingImage && (
-                  <p className="mt-2 text-sm text-blue-600">Uploading...</p>
+                  <p className="mt-2 text-sm text-green-600">Uploading...</p>
                 )}
               </div>
             </div>
@@ -469,7 +469,7 @@ function NewListingPageContent() {
             <button
               type="submit"
               disabled={loading || uploadingImage}
-              className="rounded-lg bg-blue-600 px-6 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50 transition-colors"
+              className="rounded-lg bg-green-600 px-6 py-2 text-sm font-medium text-white hover:bg-green-700 disabled:cursor-not-allowed disabled:opacity-50 transition-colors"
             >
               {loading ? 'Creating...' : 'Create Listing'}
             </button>

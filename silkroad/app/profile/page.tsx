@@ -140,7 +140,7 @@ function ProfilePageContent() {
           </p>
           <Link
             href="/"
-            className="inline-flex items-center justify-center rounded-lg bg-blue-600 px-6 py-3 text-sm font-medium text-white hover:bg-blue-700 transition-colors"
+            className="inline-flex items-center justify-center rounded-lg bg-green-600 px-6 py-3 text-sm font-medium text-white hover:bg-green-700 transition-colors"
           >
             Go to Homepage
           </Link>
@@ -173,7 +173,7 @@ function ProfilePageContent() {
           <div className="rounded-lg border border-zinc-200 bg-white p-6 shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
             <div className="flex items-center justify-between mb-2">
               <span className="text-sm text-zinc-500 dark:text-zinc-400">USDC Balance</span>
-              <svg className="h-6 w-6 text-blue-600" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <svg className="h-6 w-6 text-green-600" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <circle cx="20" cy="20" r="20" fill="#2775CA"/>
               </svg>
             </div>
@@ -216,7 +216,7 @@ function ProfilePageContent() {
               <span className="text-sm text-zinc-500 dark:text-zinc-400">Total Spent</span>
               <span className="text-2xl">💸</span>
             </div>
-            <p className="text-3xl font-bold text-blue-600 dark:text-blue-400">
+            <p className="text-3xl font-bold text-green-600 dark:text-green-400">
               ${stats.totalSpent.toFixed(2)}
             </p>
             <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-1">
@@ -242,7 +242,7 @@ function ProfilePageContent() {
               onClick={() => setActiveTab('purchases')}
               className={`flex-1 py-4 px-6 text-sm font-medium border-b-2 ${
                 activeTab === 'purchases'
-                  ? 'border-blue-600 text-blue-600 dark:text-blue-400'
+                  ? 'border-green-600 text-green-600 dark:text-green-400'
                   : 'border-transparent text-zinc-500 hover:text-zinc-700 dark:text-zinc-400'
               }`}
             >
@@ -252,7 +252,7 @@ function ProfilePageContent() {
               onClick={() => setActiveTab('sales')}
               className={`flex-1 py-4 px-6 text-sm font-medium border-b-2 ${
                 activeTab === 'sales'
-                  ? 'border-blue-600 text-blue-600 dark:text-blue-400'
+                  ? 'border-green-600 text-green-600 dark:text-green-400'
                   : 'border-transparent text-zinc-500 hover:text-zinc-700 dark:text-zinc-400'
               }`}
             >
@@ -275,7 +275,7 @@ function ProfilePageContent() {
                 </p>
                 <p className={`text-2xl font-bold ${
                   activeTab === 'purchases' 
-                    ? 'text-blue-600 dark:text-blue-400' 
+                    ? 'text-green-600 dark:text-green-400' 
                     : 'text-green-600 dark:text-green-400'
                 }`}>
                   ${totalAmount.toFixed(2)}
@@ -295,7 +295,7 @@ function ProfilePageContent() {
           {/* Loading */}
           {loading && (
             <div className="flex justify-center py-12">
-              <div className="h-8 w-8 animate-spin rounded-full border-4 border-blue-600 border-t-transparent"></div>
+              <div className="h-8 w-8 animate-spin rounded-full border-4 border-green-600 border-t-transparent"></div>
             </div>
           )}
 
@@ -319,7 +319,7 @@ function ProfilePageContent() {
               </p>
               <Link
                 href={activeTab === 'purchases' ? '/browse' : '/listings/new'}
-                className="inline-flex items-center justify-center rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 transition-colors"
+                className="inline-flex items-center justify-center rounded-lg bg-green-600 px-4 py-2 text-sm font-medium text-white hover:bg-green-700 transition-colors"
               >
                 {activeTab === 'purchases' ? 'Browse Listings' : 'Create Listing'}
               </Link>
@@ -352,7 +352,7 @@ function ProfilePageContent() {
                     <div className="text-right ml-4">
                       <p className={`text-lg font-bold ${
                         activeTab === 'purchases'
-                          ? 'text-blue-600 dark:text-blue-400'
+                          ? 'text-green-600 dark:text-green-400'
                           : 'text-green-600 dark:text-green-400'
                       }`}>
                         ${tx.amount.toFixed(2)}

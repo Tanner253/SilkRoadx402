@@ -33,6 +33,8 @@ interface MockListing {
   riskLevel: 'standard' | 'high-risk';
   state: 'in_review' | 'on_market' | 'pulled';
   approved: boolean;
+  pinned: boolean;
+  pinnedAt?: Date;
   reportsCount: number;
   failedPurchaseCount: number;
   createdAt: Date;
@@ -212,13 +214,14 @@ export const mockStore = {
   /**
    * Create listing
    */
-  createListing(data: Omit<MockListing, '_id' | 'createdAt' | 'updatedAt' | 'reportsCount' | 'failedPurchaseCount' | 'approved' | 'state' | 'riskLevel'>): MockListing {
+  createListing(data: Omit<MockListing, '_id' | 'createdAt' | 'updatedAt' | 'reportsCount' | 'failedPurchaseCount' | 'approved' | 'state' | 'riskLevel' | 'pinned'>): MockListing {
     const listing: MockListing = {
       _id: `listing_${listingIdCounter++}`,
       ...data,
       riskLevel: 'standard',
       state: 'in_review',
       approved: false,
+      pinned: false,
       reportsCount: 0,
       failedPurchaseCount: 0,
       createdAt: new Date(),
@@ -240,11 +243,27 @@ export const mockStore = {
 
   /**
    * Get all approved listings (for browse page)
+   * Pinned listings appear first, sorted by pinnedAt (most recent first)
+   * Then unpinned listings sorted by createdAt (most recent first)
    */
   getApprovedListings(): MockListing[] {
     return Array.from(mockListings.values())
       .filter(l => l.state === 'on_market' && l.approved)
-      .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
+      .sort((a, b) => {
+        // Pinned listings come first
+        if (a.pinned && !b.pinned) return -1;
+        if (!a.pinned && b.pinned) return 1;
+        
+        // Both pinned: sort by pinnedAt (most recent first)
+        if (a.pinned && b.pinned) {
+          const aTime = a.pinnedAt?.getTime() || 0;
+          const bTime = b.pinnedAt?.getTime() || 0;
+          return bTime - aTime;
+        }
+        
+        // Both unpinned: sort by createdAt (most recent first)
+        return b.createdAt.getTime() - a.createdAt.getTime();
+      });
   },
 
   /**

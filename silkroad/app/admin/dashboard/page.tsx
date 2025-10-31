@@ -18,6 +18,8 @@ interface Listing {
   riskLevel: 'standard' | 'high-risk';
   state: 'in_review' | 'on_market' | 'pulled';
   approved: boolean;
+  pinned?: boolean;
+  pinnedAt?: Date;
   createdAt: Date;
 }
 
@@ -159,6 +161,17 @@ export default function AdminDashboardPage() {
     }
   };
 
+  const handleTogglePin = async (id: string, currentlyPinned: boolean) => {
+    try {
+      await axios.post(`/api/admin/listings/${id}/pin`, { 
+        pinned: !currentlyPinned 
+      });
+      fetchListings();
+    } catch (err: any) {
+      alert(err.response?.data?.error || `Failed to ${currentlyPinned ? 'unpin' : 'pin'} listing`);
+    }
+  };
+
   const filteredListings = listings.filter(l => {
     if (filter === 'pending') return l.state === 'in_review' && !l.approved;
     if (filter === 'approved') return l.state === 'on_market' && l.approved;
@@ -185,7 +198,7 @@ export default function AdminDashboardPage() {
               <button
                 onClick={handleManualRefresh}
                 disabled={loading}
-                className="text-xs text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="text-xs text-green-600 hover:text-green-700 dark:text-green-400 dark:hover:text-green-300 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 🔄 Refresh Now
               </button>
@@ -215,7 +228,7 @@ export default function AdminDashboardPage() {
             onClick={() => setActiveTab('listings')}
             className={`px-4 py-2 text-sm font-medium transition-colors border-b-2 ${
               activeTab === 'listings'
-                ? 'border-blue-600 text-blue-600 dark:text-blue-400'
+                  ? 'border-green-600 text-green-600 dark:text-green-400'
                 : 'border-transparent text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-200'
             }`}
           >
@@ -225,7 +238,7 @@ export default function AdminDashboardPage() {
             onClick={() => setActiveTab('logs')}
             className={`px-4 py-2 text-sm font-medium transition-colors border-b-2 ${
               activeTab === 'logs'
-                ? 'border-blue-600 text-blue-600 dark:text-blue-400'
+                  ? 'border-green-600 text-green-600 dark:text-green-400'
                 : 'border-transparent text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-200'
             }`}
           >
@@ -240,7 +253,7 @@ export default function AdminDashboardPage() {
               onClick={() => setFilter('all')}
               className={`rounded-full px-4 py-2 text-sm font-medium transition-colors ${
                 filter === 'all'
-                  ? 'bg-blue-600 text-white'
+                    ? 'bg-green-600 text-white'
                   : 'bg-white text-zinc-700 hover:bg-zinc-100 dark:bg-zinc-900 dark:text-zinc-300 dark:hover:bg-zinc-800'
               }`}
             >
@@ -283,7 +296,7 @@ export default function AdminDashboardPage() {
         {/* Loading */}
         {loading && (
           <div className="flex justify-center py-12">
-            <div className="h-8 w-8 animate-spin rounded-full border-4 border-blue-600 border-t-transparent"></div>
+            <div className="h-8 w-8 animate-spin rounded-full border-4 border-green-600 border-t-transparent"></div>
           </div>
         )}
 
@@ -321,10 +334,17 @@ export default function AdminDashboardPage() {
                     {/* Content */}
                     <div className="flex-1">
                       <div className="mb-2 flex items-start justify-between">
-                        <div>
-                          <h3 className="font-semibold text-zinc-900 dark:text-zinc-50">
-                            {listing.title}
-                          </h3>
+                        <div className="flex-1">
+                          <div className="flex items-center gap-2">
+                            <h3 className="font-semibold text-zinc-900 dark:text-zinc-50">
+                              {listing.title}
+                            </h3>
+                            {listing.pinned === true && (
+                              <span className="text-yellow-500" title="Pinned listing">
+                                📌
+                              </span>
+                            )}
+                          </div>
                           <p className="text-sm text-zinc-600 dark:text-zinc-400">
                             {listing.category} • ${listing.price.toFixed(2)} USDC
                           </p>
@@ -378,6 +398,16 @@ export default function AdminDashboardPage() {
                             ✓ Live on marketplace
                           </span>
                           <button
+                            onClick={() => handleTogglePin(listing._id, listing.pinned === true)}
+                            className={`rounded-lg px-3 py-1.5 text-xs font-medium transition-colors ${
+                              listing.pinned === true
+                                ? 'bg-yellow-100 text-yellow-800 hover:bg-yellow-200 dark:bg-yellow-900 dark:text-yellow-200'
+                                : 'bg-zinc-200 text-zinc-700 hover:bg-zinc-300 dark:bg-zinc-800 dark:text-zinc-300'
+                            }`}
+                          >
+                            {listing.pinned === true ? '📌 Unpin' : '📌 Pin'}
+                          </button>
+                          <button
                             onClick={() => handleReject(listing._id)}
                             className="text-sm text-red-600 hover:text-red-700 dark:text-red-400"
                           >
@@ -393,7 +423,7 @@ export default function AdminDashboardPage() {
                           </span>
                           <button
                             onClick={() => handleRepublish(listing._id)}
-                            className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 transition-colors"
+                            className="rounded-lg bg-green-600 px-4 py-2 text-sm font-medium text-white hover:bg-green-700 transition-colors"
                           >
                             🔄 Republish
                           </button>

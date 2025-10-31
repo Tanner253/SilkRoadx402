@@ -70,6 +70,14 @@ const ListingSchema = new Schema<IListing>({
     required: true,
     default: false,
   },
+  pinned: {
+    type: Boolean,
+    default: false,
+    index: true,
+  },
+  pinnedAt: {
+    type: Date,
+  },
   reportsCount: {
     type: Number,
     default: 0,

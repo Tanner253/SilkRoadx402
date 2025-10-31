@@ -405,7 +405,7 @@ function ListingDetail({ params }: { params: Promise<{ id: string }> }) {
   if (loading) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-gradient-to-b from-zinc-50 to-zinc-100 dark:from-zinc-950 dark:to-black">
-        <div className="h-8 w-8 animate-spin rounded-full border-4 border-blue-600 border-t-transparent"></div>
+        <div className="h-8 w-8 animate-spin rounded-full border-4 border-green-600 border-t-transparent"></div>
       </div>
     );
   }
@@ -419,7 +419,7 @@ function ListingDetail({ params }: { params: Promise<{ id: string }> }) {
           </h1>
           <Link
             href="/listings"
-            className="inline-flex items-center justify-center rounded-lg bg-blue-600 px-6 py-3 text-sm font-medium text-white hover:bg-blue-700 transition-colors"
+            className="inline-flex items-center justify-center rounded-lg bg-green-600 px-6 py-3 text-sm font-medium text-white hover:bg-green-700 transition-colors"
           >
             Back to Browse
           </Link>
@@ -530,7 +530,7 @@ function ListingDetail({ params }: { params: Promise<{ id: string }> }) {
               {!isConnected || !hasAcceptedTOS ? (
                 <Link
                   href="/"
-                  className="block w-full rounded-lg bg-blue-600 py-3 text-center text-sm font-medium text-white hover:bg-blue-700 transition-colors"
+                  className="block w-full rounded-lg bg-green-600 py-3 text-center text-sm font-medium text-white hover:bg-green-700 transition-colors"
                 >
                   Connect Wallet to Purchase
                 </Link>
@@ -544,7 +544,7 @@ function ListingDetail({ params }: { params: Promise<{ id: string }> }) {
                 <button
                   onClick={handlePurchase}
                   disabled={purchasing}
-                  className="w-full rounded-lg bg-blue-600 py-3 text-sm font-medium text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50 transition-colors"
+                  className="w-full rounded-lg bg-green-600 py-3 text-sm font-medium text-white hover:bg-green-700 disabled:cursor-not-allowed disabled:opacity-50 transition-colors"
                 >
                   {purchasing ? 'Processing...' : 'Purchase Now'}
                 </button>
@@ -605,7 +605,7 @@ function ListingDetail({ params }: { params: Promise<{ id: string }> }) {
                   href={listing.whitepaperUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex items-center justify-between rounded-lg border border-zinc-200 bg-white p-4 hover:border-blue-600 hover:bg-blue-50 transition-colors dark:border-zinc-800 dark:bg-zinc-900 dark:hover:border-blue-600 dark:hover:bg-blue-950"
+                  className="flex items-center justify-between rounded-lg border border-zinc-200 bg-white p-4 hover:border-green-600 hover:bg-green-50 transition-colors dark:border-zinc-800 dark:bg-zinc-900 dark:hover:border-green-600 dark:hover:bg-green-950"
                 >
                   <div className="flex items-center space-x-3">
                     <div className="flex h-10 w-10 items-center justify-center rounded-full bg-purple-100 dark:bg-purple-900">
@@ -629,7 +629,7 @@ function ListingDetail({ params }: { params: Promise<{ id: string }> }) {
                   href={listing.githubUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex items-center justify-between rounded-lg border border-zinc-200 bg-white p-4 hover:border-blue-600 hover:bg-blue-50 transition-colors dark:border-zinc-800 dark:bg-zinc-900 dark:hover:border-blue-600 dark:hover:bg-blue-950"
+                  className="flex items-center justify-between rounded-lg border border-zinc-200 bg-white p-4 hover:border-green-600 hover:bg-green-50 transition-colors dark:border-zinc-800 dark:bg-zinc-900 dark:hover:border-green-600 dark:hover:bg-green-950"
                 >
                   <div className="flex items-center space-x-3">
                     <div className="flex h-10 w-10 items-center justify-center rounded-full bg-zinc-100 dark:bg-zinc-800">
@@ -761,8 +761,8 @@ function ListingDetail({ params }: { params: Promise<{ id: string }> }) {
 
           {/* Review Input (Only for buyers who haven't reviewed) */}
           {isConnected && hasPurchased && !hasCommented && (
-            <div className="mt-6 rounded-lg border-2 border-blue-200 bg-blue-50 p-6 dark:border-blue-900 dark:bg-blue-950">
-              <h3 className="text-lg font-bold text-blue-900 dark:text-blue-100 mb-3">
+            <div className="mt-6 rounded-lg border-2 border-green-200 bg-green-50 p-6 dark:border-green-900 dark:bg-green-950">
+              <h3 className="text-lg font-bold text-green-900 dark:text-green-100 mb-3">
                 Leave a Review
               </h3>
               <textarea
@@ -771,16 +771,16 @@ function ListingDetail({ params }: { params: Promise<{ id: string }> }) {
                 placeholder="Share your experience with this product... (5-500 characters)"
                 maxLength={500}
                 rows={3}
-                className="w-full rounded-lg border border-blue-300 bg-white px-4 py-2 text-sm text-zinc-900 placeholder-zinc-400 focus:border-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-600 dark:border-blue-700 dark:bg-zinc-800 dark:text-zinc-50 dark:placeholder-zinc-500 mb-3"
+                className="w-full rounded-lg border border-green-300 bg-white px-4 py-2 text-sm text-zinc-900 placeholder-zinc-400 focus:border-green-600 focus:outline-none focus:ring-2 focus:ring-green-600 dark:border-green-700 dark:bg-zinc-800 dark:text-zinc-50 dark:placeholder-zinc-500 mb-3"
               />
               <div className="flex items-center justify-between">
-                <span className="text-xs text-blue-700 dark:text-blue-300">
+                <span className="text-xs text-green-700 dark:text-green-300">
                   {newComment.length}/500 characters
                 </span>
                 <button
                   onClick={handleSubmitComment}
                   disabled={submittingComment || newComment.trim().length < 5}
-                  className="rounded-lg bg-blue-600 px-6 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50 transition-colors"
+                  className="rounded-lg bg-green-600 px-6 py-2 text-sm font-medium text-white hover:bg-green-700 disabled:cursor-not-allowed disabled:opacity-50 transition-colors"
                 >
                   {submittingComment ? 'Submitting...' : '📝 Post Review'}
                 </button>

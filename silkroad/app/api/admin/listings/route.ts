@@ -47,8 +47,25 @@ export async function GET(req: NextRequest) {
     if (CONFIG.MOCK_MODE) {
       console.log('🧪 MOCK: Admin fetching all listings');
       
-      // Get all listings (not just approved)
-      const allListings = Array.from((mockStore as any).getAllListings?.() || []);
+      // Get all listings (not just approved) and sort them
+      const rawListings = Array.from((mockStore as any).getAllListings?.() || []);
+      
+      // Sort: pinned first (by pinnedAt desc), then by createdAt desc
+      const allListings = rawListings.sort((a: any, b: any) => {
+        const aPinned = a.pinned === true;
+        const bPinned = b.pinned === true;
+        
+        if (aPinned && !bPinned) return -1;
+        if (!aPinned && bPinned) return 1;
+        
+        if (aPinned && bPinned) {
+          const aTime = a.pinnedAt ? new Date(a.pinnedAt).getTime() : 0;
+          const bTime = b.pinnedAt ? new Date(b.pinnedAt).getTime() : 0;
+          return bTime - aTime;
+        }
+        
+        return b.createdAt.getTime() - a.createdAt.getTime();
+      });
       
       return NextResponse.json({
         success: true,
@@ -62,8 +79,36 @@ export async function GET(req: NextRequest) {
     // ============================================
     await connectDB();
 
-    const listings = await Listing.find({})
-      .sort({ createdAt: -1 });
+    const rawListings = await Listing.find({});
+
+    // Sort listings: pinned first (by pinnedAt desc), then by createdAt desc
+    const listings = rawListings.sort((a: any, b: any) => {
+      const aPinned = a.pinned === true;
+      const bPinned = b.pinned === true;
+      
+      // Pinned listings come first
+      if (aPinned && !bPinned) return -1;
+      if (!aPinned && bPinned) return 1;
+      
+      // Both pinned: sort by pinnedAt (most recent first)
+      if (aPinned && bPinned) {
+        const aTime = a.pinnedAt ? new Date(a.pinnedAt).getTime() : 0;
+        const bTime = b.pinnedAt ? new Date(b.pinnedAt).getTime() : 0;
+        return bTime - aTime;
+      }
+      
+      // Both unpinned: sort by createdAt (most recent first)
+      const aCreated = new Date(a.createdAt).getTime();
+      const bCreated = new Date(b.createdAt).getTime();
+      return bCreated - aCreated;
+    });
+
+    console.log(`📋 Admin fetched ${listings.length} listings`);
+    const pinnedCount = listings.filter((l: any) => l.pinned === true).length;
+    console.log(`   📌 ${pinnedCount} pinned, ${listings.length - pinnedCount} unpinned`);
+    if (listings.length > 0) {
+      console.log(`   First listing: "${listings[0].title}" - pinned: ${listings[0].pinned}`);
+    }
 
     return NextResponse.json({
       success: true,

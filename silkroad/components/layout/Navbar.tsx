@@ -146,7 +146,7 @@ export function Navbar() {
 
             {/* Wallet Button - Compact on mobile */}
             {mounted && (
-              <WalletMultiButton className="!bg-blue-600 hover:!bg-blue-700 !rounded-lg !h-10 !px-3 sm:!px-4 !text-xs sm:!text-sm !font-medium transition-colors" />
+              <WalletMultiButton className="!bg-green-600 hover:!bg-green-700 !rounded-lg !h-10 !px-3 sm:!px-4 !text-xs sm:!text-sm !font-medium transition-colors" />
             )}
           </div>
         </div>
@@ -200,7 +200,7 @@ export function Navbar() {
                   href="/browse" 
                   className={`flex items-center gap-3 rounded-lg px-4 py-3 text-base font-medium transition-colors ${
                     pathname === '/browse'
-                      ? 'bg-blue-50 text-blue-600 dark:bg-blue-900/20 dark:text-blue-400'
+                      ? 'bg-green-50 text-green-600 dark:bg-green-900/20 dark:text-green-400'
                       : 'text-zinc-700 hover:bg-zinc-100 dark:text-zinc-300 dark:hover:bg-zinc-800'
                   }`}
                 >
@@ -214,7 +214,7 @@ export function Navbar() {
                   href="/leaderboard" 
                   className={`flex items-center gap-3 rounded-lg px-4 py-3 text-base font-medium transition-colors ${
                     pathname === '/leaderboard'
-                      ? 'bg-blue-50 text-blue-600 dark:bg-blue-900/20 dark:text-blue-400'
+                      ? 'bg-green-50 text-green-600 dark:bg-green-900/20 dark:text-green-400'
                       : 'text-zinc-700 hover:bg-zinc-100 dark:text-zinc-300 dark:hover:bg-zinc-800'
                   }`}
                 >
@@ -226,7 +226,7 @@ export function Navbar() {
                   href="/sell" 
                   className={`flex items-center gap-3 rounded-lg px-4 py-3 text-base font-medium transition-colors ${
                     pathname === '/sell'
-                      ? 'bg-blue-50 text-blue-600 dark:bg-blue-900/20 dark:text-blue-400'
+                      ? 'bg-green-50 text-green-600 dark:bg-green-900/20 dark:text-green-400'
                       : 'text-zinc-700 hover:bg-zinc-100 dark:text-zinc-300 dark:hover:bg-zinc-800'
                   }`}
                 >
@@ -240,7 +240,7 @@ export function Navbar() {
                   href="/my-listings" 
                   className={`flex items-center gap-3 rounded-lg px-4 py-3 text-base font-medium transition-colors ${
                     pathname === '/my-listings'
-                      ? 'bg-blue-50 text-blue-600 dark:bg-blue-900/20 dark:text-blue-400'
+                      ? 'bg-green-50 text-green-600 dark:bg-green-900/20 dark:text-green-400'
                       : 'text-zinc-700 hover:bg-zinc-100 dark:text-zinc-300 dark:hover:bg-zinc-800'
                   }`}
                 >
@@ -254,7 +254,7 @@ export function Navbar() {
                   href="/profile" 
                   className={`flex items-center gap-3 rounded-lg px-4 py-3 text-base font-medium transition-colors ${
                     pathname === '/profile'
-                      ? 'bg-blue-50 text-blue-600 dark:bg-blue-900/20 dark:text-blue-400'
+                      ? 'bg-green-50 text-green-600 dark:bg-green-900/20 dark:text-green-400'
                       : 'text-zinc-700 hover:bg-zinc-100 dark:text-zinc-300 dark:hover:bg-zinc-800'
                   }`}
                 >
