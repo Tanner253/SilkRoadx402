@@ -7,7 +7,6 @@ import { useRouter } from 'next/navigation';
 import axios from 'axios';
 import Link from 'next/link';
 import Image from 'next/image';
-import { ProtectedContent } from '@/components/auth/ProtectedContent';
 import { 
   Connection,
   PublicKey,
@@ -793,12 +792,8 @@ function ListingDetail({ params }: { params: Promise<{ id: string }> }) {
   );
 }
 
-// Export wrapped in ProtectedContent
+// Export directly (token gating handled within component for purchases only)
 export default function ListingDetailPage({ params }: { params: Promise<{ id: string }> }) {
-  return (
-    <ProtectedContent>
-      <ListingDetail params={params} />
-    </ProtectedContent>
-  );
+  return <ListingDetail params={params} />;
 }
 

@@ -5,7 +5,6 @@ import { useAuth } from '@/hooks/useAuth';
 import { useWallet } from '@solana/wallet-adapter-react';
 import axios from 'axios';
 import Link from 'next/link';
-import { ProtectedContent } from '@/components/auth/ProtectedContent';
 
 interface LeaderboardEntry {
   wallet: string;
@@ -23,10 +22,10 @@ function LeaderboardPageContent() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (mounted && isConnected && hasAcceptedTOS && isTokenGated) {
+    if (mounted) {
       fetchLeaderboard();
     }
-  }, [mounted, isConnected, hasAcceptedTOS, isTokenGated]);
+  }, [mounted]);
 
   const fetchLeaderboard = async () => {
     try {
@@ -65,6 +64,27 @@ function LeaderboardPageContent() {
             The highest earning vendors on SilkRoadx402
           </p>
         </div>
+
+        {/* Info Banners */}
+        {!isConnected ? (
+          <div className="mb-6 rounded-lg border border-blue-200 bg-blue-50 p-4 dark:border-blue-900 dark:bg-blue-950">
+            <p className="text-sm text-blue-800 dark:text-blue-200">
+              <strong>👀 Browse Mode:</strong> You're viewing the leaderboard. Connect your wallet to create listings and make purchases.
+            </p>
+          </div>
+        ) : !hasAcceptedTOS ? (
+          <div className="mb-6 rounded-lg border border-yellow-200 bg-yellow-50 p-4 dark:border-yellow-900 dark:bg-yellow-950">
+            <p className="text-sm text-yellow-800 dark:text-yellow-200">
+              <strong>⚠️ Action Required:</strong> Please accept the Terms of Service to interact with the marketplace.
+            </p>
+          </div>
+        ) : !isTokenGated ? (
+          <div className="mb-6 rounded-lg border border-yellow-200 bg-yellow-50 p-4 dark:border-yellow-900 dark:bg-yellow-950">
+            <p className="text-sm text-yellow-800 dark:text-yellow-200">
+              <strong>👀 Browse Mode:</strong> You're viewing the leaderboard. Hold <strong>50,000 $SRx402</strong> tokens to create listings and make purchases.
+            </p>
+          </div>
+        ) : null}
 
         {/* Error State */}
         {error && (
@@ -238,10 +258,6 @@ function LeaderboardPageContent() {
 }
 
 export default function LeaderboardPage() {
-  return (
-    <ProtectedContent>
-      <LeaderboardPageContent />
-    </ProtectedContent>
-  );
+  return <LeaderboardPageContent />;
 }
 

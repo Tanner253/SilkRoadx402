@@ -185,12 +185,12 @@ export default function AdminDashboardPage() {
         {/* Header */}
         <div className="mb-8 flex items-start justify-between">
           <div>
-            <h1 className="text-4xl font-bold text-zinc-900 dark:text-zinc-50 mb-2">
-              Admin Dashboard
-            </h1>
-            <p className="text-lg text-zinc-600 dark:text-zinc-400">
+          <h1 className="text-4xl font-bold text-zinc-900 dark:text-zinc-50 mb-2">
+            Admin Dashboard
+          </h1>
+          <p className="text-lg text-zinc-600 dark:text-zinc-400">
               Review and manage marketplace {activeTab === 'listings' ? 'listings' : 'system logs'}
-            </p>
+          </p>
             <div className="mt-2 flex items-center space-x-3">
               <span className="text-xs text-zinc-500 dark:text-zinc-400">
                 Last updated: {getTimeSinceUpdate()}
@@ -248,48 +248,48 @@ export default function AdminDashboardPage() {
 
         {/* Listing Filters */}
         {activeTab === 'listings' && (
-          <div className="mb-6 flex flex-wrap gap-2">
-            <button
-              onClick={() => setFilter('all')}
-              className={`rounded-full px-4 py-2 text-sm font-medium transition-colors ${
-                filter === 'all'
+        <div className="mb-6 flex flex-wrap gap-2">
+          <button
+            onClick={() => setFilter('all')}
+            className={`rounded-full px-4 py-2 text-sm font-medium transition-colors ${
+              filter === 'all'
                     ? 'bg-green-600 text-white'
-                  : 'bg-white text-zinc-700 hover:bg-zinc-100 dark:bg-zinc-900 dark:text-zinc-300 dark:hover:bg-zinc-800'
-              }`}
-            >
-              All ({listings.length})
-            </button>
-            <button
-              onClick={() => setFilter('pending')}
-              className={`rounded-full px-4 py-2 text-sm font-medium transition-colors ${
-                filter === 'pending'
-                  ? 'bg-yellow-600 text-white'
-                  : 'bg-white text-zinc-700 hover:bg-zinc-100 dark:bg-zinc-900 dark:text-zinc-300 dark:hover:bg-zinc-800'
-              }`}
-            >
-              Pending ({listings.filter(l => l.state === 'in_review' && !l.approved).length})
-            </button>
-            <button
-              onClick={() => setFilter('approved')}
-              className={`rounded-full px-4 py-2 text-sm font-medium transition-colors ${
-                filter === 'approved'
-                  ? 'bg-green-600 text-white'
-                  : 'bg-white text-zinc-700 hover:bg-zinc-100 dark:bg-zinc-900 dark:text-zinc-300 dark:hover:bg-zinc-800'
-              }`}
-            >
-              Approved ({listings.filter(l => l.state === 'on_market' && l.approved).length})
-            </button>
-            <button
-              onClick={() => setFilter('pulled')}
-              className={`rounded-full px-4 py-2 text-sm font-medium transition-colors ${
-                filter === 'pulled'
-                  ? 'bg-red-600 text-white'
-                  : 'bg-white text-zinc-700 hover:bg-zinc-100 dark:bg-zinc-900 dark:text-zinc-300 dark:hover:bg-zinc-800'
-              }`}
-            >
-              Pulled ({listings.filter(l => l.state === 'pulled').length})
-            </button>
-          </div>
+                : 'bg-white text-zinc-700 hover:bg-zinc-100 dark:bg-zinc-900 dark:text-zinc-300 dark:hover:bg-zinc-800'
+            }`}
+          >
+            All ({listings.length})
+          </button>
+          <button
+            onClick={() => setFilter('pending')}
+            className={`rounded-full px-4 py-2 text-sm font-medium transition-colors ${
+              filter === 'pending'
+                ? 'bg-yellow-600 text-white'
+                : 'bg-white text-zinc-700 hover:bg-zinc-100 dark:bg-zinc-900 dark:text-zinc-300 dark:hover:bg-zinc-800'
+            }`}
+          >
+            Pending ({listings.filter(l => l.state === 'in_review' && !l.approved).length})
+          </button>
+          <button
+            onClick={() => setFilter('approved')}
+            className={`rounded-full px-4 py-2 text-sm font-medium transition-colors ${
+              filter === 'approved'
+                ? 'bg-green-600 text-white'
+                : 'bg-white text-zinc-700 hover:bg-zinc-100 dark:bg-zinc-900 dark:text-zinc-300 dark:hover:bg-zinc-800'
+            }`}
+          >
+            Approved ({listings.filter(l => l.state === 'on_market' && l.approved).length})
+          </button>
+          <button
+            onClick={() => setFilter('pulled')}
+            className={`rounded-full px-4 py-2 text-sm font-medium transition-colors ${
+              filter === 'pulled'
+                ? 'bg-red-600 text-white'
+                : 'bg-white text-zinc-700 hover:bg-zinc-100 dark:bg-zinc-900 dark:text-zinc-300 dark:hover:bg-zinc-800'
+            }`}
+          >
+            Pulled ({listings.filter(l => l.state === 'pulled').length})
+          </button>
+        </div>
         )}
 
 
@@ -336,9 +336,9 @@ export default function AdminDashboardPage() {
                       <div className="mb-2 flex items-start justify-between">
                         <div className="flex-1">
                           <div className="flex items-center gap-2">
-                            <h3 className="font-semibold text-zinc-900 dark:text-zinc-50">
-                              {listing.title}
-                            </h3>
+                          <h3 className="font-semibold text-zinc-900 dark:text-zinc-50">
+                            {listing.title}
+                          </h3>
                             {listing.pinned === true && (
                               <span className="text-yellow-500" title="Pinned listing">
                                 📌

@@ -40,8 +40,8 @@ export function Navbar() {
     <>
       <nav className="fixed top-0 z-50 w-full border-b border-zinc-200 bg-white/80 backdrop-blur-sm dark:border-zinc-800 dark:bg-black/80">
         <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
-          {/* Mobile Menu Button */}
-          {mounted && publicKey && (
+          {/* Mobile Menu Button - Always show */}
+          {mounted && (
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
               className="md:hidden rounded-lg p-2 text-zinc-600 hover:bg-zinc-100 dark:text-zinc-400 dark:hover:bg-zinc-800 transition-colors"
@@ -66,36 +66,41 @@ export function Navbar() {
             </div>
           </Link>
 
-        {/* Navigation Links (show when wallet connected) */}
-        {publicKey && (
-          <div className="hidden md:flex items-center space-x-6">
-            <Link 
-              href="/browse" 
-              className="text-sm font-medium text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-50 transition-colors"
-            >
-              Browse
-            </Link>
-            <Link 
-              href="/leaderboard" 
-              className="text-sm font-medium text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-50 transition-colors flex items-center gap-1"
-            >
-              <span>🏆</span>
-              Leaderboard
-            </Link>
-            <Link 
-              href="/sell" 
-              className="text-sm font-medium text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-50 transition-colors"
-            >
-              Sell
-            </Link>
-            <Link 
-              href="/my-listings" 
-              className="text-sm font-medium text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-50 transition-colors"
-            >
-              My Listings
-            </Link>
-          </div>
-        )}
+        {/* Navigation Links */}
+        <div className="hidden md:flex items-center space-x-6">
+          {/* Browse & Leaderboard - Always visible */}
+          <Link 
+            href="/browse" 
+            className="text-sm font-medium text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-50 transition-colors"
+          >
+            Browse
+          </Link>
+          <Link 
+            href="/leaderboard" 
+            className="text-sm font-medium text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-50 transition-colors flex items-center gap-1"
+          >
+            <span>🏆</span>
+            Leaderboard
+          </Link>
+          
+          {/* Sell & My Listings - Only when wallet connected */}
+          {publicKey && (
+            <>
+              <Link 
+                href="/sell" 
+                className="text-sm font-medium text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-50 transition-colors"
+              >
+                Sell
+              </Link>
+              <Link 
+                href="/my-listings" 
+                className="text-sm font-medium text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-50 transition-colors"
+              >
+                My Listings
+              </Link>
+            </>
+          )}
+        </div>
 
           {/* Right Side: USDC Balance + Profile + Wallet Button */}
           <div className="flex items-center gap-2 sm:gap-3">
@@ -153,7 +158,7 @@ export function Navbar() {
       </nav>
 
       {/* Mobile Menu Overlay */}
-      {mounted && publicKey && mobileMenuOpen && (
+      {mounted && mobileMenuOpen && (
         <>
           {/* Backdrop */}
           <div 
@@ -164,8 +169,9 @@ export function Navbar() {
           {/* Menu Panel */}
           <div className="fixed top-16 left-0 right-0 bottom-0 z-40 bg-white dark:bg-zinc-900 md:hidden overflow-y-auto">
             <div className="flex flex-col p-6 space-y-6">
-              {/* USDC Balance on Mobile */}
-              <div className="flex items-center gap-3 rounded-lg border border-zinc-200 bg-zinc-50 p-4 dark:border-zinc-800 dark:bg-zinc-800">
+              {/* USDC Balance on Mobile - Only show when wallet connected */}
+              {publicKey && (
+                <div className="flex items-center gap-3 rounded-lg border border-zinc-200 bg-zinc-50 p-4 dark:border-zinc-800 dark:bg-zinc-800">
                 <svg 
                   className="h-6 w-6 text-blue-600" 
                   viewBox="0 0 40 40" 
@@ -193,9 +199,11 @@ export function Navbar() {
                   )}
                 </div>
               </div>
+              )}
 
               {/* Navigation Links */}
               <nav className="flex flex-col space-y-2">
+                {/* Browse & Leaderboard - Always visible */}
                 <Link 
                   href="/browse" 
                   className={`flex items-center gap-3 rounded-lg px-4 py-3 text-base font-medium transition-colors ${
@@ -222,47 +230,52 @@ export function Navbar() {
                   Leaderboard
                 </Link>
 
-                <Link 
-                  href="/sell" 
-                  className={`flex items-center gap-3 rounded-lg px-4 py-3 text-base font-medium transition-colors ${
-                    pathname === '/sell'
-                      ? 'bg-green-50 text-green-600 dark:bg-green-900/20 dark:text-green-400'
-                      : 'text-zinc-700 hover:bg-zinc-100 dark:text-zinc-300 dark:hover:bg-zinc-800'
-                  }`}
-                >
-                  <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-                  </svg>
-                  Sell Software
-                </Link>
+                {/* Sell, My Listings, Profile - Only when wallet connected */}
+                {publicKey && (
+                  <>
+                    <Link 
+                      href="/sell" 
+                      className={`flex items-center gap-3 rounded-lg px-4 py-3 text-base font-medium transition-colors ${
+                        pathname === '/sell'
+                          ? 'bg-green-50 text-green-600 dark:bg-green-900/20 dark:text-green-400'
+                          : 'text-zinc-700 hover:bg-zinc-100 dark:text-zinc-300 dark:hover:bg-zinc-800'
+                      }`}
+                    >
+                      <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                      </svg>
+                      Sell Software
+                    </Link>
 
-                <Link 
-                  href="/my-listings" 
-                  className={`flex items-center gap-3 rounded-lg px-4 py-3 text-base font-medium transition-colors ${
-                    pathname === '/my-listings'
-                      ? 'bg-green-50 text-green-600 dark:bg-green-900/20 dark:text-green-400'
-                      : 'text-zinc-700 hover:bg-zinc-100 dark:text-zinc-300 dark:hover:bg-zinc-800'
-                  }`}
-                >
-                  <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-                  </svg>
-                  My Listings
-                </Link>
+                    <Link 
+                      href="/my-listings" 
+                      className={`flex items-center gap-3 rounded-lg px-4 py-3 text-base font-medium transition-colors ${
+                        pathname === '/my-listings'
+                          ? 'bg-green-50 text-green-600 dark:bg-green-900/20 dark:text-green-400'
+                          : 'text-zinc-700 hover:bg-zinc-100 dark:text-zinc-300 dark:hover:bg-zinc-800'
+                      }`}
+                    >
+                      <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                      </svg>
+                      My Listings
+                    </Link>
 
-                <Link 
-                  href="/profile" 
-                  className={`flex items-center gap-3 rounded-lg px-4 py-3 text-base font-medium transition-colors ${
-                    pathname === '/profile'
-                      ? 'bg-green-50 text-green-600 dark:bg-green-900/20 dark:text-green-400'
-                      : 'text-zinc-700 hover:bg-zinc-100 dark:text-zinc-300 dark:hover:bg-zinc-800'
-                  }`}
-                >
-                  <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                  </svg>
-                  Profile & Analytics
-                </Link>
+                    <Link 
+                      href="/profile" 
+                      className={`flex items-center gap-3 rounded-lg px-4 py-3 text-base font-medium transition-colors ${
+                        pathname === '/profile'
+                          ? 'bg-green-50 text-green-600 dark:bg-green-900/20 dark:text-green-400'
+                          : 'text-zinc-700 hover:bg-zinc-100 dark:text-zinc-300 dark:hover:bg-zinc-800'
+                      }`}
+                    >
+                      <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                      </svg>
+                      Profile & Analytics
+                    </Link>
+                  </>
+                )}
               </nav>
 
               {/* Footer Links in Mobile Menu */}

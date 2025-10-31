@@ -44,10 +44,10 @@ function BrowsePageContent() {
   }, [searchParams]);
 
   useEffect(() => {
-    if (mounted && isConnected && hasAcceptedTOS) {
+    if (mounted) {
       fetchListings();
     }
-  }, [mounted, isConnected, hasAcceptedTOS]);
+  }, [mounted]);
 
   const fetchListings = async () => {
     try {
@@ -63,27 +63,6 @@ function BrowsePageContent() {
 
   if (!mounted) {
     return null;
-  }
-
-  if (!isConnected || !hasAcceptedTOS) {
-    return (
-      <div className="flex min-h-screen items-center justify-center bg-gradient-to-b from-zinc-50 to-zinc-100 dark:from-zinc-950 dark:to-black">
-        <div className="text-center">
-          <h1 className="text-2xl font-bold text-zinc-900 dark:text-zinc-50 mb-4">
-            Connect Your Wallet
-          </h1>
-          <p className="text-zinc-600 dark:text-zinc-400 mb-6">
-            You need to connect your wallet and accept TOS to browse listings
-          </p>
-          <Link
-            href="/"
-            className="inline-flex items-center justify-center rounded-lg bg-green-600 px-6 py-3 text-sm font-medium text-white hover:bg-green-700 transition-colors"
-          >
-            Go to Homepage
-          </Link>
-        </div>
-      </div>
-    );
   }
 
   const categories = ['all', 'Trading Bot', 'API Tool', 'Script', 'Custom'];
@@ -206,14 +185,26 @@ function BrowsePageContent() {
           </div>
         </div>
 
-        {/* Token Gating Warning */}
-        {!isTokenGated && (
-          <div className="mb-6 rounded-lg border border-yellow-200 bg-yellow-50 p-4 dark:border-yellow-900 dark:bg-yellow-950">
-            <p className="text-sm text-yellow-800 dark:text-yellow-200">
-              ⚠️ You don't have enough $SRx402 tokens. Some features may be restricted.
+        {/* Info Banners */}
+        {!isConnected ? (
+          <div className="mb-6 rounded-lg border border-blue-200 bg-blue-50 p-4 dark:border-blue-900 dark:bg-blue-950">
+            <p className="text-sm text-blue-800 dark:text-blue-200">
+              <strong>👀 Browse Mode:</strong> You're viewing public listings. Connect your wallet to purchase or create listings.
             </p>
           </div>
-        )}
+        ) : !hasAcceptedTOS ? (
+          <div className="mb-6 rounded-lg border border-yellow-200 bg-yellow-50 p-4 dark:border-yellow-900 dark:bg-yellow-950">
+            <p className="text-sm text-yellow-800 dark:text-yellow-200">
+              <strong>⚠️ Action Required:</strong> Please accept the Terms of Service to interact with the marketplace.
+            </p>
+          </div>
+        ) : !isTokenGated ? (
+          <div className="mb-6 rounded-lg border border-yellow-200 bg-yellow-50 p-4 dark:border-yellow-900 dark:bg-yellow-950">
+            <p className="text-sm text-yellow-800 dark:text-yellow-200">
+              <strong>👀 Browse Mode:</strong> You can view listings but need <strong>50,000 $SRx402</strong> tokens to purchase or create listings.
+            </p>
+          </div>
+        ) : null}
 
         {/* Loading State */}
         {loading && (
