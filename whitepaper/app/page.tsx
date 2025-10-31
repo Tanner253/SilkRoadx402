@@ -518,12 +518,12 @@ export default function Home() {
 
             <div className="mt-8 text-center space-y-4">
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                <a 
-                  href="https://dexscreener.com/solana/4dqugrpzcjskmshtifagpugumfy37ywknmnbg4f54fnw" 
-                  target="_blank" 
-                  rel="noopener noreferrer"
+              <a 
+                href="https://dexscreener.com/solana/4dqugrpzcjskmshtifagpugumfy37ywknmnbg4f54fnw" 
+                target="_blank" 
+                rel="noopener noreferrer"
                   className="inline-block px-8 py-3 bg-gradient-to-r from-green-500 to-cyan-500 text-black font-bold text-lg rounded hover:from-green-400 hover:to-cyan-400 transition-all shadow-lg"
-                >
+              >
                   💰 Buy $SRx402 →
                 </a>
                 <a 
@@ -533,7 +533,7 @@ export default function Home() {
                   className="inline-block px-8 py-3 bg-gradient-to-r from-purple-500 to-pink-500 text-white font-bold text-lg rounded hover:from-purple-600 hover:to-pink-600 transition-all shadow-lg"
                 >
                   🚀 Enter Marketplace →
-                </a>
+              </a>
               </div>
               <p className="text-xs text-gray-600">
                 Minimum 50,000 tokens required for marketplace access
@@ -663,8 +663,8 @@ export default function Home() {
             </a>
             <p className="text-gray-400 max-w-2xl mx-auto">
               Platform is <strong className="text-green-400">FULLY OPERATIONAL</strong> with real x402 payment flows. 
-              Sellers are receiving USDC payments from buyers today.
-            </p>
+            Sellers are receiving USDC payments from buyers today.
+          </p>
           </div>
 
           <div className="grid md:grid-cols-2 gap-8 mb-12">
@@ -866,14 +866,14 @@ export default function Home() {
             >
               💎 Buy $SRx402
             </a>
-            <a 
-              href="https://x.com/i/communities/1982622474983637154" 
-              target="_blank" 
-              rel="noopener noreferrer"
+          <a 
+            href="https://x.com/i/communities/1982622474983637154" 
+            target="_blank" 
+            rel="noopener noreferrer"
               className="inline-block px-10 py-3 bg-green-500 text-black font-bold text-lg rounded hover:bg-green-400 transition-all"
-            >
+          >
               💬 Join Community
-            </a>
+          </a>
           </div>
 
           <p className="text-sm text-gray-600 mt-8">
