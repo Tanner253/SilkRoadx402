@@ -8,6 +8,21 @@ export function Updates() {
   const updates = [
     {
       date: 'October 31, 2025',
+      version: 'v0.5.0',
+      title: 'UI Refresh & Featured Listings',
+      items: [
+        '🎨 Complete color refresh - pump.fun green theme across the app',
+        '📋 Grid and list view toggle for all listings pages',
+        'Compact list view for efficient browsing (more listings visible)',
+        '📌 Admin pin feature - promote up to 3 featured listings',
+        'Pinned listings always appear first with "Featured" badge',
+        '🔗 External links kept blue for standard web UX',
+        'Chat message reactions (❤️, 👍, 👎, 👀)',
+        '📱 Improved mobile navigation with hamburger menu',
+      ],
+    },
+    {
+      date: 'October 31, 2025',
       version: 'v0.4.0',
       title: 'Public Chat & Community Features',
       items: [
@@ -65,10 +80,10 @@ export function Updates() {
         {updates.map((update, index) => (
           <div
             key={index}
-            className="border-l-4 border-blue-600 pl-6 pb-6 last:pb-0"
+            className="border-l-4 border-green-600 pl-6 pb-6 last:pb-0"
           >
             <div className="mb-2 flex items-center space-x-3">
-              <span className="rounded-full bg-blue-600 px-3 py-1 text-xs font-bold text-white">
+              <span className="rounded-full bg-green-600 px-3 py-1 text-xs font-bold text-white">
                 {update.version}
               </span>
               <span className="text-sm text-zinc-500 dark:text-zinc-400">
@@ -84,7 +99,7 @@ export function Updates() {
                   key={itemIndex}
                   className="flex items-start space-x-2 text-sm text-zinc-700 dark:text-zinc-300"
                 >
-                  <span className="mt-1 text-blue-600">✓</span>
+                  <span className="mt-1 text-green-600">✓</span>
                   <span>{item}</span>
                 </li>
               ))}

@@ -155,7 +155,7 @@ export function TOSModal({ isOpen, onAccept, onDecline }: TOSModalProps) {
             disabled={!hasScrolled || accepting}
             className={`rounded-lg px-4 py-2 text-sm font-medium text-white transition-colors ${
               hasScrolled && !accepting
-                ? 'bg-blue-600 hover:bg-blue-700 cursor-pointer'
+                ? 'bg-green-600 hover:bg-green-700 cursor-pointer'
                 : 'bg-zinc-400 cursor-not-allowed dark:bg-zinc-700'
             }`}
           >
@@ -169,7 +169,7 @@ export function TOSModal({ isOpen, onAccept, onDecline }: TOSModalProps) {
           </p>
         )}
         {accepting && (
-          <p className="mt-2 text-center text-xs text-blue-600 dark:text-blue-400">
+          <p className="mt-2 text-center text-xs text-green-600 dark:text-green-400">
             Processing...
           </p>
         )}

@@ -87,11 +87,11 @@ export function TokenGateModal({ isOpen, currentBalance = 0, requiredBalance }: 
         </div>
 
         {/* Info */}
-        <div className="mb-6 rounded-lg bg-blue-50 p-4 dark:bg-blue-950/20">
-          <p className="text-sm text-blue-800 dark:text-blue-200">
+        <div className="mb-6 rounded-lg bg-green-50 p-4 dark:bg-green-950/20">
+          <p className="text-sm text-green-800 dark:text-green-200">
             <strong>ℹ️ How to get access:</strong>
           </p>
-          <ol className="mt-2 ml-4 space-y-1 text-sm text-blue-800 dark:text-blue-200 list-decimal">
+          <ol className="mt-2 ml-4 space-y-1 text-sm text-green-800 dark:text-green-200 list-decimal">
             <li>Buy $SRx402 tokens on pump.fun</li>
             <li>Send tokens to your connected wallet</li>
             <li>Reconnect your wallet to refresh balance</li>

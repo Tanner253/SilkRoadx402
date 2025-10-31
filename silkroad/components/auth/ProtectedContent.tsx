@@ -22,7 +22,7 @@ export function ProtectedContent({ children }: { children: ReactNode }) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-gradient-to-b from-zinc-50 to-zinc-100 dark:from-zinc-950 dark:to-black">
         <div className="text-center">
-          <div className="h-12 w-12 animate-spin rounded-full border-4 border-blue-600 border-t-transparent mx-auto mb-4"></div>
+          <div className="h-12 w-12 animate-spin rounded-full border-4 border-green-600 border-t-transparent mx-auto mb-4"></div>
           <p className="text-zinc-600 dark:text-zinc-400">Checking access...</p>
         </div>
       </div>
@@ -56,7 +56,7 @@ export function ProtectedContent({ children }: { children: ReactNode }) {
             Access Restricted
           </h2>
           <p className="text-zinc-600 dark:text-zinc-400 mb-6">
-            You need to hold at least <span className="font-bold text-blue-600">50,000 $SRx402</span> tokens to access this platform.
+            You need to hold at least <span className="font-bold text-green-600">50,000 $SRx402</span> tokens to access this platform.
           </p>
           <p className="text-sm text-zinc-500 dark:text-zinc-600">
             The Token Gate Modal will guide you to purchase tokens.

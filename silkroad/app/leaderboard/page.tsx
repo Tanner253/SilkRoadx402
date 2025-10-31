@@ -112,7 +112,7 @@ function LeaderboardPageContent() {
                   <tr
                     key={entry.wallet}
                     className={`transition-colors hover:bg-zinc-50 dark:hover:bg-zinc-800 ${
-                      isCurrentUser(entry.wallet) ? 'bg-blue-50 dark:bg-blue-950' : ''
+                      isCurrentUser(entry.wallet) ? 'bg-green-50 dark:bg-green-950' : ''
                     }`}
                   >
                     {/* Rank */}
@@ -144,7 +144,7 @@ function LeaderboardPageContent() {
                           {truncateWallet(entry.wallet)}
                         </code>
                         {isCurrentUser(entry.wallet) && (
-                          <span className="inline-flex items-center rounded-full bg-blue-100 px-2 py-0.5 text-xs font-medium text-blue-800 dark:bg-blue-900 dark:text-blue-200">
+                          <span className="inline-flex items-center rounded-full bg-green-100 px-2 py-0.5 text-xs font-medium text-green-800 dark:bg-green-900 dark:text-green-200">
                             You
                           </span>
                         )}
@@ -221,11 +221,11 @@ function LeaderboardPageContent() {
         )}
 
         {/* Info Box */}
-        <div className="mt-8 rounded-lg border border-blue-200 bg-blue-50 p-6 dark:border-blue-800 dark:bg-blue-950">
-          <h3 className="mb-2 text-sm font-bold text-blue-900 dark:text-blue-100">
+        <div className="mt-8 rounded-lg border border-green-200 bg-green-50 p-6 dark:border-green-800 dark:bg-green-950">
+          <h3 className="mb-2 text-sm font-bold text-green-900 dark:text-green-100">
             📊 How Rankings Work
           </h3>
-          <ul className="space-y-1 text-sm text-blue-800 dark:text-blue-200">
+          <ul className="space-y-1 text-sm text-green-800 dark:text-green-200">
             <li>• Rankings based on <strong>total revenue</strong> from successful sales</li>
             <li>• Updated in real-time as transactions complete</li>
             <li>• Only successful (completed) transactions count toward revenue</li>
