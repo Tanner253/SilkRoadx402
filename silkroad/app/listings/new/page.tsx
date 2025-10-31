@@ -242,45 +242,6 @@ function NewListingPageContent() {
           </p>
         </div>
 
-        {/* 🎉 LIMITED TIME PROMOTIONAL BANNER */}
-        <div className="mb-8 overflow-hidden rounded-2xl border-4 border-purple-500 bg-gradient-to-r from-purple-600 via-pink-600 to-orange-500 p-1 shadow-2xl">
-          <div className="rounded-xl bg-white dark:bg-zinc-900 p-6">
-            <div className="text-center">
-              {/* Emoji Header */}
-              <div className="mb-3 text-4xl">
-                🎉 💰 ✅
-              </div>
-              
-              {/* Main Heading */}
-              <h2 className="mb-2 text-2xl sm:text-3xl font-black bg-gradient-to-r from-purple-600 via-pink-600 to-orange-500 bg-clip-text text-transparent">
-                LIMITED TIME LAUNCH BONUS!
-              </h2>
-              
-              {/* Key Message */}
-              <div className="mb-3 inline-flex items-center space-x-2 rounded-full bg-gradient-to-r from-green-500 to-emerald-600 px-6 py-3 shadow-lg">
-                <span className="text-2xl">✅</span>
-                <span className="text-xl font-black text-white uppercase tracking-wide">
-                  Guaranteed First Sale
-                </span>
-              </div>
-              
-              {/* Description */}
-              <p className="text-base text-zinc-700 dark:text-zinc-300 mb-2">
-                <strong>Price your listing under $11 USDC</strong> and we'll purchase it ourselves!
-              </p>
-              
-              <p className="text-sm font-semibold text-purple-600 dark:text-purple-400">
-                🎁 Every listing below $11 is guaranteed to get at least 1 sale
-              </p>
-              
-              {/* Fine Print */}
-              <p className="mt-3 text-xs text-zinc-500 dark:text-zinc-400 italic">
-                ⏰ Limited time offer - First 100 listings only
-              </p>
-            </div>
-          </div>
-        </div>
-
         {/* Token Gating Warning */}
         {!isTokenGated && (
           <div className="mb-6 rounded-lg border border-yellow-200 bg-yellow-50 p-4 dark:border-yellow-900 dark:bg-yellow-950">
@@ -351,25 +312,7 @@ function NewListingPageContent() {
                 required
               />
             </div>
-            <div className="mt-2 flex items-start space-x-2">
-              <p className="text-xs text-zinc-500">Minimum $0.10 USDC</p>
-            </div>
-            {/* Launch Bonus Reminder */}
-            {formData.price && parseFloat(formData.price) < 11 && parseFloat(formData.price) >= 0.10 && (
-              <div className="mt-2 rounded-lg bg-gradient-to-r from-green-50 to-emerald-50 border-2 border-green-500 p-3 dark:from-green-950 dark:to-emerald-950">
-                <p className="text-sm font-bold text-green-700 dark:text-green-300 flex items-center">
-                  <span className="text-xl mr-2">🎉</span>
-                  LAUNCH BONUS ACTIVE! This listing qualifies for a guaranteed first sale!
-                </p>
-              </div>
-            )}
-            {formData.price && parseFloat(formData.price) >= 11 && (
-              <div className="mt-2 rounded-lg bg-yellow-50 border border-yellow-300 p-3 dark:bg-yellow-950 dark:border-yellow-700">
-                <p className="text-sm text-yellow-700 dark:text-yellow-300">
-                  💡 <strong>Tip:</strong> Price under $11 USDC to qualify for a guaranteed first sale (limited time)
-                </p>
-              </div>
-            )}
+            <p className="mt-1 text-xs text-zinc-500">Minimum $0.10 USDC</p>
           </div>
 
           {/* Category */}
