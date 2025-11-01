@@ -18,10 +18,33 @@ interface LogsPanelProps {
   onUpdate: () => void;
 }
 
+interface LogCategory {
+  id: string;
+  label: string;
+  icon: string;
+  color: string;
+}
+
 export function LogsPanel({ autoRefresh, lastUpdated, onUpdate }: LogsPanelProps) {
   const [logs, setLogs] = useState<Log[]>([]);
   const [logTypeFilter, setLogTypeFilter] = useState('all');
   const [loading, setLoading] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(true);
+
+  const logCategories: LogCategory[] = [
+    { id: 'all', label: 'All Logs', icon: '📊', color: 'zinc' },
+    { id: 'listing_created', label: 'Listing Created', icon: '📝', color: 'green' },
+    { id: 'listing_purchased', label: 'Listing Purchased', icon: '💰', color: 'green' },
+    { id: 'listing_approved', label: 'Listing Approved', icon: '✅', color: 'green' },
+    { id: 'listing_rejected', label: 'Listing Rejected', icon: '❌', color: 'orange' },
+    { id: 'report_submitted', label: 'Report Submitted', icon: '🚩', color: 'orange' },
+    { id: 'comment_posted', label: 'Comment Posted', icon: '💬', color: 'blue' },
+    { id: 'info', label: 'Info', icon: 'ℹ️', color: 'zinc' },
+    { id: 'error', label: 'Error', icon: '⚠️', color: 'red' },
+    { id: 'admin_action', label: 'Admin Action', icon: '🔧', color: 'purple' },
+    { id: 'txn_failure', label: 'Txn Failure', icon: '💔', color: 'red' },
+    { id: 'admin_fail', label: 'Admin Fail', icon: '🚫', color: 'red' },
+  ];
 
   const fetchLogs = async (silent = false) => {
     try {
@@ -107,87 +130,189 @@ export function LogsPanel({ autoRefresh, lastUpdated, onUpdate }: LogsPanelProps
     }
   };
 
+  const getLogIcon = (type: string) => {
+    const category = logCategories.find(c => c.id === type);
+    return category?.icon || '📄';
+  };
+
+  const getLogCount = (type: string) => {
+    if (type === 'all') return logs.length;
+    return logs.filter(log => log.type === type).length;
+  };
+
   return (
-    <>
-      {/* Log Type Filters */}
-      <div className="mb-6 flex flex-wrap gap-2">
-        {[
-          'all',
-          'listing_created',
-          'listing_purchased',
-          'listing_approved',
-          'listing_rejected',
-          'report_submitted',
-          'comment_posted',
-          'info',
-          'error',
-          'admin_action',
-          'txn_failure',
-          'admin_fail'
-        ].map((type) => (
-          <button
-            key={type}
-            onClick={() => setLogTypeFilter(type)}
-            className={`rounded-full px-4 py-2 text-sm font-medium transition-colors ${
-              logTypeFilter === type
-                  ? 'bg-green-600 text-white'
-                : 'bg-white text-zinc-700 hover:bg-zinc-100 dark:bg-zinc-900 dark:text-zinc-300 dark:hover:bg-zinc-800'
-            }`}
-          >
-            {type === 'all' ? 'All' : type.split('_').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ')}
-          </button>
-        ))}
-      </div>
+    <div className="flex h-[calc(100vh-12rem)] gap-6">
+      {/* Sidebar */}
+      <div className={`flex-shrink-0 transition-all duration-300 ${sidebarOpen ? 'w-72' : 'w-16'}`}>
+        <div className="h-full rounded-lg border border-zinc-200 bg-white dark:border-zinc-800 dark:bg-zinc-900 shadow-lg overflow-hidden flex flex-col">
+          {/* Sidebar Header */}
+          <div className="border-b border-zinc-200 dark:border-zinc-800 p-4 flex items-center justify-between">
+            {sidebarOpen && (
+              <h3 className="font-semibold text-zinc-900 dark:text-zinc-50">
+                Log Categories
+              </h3>
+            )}
+            <button
+              onClick={() => setSidebarOpen(!sidebarOpen)}
+              className="rounded-lg p-2 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
+              title={sidebarOpen ? 'Collapse sidebar' : 'Expand sidebar'}
+            >
+              {sidebarOpen ? (
+                <svg className="w-5 h-5 text-zinc-600 dark:text-zinc-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 19l-7-7 7-7m8 14l-7-7 7-7" />
+                </svg>
+              ) : (
+                <svg className="w-5 h-5 text-zinc-600 dark:text-zinc-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                </svg>
+              )}
+            </button>
+          </div>
 
-      {/* Loading State */}
-      {loading && (
-        <div className="flex justify-center py-12">
-          <div className="h-8 w-8 animate-spin rounded-full border-4 border-green-600 border-t-transparent"></div>
-        </div>
-      )}
+          {/* Sidebar Menu */}
+          <div className="flex-1 overflow-y-auto p-2">
+            <nav className="space-y-1">
+              {logCategories.map((category) => {
+                const isActive = logTypeFilter === category.id;
+                const count = category.id === 'all' ? logs.length : 0;
+                
+                return (
+                  <button
+                    key={category.id}
+                    onClick={() => setLogTypeFilter(category.id)}
+                    className={`w-full flex items-center gap-3 rounded-lg px-3 py-2.5 text-left transition-all ${
+                      isActive
+                        ? 'bg-green-500 text-white shadow-md'
+                        : 'text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800'
+                    }`}
+                  >
+                    <span className="text-xl">{category.icon}</span>
+                    {sidebarOpen && (
+                      <>
+                        <span className="flex-1 text-sm font-medium">
+                          {category.label}
+                        </span>
+                        {isActive && logs.length > 0 && (
+                          <span className="rounded-full bg-white/20 px-2 py-0.5 text-xs font-bold">
+                            {logs.length}
+                          </span>
+                        )}
+                      </>
+                    )}
+                  </button>
+                );
+              })}
+            </nav>
+          </div>
 
-      {/* Logs Display */}
-      {!loading && (
-        <div className="space-y-3">
-          {logs.length === 0 ? (
-            <div className="text-center py-12 text-zinc-600 dark:text-zinc-400">
-              No logs found
-            </div>
-          ) : (
-            logs.map((log) => (
-              <div
-                key={log._id}
-                className={`rounded-lg border p-4 ${getLogTypeColor(log.type)} border-current border-opacity-20`}
-              >
-                <div className="flex items-start justify-between mb-2">
-                  <div className="flex items-center space-x-2">
-                    <span className="rounded-full px-2.5 py-0.5 text-xs font-medium bg-current bg-opacity-10">
-                      {log.type}
-                    </span>
-                    {log.wallet && (
-                      <span className="text-xs font-mono">
-                        {log.wallet.slice(0, 4)}...{log.wallet.slice(-4)}
-                      </span>
-                    )}
-                    {log.ip && (
-                      <span className="text-xs opacity-60">
-                        {log.ip}
-                      </span>
-                    )}
-                  </div>
-                  <span className="text-xs opacity-60">
-                    {formatTime(log.createdAt)}
+          {/* Sidebar Footer - Stats */}
+          {sidebarOpen && (
+            <div className="border-t border-zinc-200 dark:border-zinc-800 p-4">
+              <div className="text-xs text-zinc-500 dark:text-zinc-400">
+                <div className="flex justify-between mb-1">
+                  <span>Total Logs:</span>
+                  <span className="font-bold text-zinc-900 dark:text-zinc-50">{logs.length}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span>Auto-refresh:</span>
+                  <span className={`font-bold ${autoRefresh ? 'text-green-600' : 'text-zinc-400'}`}>
+                    {autoRefresh ? 'ON' : 'OFF'}
                   </span>
                 </div>
-                <p className="text-sm">
-                  {log.message}
-                </p>
               </div>
-            ))
+            </div>
           )}
         </div>
-      )}
-    </>
+      </div>
+
+      {/* Main Content Area */}
+      <div className="flex-1 min-w-0 flex flex-col">
+        {/* Content Header */}
+        <div className="mb-4 flex items-center justify-between rounded-lg border border-zinc-200 bg-white p-4 dark:border-zinc-800 dark:bg-zinc-900 shadow-sm">
+          <div>
+            <h2 className="text-lg font-semibold text-zinc-900 dark:text-zinc-50">
+              {logCategories.find(c => c.id === logTypeFilter)?.label || 'All Logs'}
+            </h2>
+            <p className="text-sm text-zinc-500 dark:text-zinc-400">
+              {logs.length} {logs.length === 1 ? 'entry' : 'entries'} found
+            </p>
+          </div>
+          {loading && (
+            <div className="flex items-center gap-2 text-sm text-zinc-600 dark:text-zinc-400">
+              <div className="h-4 w-4 animate-spin rounded-full border-2 border-green-600 border-t-transparent"></div>
+              <span>Loading...</span>
+            </div>
+          )}
+        </div>
+
+        {/* Logs List */}
+        <div className="flex-1 overflow-y-auto rounded-lg border border-zinc-200 bg-white dark:border-zinc-800 dark:bg-zinc-900 shadow-sm">
+          {logs.length === 0 && !loading ? (
+            <div className="flex h-full items-center justify-center">
+              <div className="text-center py-12">
+                <div className="text-6xl mb-4">📭</div>
+                <p className="text-lg font-medium text-zinc-900 dark:text-zinc-50 mb-2">
+                  No logs found
+                </p>
+                <p className="text-sm text-zinc-500 dark:text-zinc-400">
+                  {logTypeFilter === 'all' 
+                    ? 'System logs will appear here as events occur'
+                    : `No ${logCategories.find(c => c.id === logTypeFilter)?.label.toLowerCase()} events yet`
+                  }
+                </p>
+              </div>
+            </div>
+          ) : (
+            <div className="divide-y divide-zinc-200 dark:divide-zinc-800">
+              {logs.map((log) => {
+                const category = logCategories.find(c => c.id === log.type);
+                return (
+                  <div
+                    key={log._id}
+                    className="p-4 hover:bg-zinc-50 dark:hover:bg-zinc-800/50 transition-colors"
+                  >
+                    <div className="flex items-start gap-4">
+                      {/* Icon */}
+                      <div className="flex-shrink-0 text-2xl">
+                        {category?.icon || '📄'}
+                      </div>
+
+                      {/* Content */}
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 mb-1">
+                          <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${getLogTypeColor(log.type)}`}>
+                            {log.type}
+                          </span>
+                          <span className="text-xs text-zinc-400 dark:text-zinc-500">
+                            {formatTime(log.createdAt)}
+                          </span>
+                        </div>
+                        
+                        <p className="text-sm text-zinc-900 dark:text-zinc-50 mb-2">
+                          {log.message}
+                        </p>
+
+                        {/* Metadata */}
+                        {log.wallet && (
+                          <div className="flex items-center gap-3 text-xs text-zinc-500 dark:text-zinc-400">
+                            <div className="flex items-center gap-1">
+                              <span className="opacity-60">👛</span>
+                              <code className="font-mono bg-zinc-100 dark:bg-zinc-800 px-1.5 py-0.5 rounded">
+                                {log.wallet.slice(0, 4)}...{log.wallet.slice(-4)}
+                              </code>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
   );
 }
 

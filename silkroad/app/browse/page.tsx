@@ -120,7 +120,7 @@ function BrowsePageContent() {
               {category === 'all' ? 'All' : category}
             </button>
           ))}
-          </div>
+        </div>
 
           {/* Bottom Row: Search, View Toggle, and Hide Toggle */}
           <div className="flex flex-col sm:flex-row gap-4 sm:items-center sm:justify-between">

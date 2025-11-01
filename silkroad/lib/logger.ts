@@ -28,12 +28,6 @@ export async function createLog(
   ip?: string
 ): Promise<void> {
   try {
-    // Skip logging in MOCK mode (optional - can be removed if you want mock logs)
-    if (CONFIG.MOCK_MODE) {
-      console.log(`📝 LOG [${type}]: ${message}`, { wallet, ip });
-      return;
-    }
-
     await connectDB();
     
     await Log.create({
