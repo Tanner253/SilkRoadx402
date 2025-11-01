@@ -7,6 +7,20 @@
 export function Updates() {
   const updates = [
     {
+      date: 'November 1, 2025',
+      version: 'v0.6.0',
+      title: 'Edit Listings & New Category',
+      items: [
+        '✏️ Edit listing functionality - update title, description, price, category, and image',
+        '🏷️ New "Jobs/Services" category for freelance and service listings',
+        '🚨 Critical USDC account warning added to listing creation',
+        '🔒 Delivery URL is now locked after creation (cannot be edited)',
+        '✅ Edited listings require admin re-approval if previously live',
+        '📝 Improved form validation and user feedback',
+        'Optional URLs (demo video, whitepaper, GitHub) remain editable',
+      ],
+    },
+    {
       date: 'October 31, 2025',
       version: 'v0.5.0',
       title: 'UI Refresh & Featured Listings',

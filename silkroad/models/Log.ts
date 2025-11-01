@@ -29,7 +29,6 @@ const LogSchema = new Schema<ILog>({
   createdAt: {
     type: Date,
     default: Date.now,
-    index: true,
   },
 });
 

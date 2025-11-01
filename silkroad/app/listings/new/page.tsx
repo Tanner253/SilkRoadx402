@@ -251,6 +251,39 @@ function NewListingPageContent() {
           </div>
         )}
 
+        {/* Critical USDC Account Warning */}
+        <div className="mb-6 rounded-lg border-2 border-red-500 bg-red-50 p-4 dark:border-red-700 dark:bg-red-950">
+          <div className="flex items-start gap-3">
+            <span className="text-2xl flex-shrink-0">🚨</span>
+            <div>
+              <h3 className="text-sm font-bold text-red-900 dark:text-red-100 mb-2">
+                CRITICAL: USDC Account Required
+              </h3>
+              <p className="text-sm text-red-800 dark:text-red-200">
+                <strong>YOU MUST HAVE A USDC ACCOUNT ON YOUR WALLET TO RECEIVE USDC FROM SALES.</strong> If you don't do this, it will error for the buyer in Phantom when they try to purchase.
+              </p>
+              <p className="text-sm text-red-800 dark:text-red-200 mt-2">
+                ✅ <strong>Ensure you have a USDC account by transferring at least $0.10 USDC to your wallet before listing.</strong>
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {/* Delivery URL Info */}
+        <div className="mb-6 rounded-lg border border-blue-200 bg-blue-50 p-4 dark:border-blue-900 dark:bg-blue-950">
+          <div className="flex items-start gap-3">
+            <span className="text-xl flex-shrink-0">ℹ️</span>
+            <div>
+              <h3 className="text-sm font-semibold text-blue-900 dark:text-blue-100 mb-1">
+                Important: Delivery URL Cannot Be Changed
+              </h3>
+              <p className="text-sm text-blue-800 dark:text-blue-200">
+                Once your listing is created, the <strong>delivery URL cannot be edited</strong>. Make sure it's correct before submitting! You can edit all other fields (title, description, price, category, image) later.
+              </p>
+            </div>
+          </div>
+        </div>
+
         {/* Form */}
         <form onSubmit={handleSubmit} className="rounded-lg border border-zinc-200 bg-white p-6 shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
           {/* Error Message */}
@@ -329,6 +362,7 @@ function NewListingPageContent() {
               <option value="Trading Bot">Trading Bot</option>
               <option value="API Tool">API Tool</option>
               <option value="Script">Script</option>
+              <option value="Jobs/Services">Jobs/Services</option>
               <option value="Custom">Custom</option>
             </select>
           </div>
