@@ -50,7 +50,7 @@ const ListingSchema = new Schema<IListing>({
   category: {
     type: String,
     required: true,
-    enum: ['Trading Bot', 'API Tool', 'Script', 'Custom'],
+    enum: ['Trading Bot', 'API Tool', 'Script', 'Jobs/Services', 'Custom'],
   },
   riskLevel: {
     type: String,

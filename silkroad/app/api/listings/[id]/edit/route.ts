@@ -156,9 +156,10 @@ export async function PUT(
     listing.githubUrl = githubUrl ? githubUrl.trim() : listing.githubUrl;
     listing.updatedAt = new Date();
 
-    // If listing was previously approved, set back to pending for admin review
-    if (listing.state === 'approved') {
-      listing.state = 'pending';
+    // If listing was previously approved and live, set back to in_review for admin approval
+    if (listing.state === 'on_market' && listing.approved) {
+      listing.state = 'in_review';
+      listing.approved = false;
     }
 
     await listing.save();
@@ -181,8 +182,9 @@ export async function PUT(
         category: listing.category,
         imageUrl: listing.imageUrl,
         state: listing.state,
+        approved: listing.approved,
       },
-      message: listing.state === 'pending' 
+      message: listing.state === 'in_review' && !listing.approved
         ? 'Listing updated and sent for admin review' 
         : 'Listing updated successfully',
     });
