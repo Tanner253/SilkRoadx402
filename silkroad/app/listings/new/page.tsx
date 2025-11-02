@@ -359,11 +359,39 @@ function NewListingPageContent() {
               className="w-full rounded-lg border border-zinc-300 bg-white px-4 py-2 text-zinc-900 focus:border-green-600 focus:outline-none focus:ring-2 focus:ring-green-600 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-50"
               required
             >
-              <option value="Trading Bot">Trading Bot</option>
-              <option value="API Tool">API Tool</option>
-              <option value="Script">Script</option>
-              <option value="Jobs/Services">Jobs/Services</option>
-              <option value="Custom">Custom</option>
+              <option value="">Select a category...</option>
+              <optgroup label="🤖 Software & Tools">
+                <option value="Trading Bot">Trading Bot</option>
+                <option value="API Tool">API Tool</option>
+                <option value="Script">Script</option>
+                <option value="NFT Tools">NFT Tools</option>
+                <option value="Data & Analytics">Data & Analytics</option>
+                <option value="Marketing Tools">Marketing Tools</option>
+              </optgroup>
+              <optgroup label="🎨 Creative Content">
+                <option value="Art & Design">Art & Design</option>
+                <option value="Music">Music</option>
+                <option value="Video Content">Video Content</option>
+              </optgroup>
+              <optgroup label="🎮 Gaming">
+                <option value="Games">Games</option>
+                <option value="Mods">Mods</option>
+              </optgroup>
+              <optgroup label="💼 Services & Access">
+                <option value="Jobs/Services">Jobs/Services</option>
+                <option value="Private Access">Private Access</option>
+                <option value="Call Groups">Call Groups</option>
+                <option value="Courses & Tutorials">Courses & Tutorials</option>
+              </optgroup>
+              <optgroup label="💬 Community Services">
+                <option value="Telegram Groups">Telegram Groups</option>
+                <option value="Discord Services">Discord Services</option>
+                <option value="Social Media">Social Media</option>
+                <option value="Raid Services">Raid Services</option>
+              </optgroup>
+              <optgroup label="⚡ Other">
+                <option value="Custom">Custom</option>
+              </optgroup>
             </select>
           </div>
 

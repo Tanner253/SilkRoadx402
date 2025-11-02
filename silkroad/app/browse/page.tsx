@@ -33,6 +33,7 @@ function BrowsePageContent() {
   const [hideMyListings, setHideMyListings] = useState(true);
   const [walletSearch, setWalletSearch] = useState<string>('');
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
+  const [sidebarOpen, setSidebarOpen] = useState(true);
 
   // Pre-fill wallet search from URL params (e.g., from leaderboard)
   useEffect(() => {
@@ -65,7 +66,29 @@ function BrowsePageContent() {
     return null;
   }
 
-  const categories = ['all', 'Trading Bot', 'API Tool', 'Script', 'Custom'];
+  const categories = [
+    { id: 'all', label: 'All Listings', icon: '🛍️', count: listings.length },
+    { id: 'Trading Bot', label: 'Trading Bots', icon: '🤖', count: listings.filter(l => l.category === 'Trading Bot').length },
+    { id: 'API Tool', label: 'API Tools', icon: '🔌', count: listings.filter(l => l.category === 'API Tool').length },
+    { id: 'Script', label: 'Scripts', icon: '📜', count: listings.filter(l => l.category === 'Script').length },
+    { id: 'Jobs/Services', label: 'Jobs & Services', icon: '💼', count: listings.filter(l => l.category === 'Jobs/Services').length },
+    { id: 'Music', label: 'Music', icon: '🎵', count: listings.filter(l => l.category === 'Music').length },
+    { id: 'Games', label: 'Games', icon: '🎮', count: listings.filter(l => l.category === 'Games').length },
+    { id: 'Mods', label: 'Mods', icon: '🔧', count: listings.filter(l => l.category === 'Mods').length },
+    { id: 'Private Access', label: 'Private Access', icon: '🔐', count: listings.filter(l => l.category === 'Private Access').length },
+    { id: 'Call Groups', label: 'Call Groups', icon: '📞', count: listings.filter(l => l.category === 'Call Groups').length },
+    { id: 'Raid Services', label: 'Raid Services', icon: '⚔️', count: listings.filter(l => l.category === 'Raid Services').length },
+    { id: 'Telegram Groups', label: 'Telegram Groups', icon: '✈️', count: listings.filter(l => l.category === 'Telegram Groups').length },
+    { id: 'Discord Services', label: 'Discord Services', icon: '💬', count: listings.filter(l => l.category === 'Discord Services').length },
+    { id: 'Art & Design', label: 'Art & Design', icon: '🎨', count: listings.filter(l => l.category === 'Art & Design').length },
+    { id: 'Video Content', label: 'Video Content', icon: '🎬', count: listings.filter(l => l.category === 'Video Content').length },
+    { id: 'Courses & Tutorials', label: 'Courses & Tutorials', icon: '📚', count: listings.filter(l => l.category === 'Courses & Tutorials').length },
+    { id: 'Data & Analytics', label: 'Data & Analytics', icon: '📊', count: listings.filter(l => l.category === 'Data & Analytics').length },
+    { id: 'Marketing Tools', label: 'Marketing Tools', icon: '📈', count: listings.filter(l => l.category === 'Marketing Tools').length },
+    { id: 'Social Media', label: 'Social Media', icon: '📱', count: listings.filter(l => l.category === 'Social Media').length },
+    { id: 'NFT Tools', label: 'NFT Tools', icon: '🖼️', count: listings.filter(l => l.category === 'NFT Tools').length },
+    { id: 'Custom', label: 'Custom', icon: '⚡', count: listings.filter(l => l.category === 'Custom').length },
+  ];
   
   // Filter by category
   let filteredListings = selectedCategory === 'all' 
@@ -91,138 +114,229 @@ function BrowsePageContent() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-zinc-50 to-zinc-100 dark:from-zinc-950 dark:to-black py-12 px-4">
-      <div className="mx-auto max-w-7xl">
-        {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-4xl font-bold text-zinc-900 dark:text-zinc-50 mb-2">
-            Browse Software
+    <div className="min-h-screen bg-gradient-to-b from-zinc-50 to-zinc-100 dark:from-zinc-950 dark:to-black py-6 px-4">
+      <div className="mx-auto max-w-[1600px]">
+        {/* Page Header */}
+        <div className="mb-6">
+          <h1 className="text-3xl font-bold text-zinc-900 dark:text-zinc-50 mb-2">
+            🛍️ Browse Marketplace
           </h1>
-          <p className="text-lg text-zinc-600 dark:text-zinc-400">
-            Discover private software, tools, and scripts
+          <p className="text-sm text-zinc-600 dark:text-zinc-400">
+            Discover software, services, content, and more
           </p>
-        </div>
-
-        {/* Filters */}
-        <div className="mb-8 space-y-4">
-          {/* Top Row: Category Filter */}
-          <div className="flex flex-wrap gap-2">
-          {categories.map((category) => (
-            <button
-              key={category}
-              onClick={() => setSelectedCategory(category)}
-              className={`rounded-full px-4 py-2 text-sm font-medium transition-colors ${
-                selectedCategory === category
-                  ? 'bg-green-600 text-white'
-                  : 'bg-white text-zinc-700 hover:bg-zinc-100 dark:bg-zinc-900 dark:text-zinc-300 dark:hover:bg-zinc-800'
-              }`}
-            >
-              {category === 'all' ? 'All' : category}
-            </button>
-          ))}
-        </div>
-
-          {/* Bottom Row: Search, View Toggle, and Hide Toggle */}
-          <div className="flex flex-col sm:flex-row gap-4 sm:items-center sm:justify-between">
-            {/* Wallet Search */}
-            <div className="flex-1 max-w-md">
-              <input
-                type="text"
-                placeholder="Search by vendor wallet address (e.g., 8KTD...GeMm or full address)"
-                value={walletSearch}
-                onChange={(e) => setWalletSearch(e.target.value)}
-                className="w-full rounded-lg border border-zinc-300 bg-white px-4 py-2 text-sm text-zinc-900 placeholder-zinc-400 focus:border-green-600 focus:outline-none focus:ring-2 focus:ring-green-600 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-50 dark:placeholder-zinc-500"
-              />
-            </div>
-
-            <div className="flex items-center gap-4">
-              {/* View Mode Toggle */}
-              <div className="flex items-center rounded-lg border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-900 p-1">
-                <button
-                  onClick={() => setViewMode('grid')}
-                  className={`p-2 rounded transition-colors ${
-                    viewMode === 'grid'
-                      ? 'bg-green-600 text-white'
-                      : 'text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-100'
-                  }`}
-                  title="Grid view"
-                >
-                  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
-                  </svg>
-                </button>
-                <button
-                  onClick={() => setViewMode('list')}
-                  className={`p-2 rounded transition-colors ${
-                    viewMode === 'list'
-                      ? 'bg-green-600 text-white'
-                      : 'text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-100'
-                  }`}
-                  title="List view"
-                >
-                  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 10h16M4 14h16M4 18h16" />
-                  </svg>
-                </button>
-              </div>
-
-              {/* Hide My Listings Toggle */}
-              <div className="flex items-center space-x-2">
-                <label className="relative inline-flex items-center cursor-pointer">
-                  <input
-                    type="checkbox"
-                    checked={hideMyListings}
-                    onChange={(e) => setHideMyListings(e.target.checked)}
-                    className="sr-only peer"
-                  />
-                  <div className="w-11 h-6 bg-zinc-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-green-300 dark:peer-focus:ring-green-800 rounded-full peer dark:bg-zinc-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-zinc-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-zinc-600 peer-checked:bg-green-600"></div>
-                  <span className="ms-3 text-sm font-medium text-zinc-700 dark:text-zinc-300 whitespace-nowrap">
-                    Hide my listings
-                  </span>
-                </label>
-              </div>
-            </div>
-          </div>
         </div>
 
         {/* Info Banners */}
         {!isConnected ? (
-          <div className="mb-6 rounded-lg border border-blue-200 bg-blue-50 p-4 dark:border-blue-900 dark:bg-blue-950">
+          <div className="mb-4 rounded-lg border border-blue-200 bg-blue-50 p-3 dark:border-blue-900 dark:bg-blue-950">
             <p className="text-sm text-blue-800 dark:text-blue-200">
-              <strong>👀 Browse Mode:</strong> You're viewing public listings. Connect your wallet to purchase or create listings.
+              <strong>👀 Browse Mode:</strong> Connect your wallet to purchase or create listings.
             </p>
           </div>
         ) : !hasAcceptedTOS ? (
-          <div className="mb-6 rounded-lg border border-yellow-200 bg-yellow-50 p-4 dark:border-yellow-900 dark:bg-yellow-950">
+          <div className="mb-4 rounded-lg border border-yellow-200 bg-yellow-50 p-3 dark:border-yellow-900 dark:bg-yellow-950">
             <p className="text-sm text-yellow-800 dark:text-yellow-200">
-              <strong>⚠️ Action Required:</strong> Please accept the Terms of Service to interact with the marketplace.
+              <strong>⚠️ Action Required:</strong> Accept TOS to interact with the marketplace.
             </p>
           </div>
         ) : !isTokenGated ? (
-          <div className="mb-6 rounded-lg border border-yellow-200 bg-yellow-50 p-4 dark:border-yellow-900 dark:bg-yellow-950">
+          <div className="mb-4 rounded-lg border border-yellow-200 bg-yellow-50 p-3 dark:border-yellow-900 dark:bg-yellow-950">
             <p className="text-sm text-yellow-800 dark:text-yellow-200">
-              <strong>👀 Browse Mode:</strong> You can view listings but need <strong>50,000 $SRx402</strong> tokens to purchase or create listings.
+              <strong>👀 Browse Mode:</strong> Need 50,000 $SRx402 tokens to purchase/create.
             </p>
           </div>
         ) : null}
 
-        {/* Loading State */}
-        {loading && (
-          <div className="flex justify-center py-12">
-            <div className="h-8 w-8 animate-spin rounded-full border-4 border-green-600 border-t-transparent"></div>
+        {/* Mobile Category Filter - Horizontal Scroll */}
+        <div className="mb-4 lg:hidden">
+          <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-thin">
+            {categories.map((category) => {
+              const isActive = selectedCategory === category.id;
+              return (
+                <button
+                  key={category.id}
+                  onClick={() => setSelectedCategory(category.id)}
+                  className={`flex-shrink-0 flex items-center gap-2 rounded-full px-4 py-2 text-sm font-medium transition-all ${
+                    isActive
+                      ? 'bg-green-500 text-white shadow-md'
+                      : 'bg-white text-zinc-700 dark:bg-zinc-800 dark:text-zinc-300 border border-zinc-200 dark:border-zinc-700'
+                  }`}
+                >
+                  <span>{category.icon}</span>
+                  {sidebarOpen && <span>{category.label}</span>}
+                  {category.count > 0 && (
+                    <span className={`rounded-full px-2 py-0.5 text-xs font-bold ${
+                      isActive ? 'bg-white/20' : 'bg-zinc-100 dark:bg-zinc-700'
+                    }`}>
+                      {category.count}
+                    </span>
+                  )}
+                </button>
+              );
+            })}
           </div>
-        )}
+        </div>
 
-        {/* Error State */}
-        {error && (
-          <div className="rounded-lg border border-red-200 bg-red-50 p-6 dark:border-red-900 dark:bg-red-950">
-            <p className="text-sm text-red-600 dark:text-red-400">⚠️ {error}</p>
+        {/* Sidebar + Content Layout */}
+        <div className="flex gap-6 pb-20">
+          {/* Sidebar - Desktop Only */}
+          <div className={`hidden lg:block flex-shrink-0 transition-all duration-300 ${sidebarOpen ? 'w-72' : 'w-16'}`}>
+            <div className="sticky top-4 rounded-lg border border-zinc-200 bg-white shadow-lg dark:border-zinc-800 dark:bg-zinc-900 overflow-hidden max-h-[calc(100vh-8rem)]">
+              {/* Sidebar Header */}
+              <div className="border-b border-zinc-200 dark:border-zinc-800 p-3 flex items-center justify-between flex-shrink-0">
+                {sidebarOpen && (
+                  <h3 className="font-semibold text-sm text-zinc-900 dark:text-zinc-50">
+                    Categories
+                  </h3>
+                )}
+                <button
+                  onClick={() => setSidebarOpen(!sidebarOpen)}
+                  className="rounded-lg p-1.5 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
+                  title={sidebarOpen ? 'Collapse sidebar' : 'Expand sidebar'}
+                >
+                  {sidebarOpen ? (
+                    <svg className="w-4 h-4 text-zinc-600 dark:text-zinc-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 19l-7-7 7-7m8 14l-7-7 7-7" />
+                    </svg>
+                  ) : (
+                    <svg className="w-4 h-4 text-zinc-600 dark:text-zinc-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                    </svg>
+                  )}
+                </button>
+              </div>
+
+              {/* Category Menu */}
+              <div className="overflow-y-auto p-2 flex-1" style={{ maxHeight: 'calc(100vh - 10rem)' }}>
+                <nav className="space-y-1">
+                  {categories.map((category) => {
+                    const isActive = selectedCategory === category.id;
+                    
+                    return (
+                      <button
+                        key={category.id}
+                        onClick={() => setSelectedCategory(category.id)}
+                        className={`w-full flex items-center gap-3 rounded-lg px-3 py-2.5 text-left transition-all ${
+                          isActive
+                            ? 'bg-green-500 text-white shadow-md'
+                            : 'text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800'
+                        }`}
+                      >
+                        <span className="text-xl flex-shrink-0">{category.icon}</span>
+                        {sidebarOpen && (
+                          <>
+                            <span className="flex-1 text-sm font-medium truncate">
+                              {category.label}
+                            </span>
+                            {category.count > 0 && (
+                              <span className={`rounded-full px-2 py-0.5 text-xs font-bold ${
+                                isActive ? 'bg-white/20' : 'bg-zinc-200 dark:bg-zinc-700'
+                              }`}>
+                                {category.count}
+                              </span>
+                            )}
+                          </>
+                        )}
+                      </button>
+                    );
+                  })}
+                </nav>
+              </div>
+            </div>
           </div>
-        )}
 
-        {/* Listings Display */}
-        {!loading && !error && (
-          <>
+          {/* Main Content */}
+          <div className="flex-1 min-w-0 w-full lg:w-auto">
+            {/* Toolbar */}
+            <div className="mb-4 rounded-lg border border-zinc-200 bg-white p-4 shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
+              <div className="flex flex-col md:flex-row gap-4 items-start md:items-center justify-between">
+                {/* Left: Search */}
+                <div className="flex-1 w-full md:max-w-md">
+                  <input
+                    type="text"
+                    placeholder="🔍 Search by vendor wallet..."
+                    value={walletSearch}
+                    onChange={(e) => setWalletSearch(e.target.value)}
+                    className="w-full rounded-lg border border-zinc-300 bg-white px-4 py-2 text-sm text-zinc-900 placeholder-zinc-400 focus:border-green-600 focus:outline-none focus:ring-2 focus:ring-green-600 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-50 dark:placeholder-zinc-500"
+                  />
+                </div>
+
+                {/* Right: View & Hide toggles */}
+                <div className="flex items-center gap-3">
+                  {/* View Mode Toggle */}
+                  <div className="flex items-center rounded-lg border border-zinc-300 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-800 p-1">
+                    <button
+                      onClick={() => setViewMode('grid')}
+                      className={`p-2 rounded transition-colors ${
+                        viewMode === 'grid'
+                          ? 'bg-green-600 text-white'
+                          : 'text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-100'
+                      }`}
+                      title="Grid view"
+                    >
+                      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
+                      </svg>
+                    </button>
+                    <button
+                      onClick={() => setViewMode('list')}
+                      className={`p-2 rounded transition-colors ${
+                        viewMode === 'list'
+                          ? 'bg-green-600 text-white'
+                          : 'text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-100'
+                      }`}
+                      title="List view"
+                    >
+                      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 10h16M4 14h16M4 18h16" />
+                      </svg>
+                    </button>
+                  </div>
+
+                  {/* Hide My Listings Toggle */}
+                  {publicKey && (
+                    <label className="flex items-center cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={hideMyListings}
+                        onChange={(e) => setHideMyListings(e.target.checked)}
+                        className="sr-only peer"
+                      />
+                      <div className="w-11 h-6 bg-zinc-200 rounded-full peer peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-green-300 dark:peer-focus:ring-green-800 dark:bg-zinc-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-zinc-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-zinc-600 peer-checked:bg-green-600 relative"></div>
+                      <span className="ms-2 text-xs font-medium text-zinc-700 dark:text-zinc-300 whitespace-nowrap hidden sm:inline">
+                        Hide mine
+                      </span>
+                    </label>
+                  )}
+                </div>
+              </div>
+
+              {/* Results Count */}
+              <div className="mt-3 pt-3 border-t border-zinc-200 dark:border-zinc-800">
+                <p className="text-sm text-zinc-600 dark:text-zinc-400">
+                  <span className="font-semibold text-zinc-900 dark:text-zinc-50">{filteredListings.length}</span> {filteredListings.length === 1 ? 'listing' : 'listings'} found
+                  {selectedCategory !== 'all' && <span> in <strong>{categories.find(c => c.id === selectedCategory)?.label}</strong></span>}
+                </p>
+              </div>
+            </div>
+
+            {/* Loading State */}
+            {loading && (
+              <div className="flex justify-center py-16">
+                <div className="h-8 w-8 animate-spin rounded-full border-4 border-green-600 border-t-transparent"></div>
+              </div>
+            )}
+
+            {/* Error State */}
+            {error && (
+              <div className="rounded-lg border border-red-200 bg-red-50 p-6 dark:border-red-900 dark:bg-red-950">
+                <p className="text-sm text-red-600 dark:text-red-400">⚠️ {error}</p>
+              </div>
+            )}
+
+            {/* Listings Display */}
+            {!loading && !error && (
+              <>
             {filteredListings.length === 0 ? (
               <div className="text-center py-12">
                 <p className="text-zinc-600 dark:text-zinc-400">No listings found in this category</p>
@@ -296,77 +410,60 @@ function BrowsePageContent() {
                 ))}
               </div>
             ) : (
-              // List View
-              <div className="space-y-2">
+              // List View - Forum Style
+              <div className="space-y-1">
                 {filteredListings.map((listing) => (
-                  <div
+                  <Link
                     key={listing._id}
-                    className="group overflow-hidden rounded-lg border border-zinc-200 bg-white shadow-sm transition-all hover:shadow-md dark:border-zinc-800 dark:bg-zinc-900"
+                    href={`/listings/${listing._id}`}
+                    className="group block"
                   >
-                    <div className="flex flex-col sm:flex-row">
-                      {/* Image */}
-                      <div className="relative h-32 sm:h-24 sm:w-40 flex-shrink-0 overflow-hidden bg-zinc-100 dark:bg-zinc-800">
-                        <Image
-                          src={listing.imageUrl}
-                          alt={listing.title}
-                          fill
-                          className="object-cover transition-transform group-hover:scale-105"
-                        />
+                    <div className="flex items-center gap-3 rounded-lg border border-zinc-200 bg-white px-4 py-2 transition-all hover:border-green-500 hover:bg-green-50 dark:border-zinc-800 dark:bg-zinc-900 dark:hover:border-green-500 dark:hover:bg-green-950/30 max-h-[50px]">
+                      {/* Status Badges */}
+                      <div className="flex items-center gap-1 flex-shrink-0">
                         {listing.pinned === true && (
-                          <div className="absolute top-1 left-1 rounded-full bg-yellow-500 px-2 py-0.5 text-xs font-medium text-white shadow-lg">
-                            📌
-                          </div>
+                          <span className="text-sm" title="Featured">📌</span>
                         )}
                         {listing.riskLevel === 'high-risk' && (
-                          <div className="absolute top-1 right-1 rounded-full bg-red-600 px-2 py-0.5 text-xs font-medium text-white">
-                            High Risk
-                          </div>
+                          <span className="text-sm" title="High Risk">⚠️</span>
                         )}
                       </div>
 
-                      {/* Content */}
-                      <div className="flex flex-1 items-center justify-between p-3 sm:p-4">
-                        <div className="flex-1 min-w-0">
-                          <h3 className="text-base font-semibold text-zinc-900 dark:text-zinc-50 line-clamp-1 mb-1">
-                            {listing.title}
-                          </h3>
+                      {/* Title */}
+                      <div className="flex-1 min-w-0">
+                        <h3 className="text-sm font-semibold text-zinc-900 dark:text-zinc-50 truncate group-hover:text-green-600 dark:group-hover:text-green-400">
+                          {listing.title}
+                        </h3>
+                      </div>
 
-                          <p className="text-sm text-zinc-600 dark:text-zinc-400 line-clamp-1 mb-2">
-                            {listing.description}
-                          </p>
+                      {/* Category */}
+                      <span className="hidden sm:inline-flex items-center rounded-full bg-zinc-100 px-2 py-0.5 text-xs font-medium text-zinc-700 dark:bg-zinc-800 dark:text-zinc-300 flex-shrink-0">
+                        {listing.category}
+                      </span>
 
-                          <div className="flex items-center gap-2">
-                            <span className="inline-flex items-center rounded-full bg-zinc-100 px-2 py-0.5 text-xs font-medium text-zinc-800 dark:bg-zinc-800 dark:text-zinc-200">
-                              {listing.category}
-                            </span>
-                            <span className="text-xs text-zinc-500 dark:text-zinc-400 font-mono">
-                              {truncateWallet(listing.wallet)}
-                            </span>
-                          </div>
-                        </div>
+                      {/* Vendor */}
+                      <span className="hidden md:block text-xs text-zinc-500 dark:text-zinc-400 font-mono flex-shrink-0">
+                        {truncateWallet(listing.wallet)}
+                      </span>
 
-                        <div className="flex items-center gap-4 ml-4">
-                          <div className="text-right">
-                            <p className="text-lg font-bold text-zinc-900 dark:text-zinc-50 whitespace-nowrap">
-                              ${listing.price.toFixed(2)}
-                            </p>
-                            <span className="text-xs text-zinc-500 dark:text-zinc-400">USDC</span>
-                          </div>
-                          <Link
-                            href={`/listings/${listing._id}`}
-                            className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 transition-colors whitespace-nowrap"
-                          >
-                            View
-                          </Link>
-                        </div>
+                      {/* Price */}
+                      <div className="flex items-center gap-2 flex-shrink-0">
+                        <span className="text-sm font-bold text-zinc-900 dark:text-zinc-50">
+                          ${listing.price.toFixed(2)}
+                        </span>
+                        <svg className="w-4 h-4 text-zinc-400 group-hover:text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                        </svg>
                       </div>
                     </div>
-                  </div>
+                  </Link>
                 ))}
               </div>
             )}
           </>
-        )}
+            )}
+          </div>
+        </div>
       </div>
     </div>
   );
