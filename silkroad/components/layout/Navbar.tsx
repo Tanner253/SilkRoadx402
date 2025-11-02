@@ -40,13 +40,13 @@ export function Navbar() {
 
   return (
     <>
-      <nav className="fixed top-0 z-50 w-full border-b border-zinc-200 bg-white/80 backdrop-blur-sm dark:border-zinc-800 dark:bg-black/80">
+      <nav className="fixed top-0 z-50 w-full border-b border-orange-900/30 bg-gradient-to-r from-black via-orange-900/60 to-black backdrop-blur-sm">
         <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
           {/* Mobile Menu Button - Always show */}
           {mounted && (
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="md:hidden rounded-lg p-2 text-zinc-600 hover:bg-zinc-100 dark:text-zinc-400 dark:hover:bg-zinc-800 transition-colors"
+              className="md:hidden rounded-lg p-2 text-orange-200 hover:bg-orange-900/50 transition-colors"
               aria-label="Toggle menu"
             >
               {mobileMenuOpen ? (
@@ -63,8 +63,8 @@ export function Navbar() {
 
           {/* Logo */}
           <Link href="/" className="flex items-center space-x-2 sm:space-x-3">
-            <span className="text-2xl">🎃</span>
-            <div className="text-lg sm:text-xl font-bold tracking-tight text-zinc-900 dark:text-zinc-50">
+            <span className="text-2xl">🦃</span>
+            <div className="text-lg sm:text-xl font-bold tracking-tight text-orange-100">
               SilkRoad<span className="text-green-500">x402</span>
             </div>
           </Link>
@@ -74,13 +74,13 @@ export function Navbar() {
           {/* Browse & Leaderboard - Always visible */}
           <Link 
             href="/browse" 
-            className="text-sm font-medium text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-50 transition-colors"
+            className="text-sm font-medium text-orange-200 hover:text-orange-100 transition-colors"
           >
             Browse
           </Link>
           <Link 
             href="/leaderboard" 
-            className="text-sm font-medium text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-50 transition-colors flex items-center gap-1"
+            className="text-sm font-medium text-orange-200 hover:text-orange-100 transition-colors flex items-center gap-1"
           >
             <span>🏆</span>
             Leaderboard
@@ -91,13 +91,13 @@ export function Navbar() {
             <>
               <Link 
                 href="/sell" 
-                className="text-sm font-medium text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-50 transition-colors"
+                className="text-sm font-medium text-orange-200 hover:text-orange-100 transition-colors"
               >
                 Sell
               </Link>
               <Link 
                 href="/my-listings" 
-                className="text-sm font-medium text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-50 transition-colors"
+                className="text-sm font-medium text-orange-200 hover:text-orange-100 transition-colors"
               >
                 My Listings
               </Link>
@@ -109,12 +109,12 @@ export function Navbar() {
           <div className="flex items-center gap-2 sm:gap-3">
             {/* Active Users Counter - Hidden on mobile (shown in hamburger menu) */}
             {mounted && (
-              <div className="hidden md:flex items-center gap-1.5 rounded-lg border border-zinc-200 bg-zinc-50 px-2 sm:px-3 py-2 dark:border-zinc-800 dark:bg-zinc-900">
+              <div className="hidden md:flex items-center gap-1.5 rounded-lg border border-orange-700/50 bg-black/40 px-2 sm:px-3 py-2">
                 <span className="text-green-500 text-xs sm:text-sm">🟢</span>
-                <span className="text-xs sm:text-sm font-semibold text-zinc-900 dark:text-zinc-50">
+                <span className="text-xs sm:text-sm font-semibold text-orange-100">
                   {activeUsers}
                 </span>
-                <span className="hidden sm:inline text-xs text-zinc-500 dark:text-zinc-400">
+                <span className="hidden sm:inline text-xs text-orange-200">
                   online
                 </span>
               </div>
@@ -122,7 +122,7 @@ export function Navbar() {
 
             {/* USDC Balance - Hidden on mobile when connected */}
             {mounted && publicKey && (
-              <div className="hidden sm:flex items-center gap-2 rounded-lg border border-zinc-200 bg-zinc-50 px-3 py-2 dark:border-zinc-800 dark:bg-zinc-900">
+              <div className="hidden sm:flex items-center gap-2 rounded-lg border border-orange-700/50 bg-black/40 px-3 py-2">
                 <svg 
                   className="h-5 w-5 text-blue-600" 
                   viewBox="0 0 40 40" 
@@ -134,17 +134,17 @@ export function Navbar() {
                   <path d="M21 23H16V26H21C22.933 26 24.5 24.433 24.5 22.5C24.5 21.567 22.933 23 21 23Z" fill="white"/>
                 </svg>
                 <div className="flex flex-col">
-                  <span className="text-xs text-zinc-500 dark:text-zinc-400">USDC</span>
+                  <span className="text-xs text-orange-300">USDC</span>
                   {loading ? (
-                    <span className="text-sm font-semibold text-zinc-900 dark:text-zinc-50">
+                    <span className="text-sm font-semibold text-orange-100">
                       Loading...
                     </span>
                   ) : balance !== null ? (
-                    <span className="text-sm font-semibold text-zinc-900 dark:text-zinc-50">
+                    <span className="text-sm font-semibold text-orange-100">
                       ${balance.toFixed(2)}
                     </span>
                   ) : (
-                    <span className="text-sm font-semibold text-zinc-500 dark:text-zinc-400">
+                    <span className="text-sm font-semibold text-orange-200">
                       --
                     </span>
                   )}
@@ -156,10 +156,10 @@ export function Navbar() {
             {mounted && publicKey && (
               <Link
                 href="/profile"
-                className="flex items-center gap-2 rounded-lg border border-zinc-200 bg-white px-2 sm:px-3 py-2 hover:bg-zinc-50 dark:border-zinc-800 dark:bg-zinc-900 dark:hover:bg-zinc-800 transition-colors"
+                className="flex items-center gap-2 rounded-lg border border-orange-700/50 bg-black/40 px-2 sm:px-3 py-2 hover:bg-orange-900/50 transition-colors"
                 title="View Profile & Analytics"
               >
-                <svg className="h-5 w-5 text-zinc-600 dark:text-zinc-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <svg className="h-5 w-5 text-orange-200" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                 </svg>
               </Link>

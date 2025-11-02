@@ -114,7 +114,7 @@ function BrowsePageContent() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-zinc-50 to-zinc-100 dark:from-zinc-950 dark:to-black py-6 px-4">
+    <div className="min-h-screen bg-gradient-to-b from-zinc-50 to-zinc-100 dark:from-zinc-950 dark:to-black py-6 px-4 relative">
       <div className="mx-auto max-w-[1600px]">
         {/* Page Header */}
         <div className="mb-6">
@@ -472,7 +472,7 @@ function BrowsePageContent() {
 export default function BrowsePage() {
   return (
     <Suspense fallback={
-      <div className="flex min-h-screen items-center justify-center bg-gradient-to-b from-zinc-50 to-zinc-100 dark:from-zinc-950 dark:to-black">
+      <div className="flex min-h-screen items-center justify-center bg-gradient-to-b from-zinc-50 to-zinc-100 dark:from-zinc-950 dark:to-black relative">
         <div className="text-center">
           <div className="h-8 w-8 animate-spin rounded-full border-4 border-blue-600 border-t-transparent mx-auto"></div>
           <p className="mt-4 text-zinc-600 dark:text-zinc-400">Loading...</p>

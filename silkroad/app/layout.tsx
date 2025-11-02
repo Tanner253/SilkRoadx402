@@ -37,12 +37,14 @@ export default function RootLayout({
         <AppInitializer />
         <SolanaWalletProvider>
           <AuthProvider>
-          <Navbar />
-          <main className="pt-16 pb-16">
-        {children}
-          </main>
-          <Footer />
-          <PublicChat />
+            <div className="relative">
+              <Navbar />
+              <main className="pt-16 pb-16">
+                {children}
+              </main>
+              <Footer />
+              <PublicChat />
+            </div>
           </AuthProvider>
         </SolanaWalletProvider>
       </body>

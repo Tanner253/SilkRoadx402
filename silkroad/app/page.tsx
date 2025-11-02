@@ -3,6 +3,7 @@
 import { useAuth } from '@/hooks/useAuth';
 import { WalletMultiButton } from '@solana/wallet-adapter-react-ui';
 import Link from 'next/link';
+import { FallingLeavesCSS } from '@/components/effects/FallingLeavesCSS';
 
 export default function Home() {
   const { 
@@ -21,8 +22,9 @@ export default function Home() {
 
   return (
     <>
+      <FallingLeavesCSS />
       {/* Homepage */}
-      <div className="flex min-h-screen flex-col items-center justify-center bg-gradient-to-b from-zinc-50 to-zinc-100 dark:from-zinc-950 dark:to-black px-4">
+      <div className="flex min-h-screen flex-col items-center justify-center bg-gradient-to-b from-zinc-50 to-zinc-100 dark:from-zinc-950 dark:to-black px-4 relative z-10">
         <div className="w-full max-w-4xl text-center">
           {/* Hero Section */}
           <div className="mb-8">
@@ -34,6 +36,27 @@ export default function Home() {
               <span className="font-semibold text-green-600">x402 micropayments</span> on Solana.
               No KYC. No middlemen. Just code.
             </p>
+          </div>
+
+          {/* 0% Fees Banner */}
+          <div className="mb-8 rounded-2xl border-2 border-green-500 bg-gradient-to-r from-green-50 via-emerald-50 to-green-50 dark:from-green-950 dark:via-emerald-950 dark:to-green-950 p-6 shadow-lg">
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+              <div className="flex items-center gap-2">
+                <span className="text-4xl">💰</span>
+                <div className="text-left">
+                  <h3 className="text-3xl font-black text-green-600 dark:text-green-400">
+                    0% FEES
+                  </h3>
+                  <p className="text-sm font-semibold text-zinc-700 dark:text-zinc-300">
+                    100% Direct P2P
+                  </p>
+                </div>
+              </div>
+              <div className="hidden sm:block text-zinc-400">|</div>
+              <p className="text-center sm:text-left text-sm text-zinc-600 dark:text-zinc-400 max-w-md">
+                <span className="font-bold text-zinc-900 dark:text-zinc-50">No platform fees.</span> Sellers keep <span className="text-green-600 dark:text-green-400 font-bold">100%</span> of every sale. Payments go straight from buyer to seller via Solana USDC.
+              </p>
+            </div>
           </div>
 
           {/* 0% Fees Banner */}
@@ -236,11 +259,12 @@ export default function Home() {
               </p>
             </div>
 
+
             <div className="rounded-lg border border-zinc-200 bg-white/50 p-6 backdrop-blur-sm dark:border-zinc-800 dark:bg-zinc-900/50">
-              <div className="text-2xl mb-3">⚡</div>
-              <h3 className="mb-2 font-semibold text-zinc-900 dark:text-zinc-50">x402 Payments</h3>
+              <div className="text-2xl mb-3">💰</div>
+              <h3 className="mb-2 font-semibold text-zinc-900 dark:text-zinc-50">0% Platform Fees</h3>
               <p className="text-sm text-zinc-600 dark:text-zinc-400">
-                Direct P2P micropayments using HTTP 402 protocol.
+                Sellers keep 100% of every sale. Direct P2P payments via USDC.
               </p>
             </div>
 

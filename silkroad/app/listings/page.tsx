@@ -102,7 +102,7 @@ function ListingsPageContent() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-zinc-50 to-zinc-100 dark:from-zinc-950 dark:to-black py-6 px-4">
+    <div className="min-h-screen bg-gradient-to-b from-zinc-50 to-zinc-100 dark:from-zinc-950 dark:to-black py-6 px-4 relative">
       <div className="mx-auto max-w-[1600px]">
         {/* Page Header */}
         <div className="mb-6">
