@@ -29,12 +29,12 @@ export default function Home() {
           {/* Hero Section */}
           <div className="mb-8">
             <h1 className="mb-4 text-5xl font-bold tracking-tight text-zinc-900 dark:text-zinc-50 sm:text-6xl">
-              Anonymous Software Marketplace
+              Anonymous Digital Marketplace
           </h1>
             <p className="mx-auto max-w-2xl text-lg text-zinc-600 dark:text-zinc-400">
-              Peer-to-peer marketplace for private software using{' '}
+              Peer-to-peer marketplace for private commerce using{' '}
               <span className="font-semibold text-green-600">x402 micropayments</span> on Solana.
-              No KYC. No middlemen. Just code.
+              No KYC. No middlemen. Just freedom.
             </p>
           </div>
 
@@ -184,7 +184,7 @@ export default function Home() {
                     >
                       <div className="text-3xl mb-2">🔍</div>
                       <h3 className="font-semibold text-zinc-900 dark:text-zinc-50">Browse</h3>
-                      <p className="text-sm text-zinc-600 dark:text-zinc-400">Explore software listings</p>
+                      <p className="text-sm text-zinc-600 dark:text-zinc-400">Explore listings</p>
                     </Link>
 
                     <Link
@@ -193,7 +193,7 @@ export default function Home() {
                     >
                       <div className="text-3xl mb-2">💼</div>
                       <h3 className="font-semibold text-zinc-900 dark:text-zinc-50">Sell</h3>
-                      <p className="text-sm text-zinc-600 dark:text-zinc-400">List your software</p>
+                      <p className="text-sm text-zinc-600 dark:text-zinc-400">List your products</p>
                     </Link>
 
                     <Link
