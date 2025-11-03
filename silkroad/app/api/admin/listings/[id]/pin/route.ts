@@ -3,6 +3,7 @@ import { CONFIG } from '@/config/constants';
 import { mockStore } from '@/lib/mockStore';
 import { connectDB } from '@/lib/db';
 import { Listing } from '@/models/Listing';
+import { Fundraiser } from '@/models/Fundraiser';
 import { createLog, getIpFromRequest } from '@/lib/logger';
 
 /**
@@ -107,7 +108,14 @@ export async function POST(
     // ============================================
     await connectDB();
 
-    const listing = await Listing.findById(id);
+    // Try to find in Listing collection first
+    let listing = await Listing.findById(id);
+    
+    // If not found, try Fundraiser collection
+    if (!listing) {
+      listing = await Fundraiser.findById(id);
+    }
+
     if (!listing) {
       return NextResponse.json(
         { error: 'Listing not found' },

@@ -71,12 +71,18 @@ export function Navbar() {
 
         {/* Navigation Links */}
         <div className="hidden md:flex items-center space-x-6">
-          {/* Browse & Leaderboard - Always visible */}
-          <Link 
-            href="/browse" 
+          {/* Market, Fundraisers & Leaderboard - Always visible */}
+          <Link
+            href="/browse"
             className="text-sm font-medium text-orange-200 hover:text-orange-100 transition-colors"
           >
-            Browse
+            Market
+          </Link>
+          <Link 
+            href="/fundraisers" 
+            className="text-sm font-medium text-orange-200 hover:text-orange-100 transition-colors"
+          >
+            Fundraisers
           </Link>
           <Link 
             href="/leaderboard" 
@@ -230,9 +236,9 @@ export function Navbar() {
 
               {/* Navigation Links */}
               <nav className="flex flex-col space-y-2">
-                {/* Browse & Leaderboard - Always visible */}
-                <Link 
-                  href="/browse" 
+                {/* Market, Fundraisers & Leaderboard - Always visible */}
+                <Link
+                  href="/browse"
                   className={`flex items-center gap-3 rounded-lg px-4 py-3 text-base font-medium transition-colors ${
                     pathname === '/browse'
                       ? 'bg-green-50 text-green-600 dark:bg-green-900/20 dark:text-green-400'
@@ -242,7 +248,19 @@ export function Navbar() {
                   <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                   </svg>
-                  Browse Marketplace
+                  Market
+                </Link>
+
+                <Link 
+                  href="/fundraisers" 
+                  className={`flex items-center gap-3 rounded-lg px-4 py-3 text-base font-medium transition-colors ${
+                    pathname === '/fundraisers' || pathname?.startsWith('/fundraisers/')
+                      ? 'bg-green-50 text-green-600 dark:bg-green-900/20 dark:text-green-400'
+                      : 'text-zinc-700 hover:bg-zinc-100 dark:text-zinc-300 dark:hover:bg-zinc-800'
+                  }`}
+                >
+                  <span className="text-xl">💝</span>
+                  Fundraisers
                 </Link>
 
                 <Link 

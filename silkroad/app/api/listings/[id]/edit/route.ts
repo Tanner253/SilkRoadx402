@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { connectDB } from '@/lib/db';
 import { Listing } from '@/models/Listing';
+import { Fundraiser } from '@/models/Fundraiser';
 import { checkRateLimit, RATE_LIMITS } from '@/lib/rateLimit';
 import { sanitizeString } from '@/lib/validation/sanitization';
 import { createLog, getIpFromRequest } from '@/lib/logger';
@@ -127,8 +128,13 @@ export async function PUT(
       );
     }
 
-    // Find the listing
-    const listing = await Listing.findById(id);
+    // Try to find in Listing collection first
+    let listing = await Listing.findById(id);
+    
+    // If not found, try Fundraiser collection
+    if (!listing) {
+      listing = await Fundraiser.findById(id);
+    }
     
     if (!listing) {
       return NextResponse.json(

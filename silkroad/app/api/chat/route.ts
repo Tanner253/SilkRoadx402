@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { connectDB } from '@/lib/db';
 import { ChatMessage } from '@/models/ChatMessage';
 import { Listing } from '@/models/Listing';
+import { Fundraiser } from '@/models/Fundraiser';
 import { CONFIG } from '@/config/constants';
 import { mockStore } from '@/lib/mockStore';
 import { checkRateLimit, RATE_LIMITS } from '@/lib/rateLimit';
@@ -39,8 +40,13 @@ export async function GET(req: NextRequest) {
       .sort({ createdAt: -1 })
       .limit(limit)
       .lean();
+    
+    const messagesWithReplies = messages.filter((m: any) => m.replyTo);
+    if (messagesWithReplies.length > 0) {
+      console.log(`📬 Found ${messagesWithReplies.length} messages with replyTo field before enrichment`);
+    }
 
-    // Enrich with listing data if attached
+    // Enrich with listing data and reply data if attached
     const enrichedMessages = await Promise.all(
       messages.map(async (msg: any) => {
         // Convert reactions Map to plain object (handle both Map and POJO)
@@ -54,30 +60,55 @@ export async function GET(req: NextRequest) {
           }
         }
         
-        if (msg.listingId) {
-          const listing = await Listing.findById(msg.listingId).lean() as { _id: any; title: string; price: number; imageUrl: string } | null;
-          return {
-            ...msg,
-            reactions,
-            listing: listing ? {
-              _id: listing._id.toString(),
-              title: listing.title,
-              price: listing.price,
-              imageUrl: listing.imageUrl,
-            } : null,
-          };
-        }
-        return {
+        const enriched: any = {
           ...msg,
           reactions,
         };
+        
+        // Attach listing/fundraiser data if present
+        if (msg.listingId) {
+          // Try listing first
+          let listing = await Listing.findById(msg.listingId).lean() as { _id: any; title: string; price: number; imageUrl: string } | null;
+          
+          // If not found, try fundraiser
+          if (!listing) {
+            listing = await Fundraiser.findById(msg.listingId).lean() as { _id: any; title: string; price: number; imageUrl: string } | null;
+          }
+          
+          enriched.listing = listing ? {
+            _id: listing._id.toString(),
+            title: listing.title,
+            price: listing.price,
+            imageUrl: listing.imageUrl,
+            type: listing ? (await Listing.findById(msg.listingId) ? 'listing' : 'fundraiser') : undefined,
+          } : null;
+        }
+        
+        // Attach reply data if present
+        if (msg.replyTo) {
+          const repliedMsg = await ChatMessage.findById(msg.replyTo).lean() as { _id: any; wallet: string; message: string } | null;
+          console.log(`📧 Message ${msg._id} replies to ${msg.replyTo}, found:`, repliedMsg ? 'YES' : 'NO');
+          enriched.replyTo = repliedMsg ? {
+            _id: repliedMsg._id.toString(),
+            wallet: repliedMsg.wallet,
+            message: repliedMsg.message,
+          } : null;
+        }
+        
+        return enriched;
       })
     );
 
     // Reverse to show oldest first (chat order)
+    const finalMessages = enrichedMessages.reverse();
+    const enrichedWithReplies = finalMessages.filter((m: any) => m.replyTo);
+    if (enrichedWithReplies.length > 0) {
+      console.log(`✨ Returning ${enrichedWithReplies.length} messages with enriched reply data`);
+    }
+    
     return NextResponse.json({
       success: true,
-      messages: enrichedMessages.reverse(),
+      messages: finalMessages,
     });
   } catch (error: any) {
     console.error('❌ Fetch chat messages error:', error);
@@ -95,7 +126,9 @@ export async function GET(req: NextRequest) {
  */
 export async function POST(req: NextRequest) {
   try {
-    const { wallet, message, listingId } = await req.json();
+    const { wallet, message, listingId, replyTo } = await req.json();
+
+    console.log('📨 POST /api/chat received:', { wallet: wallet?.slice(0, 8), message, listingId, replyTo });
 
     if (!wallet || !message) {
       return NextResponse.json(
@@ -167,32 +200,43 @@ export async function POST(req: NextRequest) {
     // ============================================
     await connectDB();
 
-    // If listing attached, verify it exists and belongs to user
+    // If listing/fundraiser attached, verify it exists and belongs to user
     if (listingId) {
-      const listing = await Listing.findById(listingId);
-      if (!listing) {
+      let item = await Listing.findById(listingId);
+      
+      // If not a listing, try fundraiser
+      if (!item) {
+        item = await Fundraiser.findById(listingId);
+      }
+      
+      if (!item) {
         return NextResponse.json(
-          { error: 'Listing not found' },
+          { error: 'Listing/Fundraiser not found' },
           { status: 404 }
         );
       }
-      if (listing.wallet !== wallet) {
+      if (item.wallet !== wallet) {
         return NextResponse.json(
-          { error: 'You can only attach your own listings' },
+          { error: 'You can only attach your own listings/fundraisers' },
           { status: 403 }
         );
       }
     }
 
     // Create chat message
-    const chatMessage = await ChatMessage.create({
+    const chatMessageData = {
       wallet,
       message: validation.message,
       messageType,
       listingId: listingId || undefined,
-    });
-
-    console.log(`💬 Chat message from ${wallet.slice(0, 8)}: ${validation.message}`);
+      replyTo: replyTo || undefined,
+    };
+    
+    console.log(`💬 Creating chat message with data:`, chatMessageData);
+    
+    const chatMessage = await ChatMessage.create(chatMessageData);
+    
+    console.log(`✅ Chat message created with ID: ${chatMessage._id}, replyTo: ${chatMessage.replyTo || 'none'}`);
 
     // Log chat activity
     await createLog(

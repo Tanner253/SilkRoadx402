@@ -8,6 +8,28 @@ export function Updates() {
   const updates = [
     {
       date: 'November 3, 2025',
+      version: 'v0.8.0',
+      title: '💝 Fundraisers Platform, Chat Replies & RuneScape Market',
+      items: [
+        '💝 NEW: Complete fundraiser platform alongside listings marketplace',
+        '🎯 Anonymous fundraising with same x402 payment flow as purchases',
+        '💰 Fundraiser categories: Medical, Education, Community, Emergency, Creative, Other',
+        '🔒 Full seller management: Create, edit, deactivate fundraisers in "My Listings"',
+        '👨‍💼 Admin support: Separate fundraiser tab with independent approval workflow',
+        '🐛 Fixed fundraiser x402 donation protocol (proper payment verification)',
+        '💬 Full threaded reply system in RuneScape Market chat',
+        '📨 Reply messages display quoted context with green visual indicators',
+        '🖱️ Click reply quotes to smoothly scroll to original message with highlight',
+        '💚 Desktop: Click ↩ button to reply | Mobile: Swipe right on messages',
+        '🔄 Backend enrichment system fetches original message data for replies',
+        '🦃 Added turkey emoji (🦃) reaction to chat emoji picker',
+        '🏪 Rebranded chat to "RuneScape Market" with shop icon and green theme',
+        '🔒 Owner protection: Hide purchase/donate buttons on own items',
+        '🎨 Fixed horizontal scrollbar in chat with overflow controls',
+      ],
+    },
+    {
+      date: 'November 3, 2025',
       version: 'v0.7.0',
       title: 'Marketplace Expansion & View Analytics',
       items: [

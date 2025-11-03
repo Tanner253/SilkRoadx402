@@ -3,6 +3,7 @@ import { CONFIG } from '@/config/constants';
 import { mockStore } from '@/lib/mockStore';
 import { connectDB } from '@/lib/db';
 import { Listing } from '@/models/Listing';
+import { Fundraiser } from '@/models/Fundraiser';
 
 // GET - Get listing by ID
 export async function GET(
@@ -38,7 +39,16 @@ export async function GET(
     // ============================================
     await connectDB();
 
-    const listing = await Listing.findById(id);
+    // Try to find in Listing collection first
+    let listing = await Listing.findById(id);
+    let itemType: 'listing' | 'fundraiser' = 'listing';
+
+    // If not found, check Fundraiser collection
+    if (!listing) {
+      listing = await Fundraiser.findById(id);
+      itemType = 'fundraiser';
+    }
+
     if (!listing) {
       return NextResponse.json(
         { error: 'Listing not found' },
@@ -46,9 +56,15 @@ export async function GET(
       );
     }
 
+    // Add type field to response
+    const listingWithType = {
+      ...listing.toObject(),
+      type: itemType,
+    };
+
     return NextResponse.json({
       success: true,
-      listing,
+      listing: listingWithType,
     });
   } catch (error: any) {
     console.error('Get listing error:', error);
@@ -94,11 +110,21 @@ export async function PATCH(
     // ============================================
     await connectDB();
 
-    const listing = await Listing.findByIdAndUpdate(
+    // Try to update in Listing collection first
+    let listing = await Listing.findByIdAndUpdate(
       id,
       { ...updates, updatedAt: new Date() },
       { new: true }
     );
+
+    // If not found, try Fundraiser collection
+    if (!listing) {
+      listing = await Fundraiser.findByIdAndUpdate(
+        id,
+        { ...updates, updatedAt: new Date() },
+        { new: true }
+      );
+    }
 
     if (!listing) {
       return NextResponse.json(
@@ -153,7 +179,14 @@ export async function DELETE(
     // ============================================
     await connectDB();
 
-    const listing = await Listing.findByIdAndDelete(id);
+    // Try to delete from Listing collection first
+    let listing = await Listing.findByIdAndDelete(id);
+
+    // If not found, try Fundraiser collection
+    if (!listing) {
+      listing = await Fundraiser.findByIdAndDelete(id);
+    }
+
     if (!listing) {
       return NextResponse.json(
         { error: 'Listing not found' },

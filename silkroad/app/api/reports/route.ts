@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { connectDB } from '@/lib/db';
 import { Report } from '@/models/Report';
 import { Listing } from '@/models/Listing';
+import { Fundraiser } from '@/models/Fundraiser';
 import { CONFIG } from '@/config/constants';
 import { mockStore } from '@/lib/mockStore';
 import { checkRateLimit, RATE_LIMITS } from '@/lib/rateLimit';
@@ -60,11 +61,18 @@ export async function POST(req: NextRequest) {
     // ============================================
     await connectDB();
 
-    // Check if listing exists
-    const listing = await Listing.findById(listingId);
+    // Check if listing or fundraiser exists
+    let listing = await Listing.findById(listingId);
+    let itemType = 'listing';
+    
+    if (!listing) {
+      listing = await Fundraiser.findById(listingId);
+      itemType = 'fundraiser';
+    }
+    
     if (!listing) {
       return NextResponse.json(
-        { error: 'Listing not found' },
+        { error: 'Item not found' },
         { status: 404 }
       );
     }
@@ -93,12 +101,12 @@ export async function POST(req: NextRequest) {
     listing.reportsCount += 1;
     await listing.save();
 
-    console.log(`🚨 Listing ${listingId} reported by ${wallet.slice(0, 8)} (total: ${listing.reportsCount})`);
+    console.log(`🚨 ${itemType.charAt(0).toUpperCase() + itemType.slice(1)} ${listingId} reported by ${wallet.slice(0, 8)} (total: ${listing.reportsCount})`);
 
     // Log report submission
     await createLog(
       'report_submitted',
-      `Listing "${listing.title}" reported by ${wallet.slice(0, 8)}... (Total reports: ${listing.reportsCount})`,
+      `${itemType.charAt(0).toUpperCase() + itemType.slice(1)} "${listing.title}" reported by ${wallet.slice(0, 8)}... (Total reports: ${listing.reportsCount})`,
       wallet,
       getIpFromRequest(req)
     );

@@ -25,6 +25,7 @@ interface Listing {
   demoVideoUrl?: string;
   whitepaperUrl?: string;
   githubUrl?: string;
+  type?: 'listing' | 'fundraiser'; // Added to distinguish type
 }
 
 function MyListingsPageContent() {
@@ -65,8 +66,29 @@ function MyListingsPageContent() {
 
     try {
       setLoading(true);
-      const response = await axios.get(`/api/listings?wallet=${publicKey.toBase58()}`);
-      setListings(response.data.listings || []);
+      
+      // Fetch both regular listings and fundraisers
+      const [listingsResponse, fundraisersResponse] = await Promise.all([
+        axios.get(`/api/listings?wallet=${publicKey.toBase58()}`).catch(() => ({ data: { listings: [] } })),
+        axios.get(`/api/fundraisers?wallet=${publicKey.toBase58()}`).catch(() => ({ data: { fundraisers: [] } })),
+      ]);
+
+      // Combine and mark with type
+      const listings = (listingsResponse.data.listings || []).map((item: Listing) => ({ 
+        ...item, 
+        type: 'listing' as const 
+      }));
+      const fundraisers = (fundraisersResponse.data.fundraisers || []).map((item: Listing) => ({ 
+        ...item, 
+        type: 'fundraiser' as const 
+      }));
+
+      // Merge and sort by creation date (newest first)
+      const combined = [...listings, ...fundraisers].sort((a, b) => 
+        new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+      );
+
+      setListings(combined);
     } catch (err: any) {
       setError(err.response?.data?.error || 'Failed to load listings');
     } finally {
@@ -74,52 +96,58 @@ function MyListingsPageContent() {
     }
   };
 
-  const handleDelete = async (id: string) => {
-    if (!confirm('Are you sure you want to delete this listing?')) {
+  const handleDelete = async (id: string, type?: 'listing' | 'fundraiser') => {
+    const itemType = type === 'fundraiser' ? 'fundraiser' : 'listing';
+    if (!confirm(`Are you sure you want to delete this ${itemType}?`)) {
       return;
     }
 
     try {
       setDeletingId(id);
-      await axios.delete(`/api/listings/${id}`);
+      const endpoint = type === 'fundraiser' ? `/api/fundraisers/${id}` : `/api/listings/${id}`;
+      await axios.delete(endpoint);
       setListings(prev => prev.filter(l => l._id !== id));
     } catch (err: any) {
-      alert(err.response?.data?.error || 'Failed to delete listing');
+      alert(err.response?.data?.error || `Failed to delete ${itemType}`);
     } finally {
       setDeletingId(null);
     }
   };
 
-  const handleDeactivate = async (id: string) => {
-    if (!confirm('Take this listing off the market? You can reactivate it later.')) {
+  const handleDeactivate = async (id: string, type?: 'listing' | 'fundraiser') => {
+    const itemType = type === 'fundraiser' ? 'fundraiser' : 'listing';
+    if (!confirm(`Take this ${itemType} off the market? You can reactivate it later.`)) {
       return;
     }
 
     try {
       setUpdatingId(id);
-      await axios.patch(`/api/listings/${id}`, { state: 'pulled' });
+      const endpoint = type === 'fundraiser' ? `/api/fundraisers/${id}` : `/api/listings/${id}`;
+      await axios.patch(endpoint, { state: 'pulled' });
       await fetchMyListings(); // Refresh list
     } catch (err: any) {
-      alert(err.response?.data?.error || 'Failed to deactivate listing');
+      alert(err.response?.data?.error || `Failed to deactivate ${itemType}`);
     } finally {
       setUpdatingId(null);
     }
   };
 
-  const handleReactivate = async (id: string) => {
-    if (!confirm('Reactivate this listing? It will need admin approval again.')) {
+  const handleReactivate = async (id: string, type?: 'listing' | 'fundraiser') => {
+    const itemType = type === 'fundraiser' ? 'fundraiser' : 'listing';
+    if (!confirm(`Reactivate this ${itemType}? It will need admin approval again.`)) {
       return;
     }
 
     try {
       setUpdatingId(id);
-      await axios.patch(`/api/listings/${id}`, { 
+      const endpoint = type === 'fundraiser' ? `/api/fundraisers/${id}` : `/api/listings/${id}`;
+      await axios.patch(endpoint, { 
         state: 'in_review',
         approved: false 
       });
       await fetchMyListings(); // Refresh list
     } catch (err: any) {
-      alert(err.response?.data?.error || 'Failed to reactivate listing');
+      alert(err.response?.data?.error || `Failed to reactivate ${itemType}`);
     } finally {
       setUpdatingId(null);
     }
@@ -234,7 +262,13 @@ function MyListingsPageContent() {
 
     try {
       setSubmittingEdit(true);
-      await axios.put(`/api/listings/${editingListing._id}/edit`, {
+      
+      // Use correct endpoint based on item type
+      const endpoint = editingListing.type === 'fundraiser'
+        ? `/api/fundraisers/${editingListing._id}/edit`
+        : `/api/listings/${editingListing._id}/edit`;
+      
+      await axios.post(endpoint, {
         wallet: publicKey.toBase58(),
         title: editFormData.title,
         description: editFormData.description,
@@ -248,9 +282,11 @@ function MyListingsPageContent() {
 
       closeEditModal();
       await fetchMyListings(); // Refresh list
-      alert('Listing updated successfully!');
+      const itemType = editingListing.type === 'fundraiser' ? 'Fundraiser' : 'Listing';
+      alert(`${itemType} updated successfully!`);
     } catch (err: any) {
-      setEditError(err.response?.data?.error || 'Failed to update listing');
+      const itemType = editingListing.type === 'fundraiser' ? 'fundraiser' : 'listing';
+      setEditError(err.response?.data?.error || `Failed to update ${itemType}`);
     } finally {
       setSubmittingEdit(false);
     }
@@ -398,8 +434,15 @@ function MyListingsPageContent() {
                           />
                         </div>
                         <div>
-                          <div className="font-medium text-zinc-900 dark:text-zinc-50">
-                            {listing.title}
+                          <div className="flex items-center gap-2">
+                            <div className="font-medium text-zinc-900 dark:text-zinc-50">
+                              {listing.title}
+                            </div>
+                            {listing.type === 'fundraiser' && (
+                              <span className="inline-flex items-center gap-1 rounded-full bg-purple-100 px-2 py-0.5 text-xs font-medium text-purple-700 dark:bg-purple-900 dark:text-purple-300">
+                                💝
+                              </span>
+                            )}
                           </div>
                           <div className="text-sm text-zinc-500 dark:text-zinc-400">
                             {listing.category}
@@ -433,7 +476,7 @@ function MyListingsPageContent() {
                     <td className="px-6 py-4">
                       <div className="flex items-center justify-end space-x-2">
                         <Link
-                          href={`/listings/${listing._id}`}
+                          href={listing.type === 'fundraiser' ? `/fundraisers/${listing._id}?from=my-listings` : `/listings/${listing._id}?from=my-listings`}
                           className="text-sm text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300"
                         >
                           View
@@ -446,7 +489,7 @@ function MyListingsPageContent() {
                         </button>
                         {listing.state === 'on_market' && listing.approved && (
                           <button
-                            onClick={() => handleDeactivate(listing._id)}
+                            onClick={() => handleDeactivate(listing._id, listing.type)}
                             disabled={updatingId === listing._id}
                             className="text-sm text-orange-600 hover:text-orange-700 disabled:opacity-50 dark:text-orange-400 dark:hover:text-orange-300"
                           >
@@ -455,7 +498,7 @@ function MyListingsPageContent() {
                         )}
                         {listing.state === 'pulled' && (
                           <button
-                            onClick={() => handleReactivate(listing._id)}
+                            onClick={() => handleReactivate(listing._id, listing.type)}
                             disabled={updatingId === listing._id}
                             className="text-sm text-green-600 hover:text-green-700 disabled:opacity-50 dark:text-green-400 dark:hover:text-green-300"
                           >
@@ -463,8 +506,8 @@ function MyListingsPageContent() {
                           </button>
                         )}
                         <button
-                          onClick={() => handleDelete(listing._id)}
-                          disabled={deletingId === listing._id}
+                        onClick={() => handleDelete(listing._id, listing.type)}
+                        disabled={deletingId === listing._id}
                           className="text-sm text-red-600 hover:text-red-700 disabled:opacity-50 dark:text-red-400 dark:hover:text-red-300"
                         >
                           {deletingId === listing._id ? 'Deleting...' : 'Delete'}

@@ -58,6 +58,21 @@ function ListingDetail({ params }: { params: Promise<{ id: string }> }) {
   const [hasPurchased, setHasPurchased] = useState(false);
   const [hasCommented, setHasCommented] = useState(false);
 
+  // Track navigation context from URL params
+  const [backUrl, setBackUrl] = useState('/browse');
+  
+  useEffect(() => {
+    // Check if we have a 'from' query parameter
+    const urlParams = new URLSearchParams(window.location.search);
+    const from = urlParams.get('from');
+    
+    if (from === 'my-listings') {
+      setBackUrl('/listings/my');
+    } else {
+      setBackUrl('/browse');
+    }
+  }, []);
+
   const fetchListing = async () => {
     try {
       setLoading(true);
@@ -395,13 +410,18 @@ function ListingDetail({ params }: { params: Promise<{ id: string }> }) {
       } catch (err: any) {
         console.error('❌ Purchase error:', err);
         
-        if (err.code === 4001) {
-          // User rejected signature
-          setError('Transaction cancelled by user');
+        // Handle user rejection gracefully
+        if (err.code === 4001 || err.name === 'WalletSignTransactionError' || err.message?.includes('rejected')) {
+          console.log('ℹ️ User cancelled transaction');
+          setError('Transaction cancelled');
+          return; // Don't show alert, user knows they cancelled
         } else if (err.response?.status === 402) {
           setError('Payment verification failed: ' + (err.response.data.error || 'Unknown error'));
+          alert('❌ Payment verification failed. Please try again.');
         } else {
-          setError(err.response?.data?.error || err.message || 'Purchase failed');
+          const errorMsg = err.response?.data?.error || err.message || 'Purchase failed';
+          setError(errorMsg);
+          alert(`❌ ${errorMsg}`);
         }
       } finally {
         setPurchasing(false);
@@ -429,10 +449,10 @@ function ListingDetail({ params }: { params: Promise<{ id: string }> }) {
             {error || 'Listing Not Found'}
           </h1>
           <Link
-            href="/listings"
+            href={backUrl}
             className="inline-flex items-center justify-center rounded-lg bg-green-600 px-6 py-3 text-sm font-medium text-white hover:bg-green-700 transition-colors"
           >
-            Back to Browse
+            {backUrl === '/listings/my' ? 'Back to My Listings' : 'Back to Browse'}
           </Link>
         </div>
       </div>
@@ -444,10 +464,10 @@ function ListingDetail({ params }: { params: Promise<{ id: string }> }) {
       <div className="mx-auto max-w-5xl">
         {/* Back Button */}
         <Link
-          href="/listings"
+          href={backUrl}
           className="mb-6 inline-flex items-center text-sm text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-50"
         >
-          ← Back to Browse
+          {backUrl === '/listings/my' ? '← Back to My Listings' : '← Back to Browse'}
         </Link>
 
 
@@ -538,7 +558,11 @@ function ListingDetail({ params }: { params: Promise<{ id: string }> }) {
                 </div>
               )}
 
-              {!isConnected || !hasAcceptedTOS ? (
+              {publicKey && listing.wallet === publicKey.toBase58() ? (
+                <div className="w-full rounded-lg bg-zinc-100 border border-zinc-300 px-6 py-3 text-sm font-medium text-zinc-600 text-center dark:bg-zinc-800 dark:border-zinc-700 dark:text-zinc-400">
+                  👤 This is your listing
+                </div>
+              ) : !isConnected || !hasAcceptedTOS ? (
                 <Link
                   href="/"
                   className="block w-full rounded-lg bg-green-600 py-3 text-center text-sm font-medium text-white hover:bg-green-700 transition-colors"

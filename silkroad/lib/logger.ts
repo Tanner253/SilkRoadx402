@@ -15,6 +15,10 @@ export type LogType =
   | 'listing_purchased'
   | 'listing_approved'
   | 'listing_rejected'
+  | 'fundraiser_created'
+  | 'fundraiser_donated'
+  | 'fundraiser_approved'
+  | 'fundraiser_rejected'
   | 'report_submitted'
   | 'comment_posted';
 

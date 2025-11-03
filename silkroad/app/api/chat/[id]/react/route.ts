@@ -3,7 +3,7 @@ import { connectDB } from '@/lib/db';
 import { ChatMessage } from '@/models/ChatMessage';
 import { CONFIG } from '@/config/constants';
 
-const ALLOWED_REACTIONS = ['❤️', '👍', '👎', '👀'];
+const ALLOWED_REACTIONS = ['❤️', '👍', '👎', '👀', '🦃'];
 
 /**
  * POST /api/chat/[id]/react
@@ -27,7 +27,7 @@ export async function POST(
 
     if (!ALLOWED_REACTIONS.includes(emoji)) {
       return NextResponse.json(
-        { error: 'Invalid reaction. Allowed: ❤️, 👍, 👎, 👀' },
+        { error: 'Invalid reaction. Allowed: ❤️, 👍, 👎, 👀, 🦃' },
         { status: 400 }
       );
     }

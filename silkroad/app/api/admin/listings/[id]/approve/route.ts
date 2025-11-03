@@ -3,6 +3,7 @@ import { CONFIG } from '@/config/constants';
 import { mockStore } from '@/lib/mockStore';
 import { connectDB } from '@/lib/db';
 import { Listing } from '@/models/Listing';
+import { Fundraiser } from '@/models/Fundraiser';
 import { createLog, getIpFromRequest } from '@/lib/logger';
 
 /**
@@ -73,7 +74,8 @@ export async function POST(
     // ============================================
     await connectDB();
 
-    const listing = await Listing.findByIdAndUpdate(
+    // Try to find and update in Listing collection first
+    let listing = await Listing.findByIdAndUpdate(
       id,
       {
         approved: true,
@@ -82,6 +84,19 @@ export async function POST(
       },
       { new: true }
     );
+
+    // If not found, try Fundraiser collection
+    if (!listing) {
+      listing = await Fundraiser.findByIdAndUpdate(
+        id,
+        {
+          approved: true,
+          state: 'on_market',
+          updatedAt: new Date(),
+        },
+        { new: true }
+      );
+    }
 
     if (!listing) {
       return NextResponse.json(

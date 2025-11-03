@@ -3,6 +3,7 @@ import { cookies } from 'next/headers';
 import { connectDB } from '@/lib/db';
 import { Report } from '@/models/Report';
 import { Listing } from '@/models/Listing';
+import { Fundraiser } from '@/models/Fundraiser';
 import { CONFIG } from '@/config/constants';
 
 /**
@@ -68,18 +69,27 @@ export async function GET(req: NextRequest) {
       createdAt: Date;
     }>;
 
-    // Enrich with listing data
+    // Enrich with listing/fundraiser data
     const enrichedReports = await Promise.all(
       reports.map(async (report) => {
-        const listing = await Listing.findById(report.listingId).lean() as { _id: any; title: string; wallet: string; state: string; reportsCount: number } | null;
+        // Try Listing first, then Fundraiser
+        let item = await Listing.findById(report.listingId).lean() as { _id: any; title: string; wallet: string; state: string; reportsCount: number; type?: string } | null;
+        let itemType = 'listing';
+        
+        if (!item) {
+          item = await Fundraiser.findById(report.listingId).lean() as { _id: any; title: string; wallet: string; state: string; reportsCount: number; type?: string } | null;
+          itemType = 'fundraiser';
+        }
+        
         return {
           ...report,
-          listing: listing ? {
-            _id: listing._id.toString(),
-            title: listing.title,
-            wallet: listing.wallet,
-            state: listing.state,
-            reportsCount: listing.reportsCount,
+          listing: item ? {
+            _id: item._id.toString(),
+            title: item.title,
+            wallet: item.wallet,
+            state: item.state,
+            reportsCount: item.reportsCount,
+            type: itemType,
           } : null,
         };
       })
