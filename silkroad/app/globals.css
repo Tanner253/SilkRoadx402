@@ -125,3 +125,14 @@ body::before {
     sway ease-in-out infinite,
     spin linear infinite;
 }
+
+.falling-leaf-once {
+  position: absolute;
+  pointer-events: none;
+  user-select: none;
+  animation: 
+    fall linear forwards,
+    sway ease-in-out,
+    spin linear;
+  animation-iteration-count: 1, 1, 1;
+}

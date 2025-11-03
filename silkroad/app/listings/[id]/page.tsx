@@ -586,13 +586,13 @@ function ListingDetail({ params }: { params: Promise<{ id: string }> }) {
                     {listing.views?.toLocaleString() || 0}
                   </span>
                 </div>
-              </div>
+            </div>
 
-              {/* Seller Info */}
+            {/* Seller Info */}
               <div className="rounded-lg border border-zinc-200 bg-white p-4 dark:border-zinc-800 dark:bg-zinc-900">
-                <div className="text-xs text-zinc-500 dark:text-zinc-400 mb-1">Seller</div>
-                <div className="text-sm font-mono text-zinc-900 dark:text-zinc-50">
-                  {listing.wallet.slice(0, 8)}...{listing.wallet.slice(-6)}
+              <div className="text-xs text-zinc-500 dark:text-zinc-400 mb-1">Seller</div>
+              <div className="text-sm font-mono text-zinc-900 dark:text-zinc-50">
+                {listing.wallet.slice(0, 8)}...{listing.wallet.slice(-6)}
                 </div>
               </div>
             </div>
