@@ -34,6 +34,7 @@ interface Listing {
   demoVideoUrl?: string;
   whitepaperUrl?: string;
   githubUrl?: string;
+  views?: number;
 }
 
 function ListingDetail({ params }: { params: Promise<{ id: string }> }) {
@@ -57,19 +58,6 @@ function ListingDetail({ params }: { params: Promise<{ id: string }> }) {
   const [hasPurchased, setHasPurchased] = useState(false);
   const [hasCommented, setHasCommented] = useState(false);
 
-  useEffect(() => {
-    if (mounted && id) {
-      fetchListing();
-      fetchComments();
-    }
-  }, [mounted, id]);
-
-  useEffect(() => {
-    if (mounted && id && publicKey) {
-      checkPurchaseStatus();
-    }
-  }, [mounted, id, publicKey]);
-
   const fetchListing = async () => {
     try {
       setLoading(true);
@@ -90,6 +78,30 @@ function ListingDetail({ params }: { params: Promise<{ id: string }> }) {
       console.error('Failed to fetch comments:', err);
     }
   };
+
+  const incrementViews = async () => {
+    try {
+      await axios.post(`/api/listings/${id}/view`);
+      console.log('✅ View tracked for listing:', id);
+    } catch (err) {
+      // Silently fail - view tracking is not critical
+      console.debug('Failed to track view:', err);
+    }
+  };
+
+  useEffect(() => {
+    if (mounted && id) {
+      fetchListing();
+      fetchComments();
+      incrementViews();
+    }
+  }, [mounted, id]);
+
+  useEffect(() => {
+    if (mounted && id && publicKey) {
+      checkPurchaseStatus();
+    }
+  }, [mounted, id, publicKey]);
 
   const checkPurchaseStatus = async () => {
     if (!publicKey) return;
@@ -563,11 +575,25 @@ function ListingDetail({ params }: { params: Promise<{ id: string }> }) {
               </ul>
             </div>
 
-            {/* Seller Info */}
-            <div className="mt-6 rounded-lg border border-zinc-200 bg-white p-4 dark:border-zinc-800 dark:bg-zinc-900">
-              <div className="text-xs text-zinc-500 dark:text-zinc-400 mb-1">Seller</div>
-              <div className="text-sm font-mono text-zinc-900 dark:text-zinc-50">
-                {listing.wallet.slice(0, 8)}...{listing.wallet.slice(-6)}
+            {/* Stats Row - Views & Seller */}
+            <div className="mt-6 grid grid-cols-2 gap-4">
+              {/* Views */}
+              <div className="rounded-lg border border-zinc-200 bg-white p-4 dark:border-zinc-800 dark:bg-zinc-900">
+                <div className="text-xs text-zinc-500 dark:text-zinc-400 mb-1">Total Views</div>
+                <div className="flex items-center gap-2">
+                  <span className="text-xl">👁️</span>
+                  <span className="text-lg font-bold text-zinc-900 dark:text-zinc-50">
+                    {listing.views?.toLocaleString() || 0}
+                  </span>
+                </div>
+              </div>
+
+              {/* Seller Info */}
+              <div className="rounded-lg border border-zinc-200 bg-white p-4 dark:border-zinc-800 dark:bg-zinc-900">
+                <div className="text-xs text-zinc-500 dark:text-zinc-400 mb-1">Seller</div>
+                <div className="text-sm font-mono text-zinc-900 dark:text-zinc-50">
+                  {listing.wallet.slice(0, 8)}...{listing.wallet.slice(-6)}
+                </div>
               </div>
             </div>
           </div>

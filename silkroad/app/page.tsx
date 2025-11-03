@@ -24,7 +24,7 @@ export default function Home() {
     <>
       <FallingLeavesCSS />
       {/* Homepage */}
-      <div className="flex min-h-screen flex-col items-center justify-center bg-gradient-to-b from-zinc-50 to-zinc-100 dark:from-zinc-950 dark:to-black px-4 relative z-10">
+      <div className="flex min-h-[calc(100vh-8rem)] flex-col items-center justify-center bg-gradient-to-b from-zinc-50 to-zinc-100 dark:from-zinc-950 dark:to-black px-4 py-12 relative z-10">
         <div className="w-full max-w-4xl text-center">
           {/* Hero Section */}
           <div className="mb-8">

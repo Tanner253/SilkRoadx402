@@ -230,15 +230,15 @@ function NewListingPageContent() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-zinc-50 to-zinc-100 dark:from-zinc-950 dark:to-black py-12 px-4">
+    <div className="min-h-screen bg-gradient-to-b from-zinc-50 to-zinc-100 dark:from-zinc-950 dark:to-black py-12 px-4 pb-24">
       <div className="mx-auto max-w-3xl">
         {/* Header */}
         <div className="mb-8">
           <h1 className="text-4xl font-bold text-zinc-900 dark:text-zinc-50 mb-2">
-            List Your Software
+            List Your Product
           </h1>
           <p className="text-lg text-zinc-600 dark:text-zinc-400">
-            Create a new listing for your private software
+            Create a new listing for the marketplace
           </p>
         </div>
 

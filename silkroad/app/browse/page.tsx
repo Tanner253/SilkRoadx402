@@ -19,6 +19,7 @@ interface Listing {
   riskLevel: 'standard' | 'high-risk';
   pinned?: boolean;
   pinnedAt?: Date;
+  views?: number;
 }
 
 function BrowsePageContent() {
@@ -114,7 +115,7 @@ function BrowsePageContent() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-zinc-50 to-zinc-100 dark:from-zinc-950 dark:to-black py-6 px-4 relative">
+    <div className="min-h-screen bg-gradient-to-b from-zinc-50 to-zinc-100 dark:from-zinc-950 dark:to-black py-6 px-4 pb-20 relative">
       <div className="mx-auto max-w-[1600px]">
         {/* Page Header */}
         <div className="mb-6">
@@ -339,7 +340,17 @@ function BrowsePageContent() {
               <>
             {filteredListings.length === 0 ? (
               <div className="text-center py-12">
-                <p className="text-zinc-600 dark:text-zinc-400">No listings found in this category</p>
+                <div className="mb-4 text-6xl">🔍</div>
+                <p className="text-zinc-600 dark:text-zinc-400 mb-4">No listings found in this category</p>
+                {isTokenGated && (
+                  <Link
+                    href="/sell"
+                    className="inline-flex items-center gap-2 rounded-lg bg-green-600 px-6 py-3 text-sm font-medium text-white hover:bg-green-700 transition-colors"
+                  >
+                    <span>💼</span>
+                    Be the first to list here!
+                  </Link>
+                )}
               </div>
             ) : viewMode === 'grid' ? (
               // Grid View
@@ -358,7 +369,7 @@ function BrowsePageContent() {
                         className="object-cover transition-transform group-hover:scale-105"
                       />
                       {listing.pinned === true && (
-                        <div className="absolute top-2 left-2 rounded-full bg-yellow-500 px-3 py-1 text-xs font-medium text-white shadow-lg">
+                        <div className="absolute top-2 left-2 rounded-full bg-yellow-500 px-3 py-1 text-xs font-medium text-white shadow-lg animate-pulse">
                           📌 Featured
                         </div>
                       )}
@@ -397,10 +408,15 @@ function BrowsePageContent() {
                         </Link>
                       </div>
 
-                      <div className="mt-3 pt-3 border-t border-zinc-200 dark:border-zinc-800 flex items-center justify-between">
-                        <span className="inline-flex items-center rounded-full bg-zinc-100 px-2.5 py-0.5 text-xs font-medium text-zinc-800 dark:bg-zinc-800 dark:text-zinc-200">
-                          {listing.category}
-                        </span>
+                      <div className="mt-3 pt-3 border-t border-zinc-200 dark:border-zinc-800">
+                        <div className="flex items-center justify-between mb-2">
+                          <span className="inline-flex items-center rounded-full bg-zinc-100 px-2.5 py-0.5 text-xs font-medium text-zinc-800 dark:bg-zinc-800 dark:text-zinc-200">
+                            {listing.category}
+                          </span>
+                          <span className="flex items-center gap-1 text-xs text-zinc-500 dark:text-zinc-400">
+                            👁️ {listing.views || 0}
+                          </span>
+                        </div>
                         <span className="text-xs text-zinc-500 dark:text-zinc-400 font-mono">
                           {truncateWallet(listing.wallet)}
                         </span>
@@ -444,6 +460,11 @@ function BrowsePageContent() {
                       {/* Vendor */}
                       <span className="hidden md:block text-xs text-zinc-500 dark:text-zinc-400 font-mono flex-shrink-0">
                         {truncateWallet(listing.wallet)}
+                      </span>
+
+                      {/* Views */}
+                      <span className="hidden lg:flex items-center gap-1 text-xs text-zinc-500 dark:text-zinc-400 flex-shrink-0">
+                        👁️ {listing.views || 0}
                       </span>
 
                       {/* Price */}

@@ -37,6 +37,7 @@ interface MockListing {
   pinnedAt?: Date;
   reportsCount: number;
   failedPurchaseCount: number;
+  views: number;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -214,7 +215,7 @@ export const mockStore = {
   /**
    * Create listing
    */
-  createListing(data: Omit<MockListing, '_id' | 'createdAt' | 'updatedAt' | 'reportsCount' | 'failedPurchaseCount' | 'approved' | 'state' | 'riskLevel' | 'pinned'>): MockListing {
+  createListing(data: Omit<MockListing, '_id' | 'createdAt' | 'updatedAt' | 'reportsCount' | 'failedPurchaseCount' | 'approved' | 'state' | 'riskLevel' | 'pinned' | 'views'>): MockListing {
     const listing: MockListing = {
       _id: `listing_${listingIdCounter++}`,
       ...data,
@@ -224,6 +225,7 @@ export const mockStore = {
       pinned: false,
       reportsCount: 0,
       failedPurchaseCount: 0,
+      views: 0,
       createdAt: new Date(),
       updatedAt: new Date(),
     };

@@ -7,6 +7,24 @@
 export function Updates() {
   const updates = [
     {
+      date: 'November 3, 2025',
+      version: 'v0.7.0',
+      title: 'Marketplace Expansion & View Analytics',
+      items: [
+        '🌐 Rebranded from "Software Marketplace" to "Digital Marketplace"',
+        '📦 Platform now supports any legal goods, not just software',
+        '👁️ View counter feature - track listing popularity',
+        '📊 View analytics displayed on all listing cards',
+        '📈 Total views prominently shown on listing detail pages',
+        '✨ Animated pulse effect on featured listing badges',
+        '🎨 Fixed homepage spacing to account for navbar/footer offset',
+        '📱 Improved page padding across all views',
+        '🚀 Enhanced empty state with "Be the first to list" CTA button',
+        '🏷️ Updated all labels from "software" to generic "product" terminology',
+        'View counts persist across sessions and increment on each visit',
+      ],
+    },
+    {
       date: 'November 1, 2025',
       version: 'v0.6.0',
       title: 'Edit Listings & New Category',

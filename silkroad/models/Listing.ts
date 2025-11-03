@@ -110,6 +110,11 @@ const ListingSchema = new Schema<IListing>({
   lastFailureAt: {
     type: Date,
   },
+  views: {
+    type: Number,
+    default: 0,
+    index: true,
+  },
 }, {
   timestamps: true,
 });

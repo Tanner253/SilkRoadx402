@@ -29,6 +29,7 @@ export interface IListing extends Document {
   reportsCount: number;
   failedPurchaseCount: number;
   lastFailureAt?: Date;
+  views: number;
   createdAt: Date;
   updatedAt: Date;
 }
