@@ -12,6 +12,7 @@ import { mockStore } from '@/lib/mockStore';
 import { connectDB } from '@/lib/db';
 import { Transaction } from '@/models/Transaction';
 import { Listing } from '@/models/Listing';
+import { Fundraiser } from '@/models/Fundraiser';
 
 export async function GET(req: NextRequest) {
   try {
@@ -76,14 +77,21 @@ export async function GET(req: NextRequest) {
       .sort({ createdAt: -1 })
       .lean();
 
-    // Enrich with listing data
+    // Enrich with listing or fundraiser data
     const enrichedTransactions = await Promise.all(
       transactions.map(async (tx) => {
-        const listing = await Listing.findById(tx.listingId).select('title category').lean() as { title: string; category: string } | null;
+        // Try to find as listing first
+        let item = await Listing.findById(tx.listingId).select('title category').lean() as { title: string; category: string } | null;
+        
+        // If not found, try fundraiser
+        if (!item) {
+          item = await Fundraiser.findById(tx.listingId).select('title category').lean() as { title: string; category: string } | null;
+        }
+        
         return {
           ...tx,
-          listingTitle: listing?.title || 'Unknown',
-          listingCategory: listing?.category || 'Unknown',
+          listingTitle: item?.title || 'Unknown',
+          listingCategory: item?.category || 'Unknown',
         };
       })
     );
