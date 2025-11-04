@@ -7,6 +7,27 @@
 export function Updates() {
   const updates = [
     {
+      date: 'November 4, 2025',
+      version: 'v0.8.1',
+      title: '📊 Fundraiser Progress Tracking & UX Improvements',
+      items: [
+        '📊 Fixed fundraiser progress bars now always visible on details page',
+        '💰 Fixed goal amounts - now uses user input instead of hardcoded $500',
+        '🎯 Real-time donation tracking - raised amounts calculated from actual transactions (source of truth)',
+        '📈 Added progress bars to fundraiser list view with multiple indicators',
+        '💝 List view shows: bottom progress bar, amount display ($X/$Y), and percentage badge',
+        '🔗 Clickable organizer/seller wallets - filter fundraisers or listings by wallet',
+        '📦 Seller wallets on market listings link to all items by that seller',
+        '💝 Organizer wallets on fundraisers link to all fundraisers by that organizer',
+        '📏 Fixed wallet text sizing - now smaller (6/4 chars) to fit properly in boxes',
+        '🎨 Purple theme consistency for all fundraiser elements (hover states, progress bars)',
+        '⚡ Removed manual database sync needs - API now calculates raised amounts dynamically',
+        '🔧 Fixed TypeScript interface to properly support goalAmount and raisedAmount fields',
+        '💎 Enhanced catalog page to show accurate progress bars with transaction data',
+        '📱 Responsive progress indicators - different info shown at mobile/tablet/desktop',
+      ],
+    },
+    {
       date: 'November 3, 2025',
       version: 'v0.8.0',
       title: '💝 Fundraisers Platform, Chat Replies & RuneScape Market',
