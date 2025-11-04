@@ -35,7 +35,7 @@ interface Fundraiser {
   whitepaperUrl?: string;
   githubUrl?: string;
   views?: number;
-  donatedAmount?: number;
+  raisedAmount?: number;
   goalAmount?: number;
 }
 
@@ -59,6 +59,10 @@ function FundraiserDetail({ params }: { params: Promise<{ id: string }> }) {
   const [submittingComment, setSubmittingComment] = useState(false);
   const [hasDonated, setHasDonated] = useState(false);
   const [hasCommented, setHasCommented] = useState(false);
+  const [customDonationAmount, setCustomDonationAmount] = useState<string>('');
+  const [transactions, setTransactions] = useState<any[]>([]);
+  const [totalRaised, setTotalRaised] = useState(0);
+  const [donationCount, setDonationCount] = useState(0);
 
   // Track navigation context from URL params
   const [backUrl, setBackUrl] = useState('/fundraisers');
@@ -96,6 +100,17 @@ function FundraiserDetail({ params }: { params: Promise<{ id: string }> }) {
     }
   };
 
+  const fetchTransactions = async () => {
+    try {
+      const response = await axios.get(`/api/fundraisers/${id}/transactions`);
+      setTransactions(response.data.transactions || []);
+      setTotalRaised(response.data.totalRaised || 0);
+      setDonationCount(response.data.donationCount || 0);
+    } catch (err: any) {
+      console.error('Failed to fetch transactions:', err);
+    }
+  };
+
   const incrementViews = async () => {
     try {
       await axios.post(`/api/fundraisers/${id}/view`);
@@ -110,6 +125,7 @@ function FundraiserDetail({ params }: { params: Promise<{ id: string }> }) {
     if (mounted && id) {
       fetchFundraiser();
       fetchComments();
+      fetchTransactions();
       incrementViews();
     }
   }, [mounted, id]);
@@ -139,7 +155,14 @@ function FundraiserDetail({ params }: { params: Promise<{ id: string }> }) {
       return;
     }
 
-    if (confirm(`Support "${fundraiser.title}" with $${fundraiser.price.toFixed(2)} USDC donation?`)) {
+    // Validate custom donation amount
+    const donationAmount = parseFloat(customDonationAmount);
+    if (isNaN(donationAmount) || donationAmount < 0.10) {
+      setError('Please enter a valid donation amount (minimum $0.10 USDC)');
+      return;
+    }
+
+    if (confirm(`Support "${fundraiser.title}" with $${donationAmount.toFixed(2)} USDC donation?`)) {
       try {
         setDonating(true);
         setError(null);
@@ -155,6 +178,7 @@ function FundraiserDetail({ params }: { params: Promise<{ id: string }> }) {
         try {
           await axios.post('/api/fundraise', {
             fundraiserId: fundraiser._id,
+            customAmount: donationAmount, // Send custom amount to backend
           });
           // If we get here, payment wasn't required (shouldn't happen)
           throw new Error('Expected 402 Payment Required response');
@@ -169,7 +193,8 @@ function FundraiserDetail({ params }: { params: Promise<{ id: string }> }) {
 
         // Extract payment requirements
         const requirements = paymentRequired.accepts[0];
-        const amountLamports = parseInt(requirements.maxAmountRequired);
+        // Use custom donation amount instead of the default
+        const amountLamports = Math.floor(donationAmount * 1_000_000);
         const sellerWallet = new PublicKey(requirements.payTo);
         const usdcMint = new PublicKey(requirements.asset);
         
@@ -292,29 +317,35 @@ function FundraiserDetail({ params }: { params: Promise<{ id: string }> }) {
         // Encode to Base64
         const paymentHeader = Buffer.from(JSON.stringify(paymentPayload)).toString('base64');
 
-        // Send to backend with X-PAYMENT header
-        const finalResponse = await axios.post(
-          '/api/fundraise',
-          { fundraiserId: fundraiser._id },
-          {
-            headers: {
-              'X-PAYMENT': paymentHeader,
+          // Send to backend with X-PAYMENT header
+          const finalResponse = await axios.post(
+            '/api/fundraise',
+            { 
+              fundraiserId: fundraiser._id,
+              customAmount: donationAmount, // Include custom amount
             },
+            {
+              headers: {
+                'X-PAYMENT': paymentHeader,
+              },
+            }
+          );
+
+          console.log('✅ Backend response received:', finalResponse.data);
+
+          if (finalResponse.data.success && finalResponse.data.transactionId) {
+            console.log('🎉 Donation successful! Transaction ID:', finalResponse.data.transactionId);
+            
+            // Refresh transactions and fundraiser data before redirecting
+            await fetchTransactions();
+            await fetchFundraiser();
+            
+            // Redirect to delivery page with transaction ID
+            router.push(`/delivery/${finalResponse.data.transactionId}`);
+          } else {
+            console.error('❌ No transaction ID in response:', finalResponse.data);
+            throw new Error('Donation succeeded but no transaction record received');
           }
-        );
-
-        console.log('✅ Backend response received:', finalResponse.data);
-
-        if (finalResponse.data.success && finalResponse.data.deliveryUrl) {
-          console.log('🎉 Donation successful!');
-          
-          alert(`🎉 Thank you for your donation! Your support means everything!\n\n✨ Reward/Thank You: ${finalResponse.data.deliveryUrl}`);
-          setHasDonated(true);
-          fetchFundraiser(); // Refresh to show updated donation amount
-        } else {
-          console.error('❌ No delivery URL in response:', finalResponse.data);
-          throw new Error('Donation succeeded but no thank you message received');
-        }
 
       } catch (err: any) {
         console.error('❌ Donation error:', err);
@@ -550,32 +581,25 @@ function FundraiserDetail({ params }: { params: Promise<{ id: string }> }) {
               </h1>
               
               {/* Donation Progress */}
-              {fundraiser.goalAmount && (
-                <div className="mb-4">
-                  <div className="flex justify-between text-sm mb-2">
-                    <span className="text-zinc-600 dark:text-zinc-400">
-                      ${(fundraiser.donatedAmount || 0).toFixed(2)} raised
-                    </span>
-                    <span className="text-zinc-600 dark:text-zinc-400">
-                      Goal: ${fundraiser.goalAmount.toFixed(2)}
-                    </span>
-                  </div>
-                  <div className="w-full bg-zinc-200 rounded-full h-3 dark:bg-zinc-700">
-                    <div 
-                      className="bg-purple-600 h-3 rounded-full transition-all duration-300"
-                      style={{ width: `${Math.min(((fundraiser.donatedAmount || 0) / fundraiser.goalAmount) * 100, 100)}%` }}
-                    />
-                  </div>
-                  <div className="text-xs text-zinc-500 dark:text-zinc-400 mt-1">
-                    {Math.round(((fundraiser.donatedAmount || 0) / fundraiser.goalAmount) * 100)}% funded
-                  </div>
+              <div className="mb-6 rounded-lg border border-purple-200 bg-purple-50 p-4 dark:border-purple-900 dark:bg-purple-950">
+                <div className="flex justify-between text-sm mb-2">
+                  <span className="font-semibold text-purple-900 dark:text-purple-100">
+                    ${totalRaised.toFixed(2)} raised
+                  </span>
+                  <span className="text-purple-700 dark:text-purple-300">
+                    of ${(fundraiser.goalAmount || fundraiser.price).toFixed(2)} goal
+                  </span>
                 </div>
-              )}
-
-              <p className="text-xl font-bold text-purple-600 dark:text-purple-400 mb-4">
-                ${fundraiser.price.toFixed(2)} USDC
-                <span className="text-sm font-normal text-zinc-500 dark:text-zinc-400"> / donation</span>
-              </p>
+                <div className="w-full bg-purple-200 rounded-full h-3 dark:bg-purple-900 overflow-hidden">
+                  <div 
+                    className="bg-gradient-to-r from-purple-600 to-pink-600 h-3 rounded-full transition-all duration-500"
+                    style={{ width: `${Math.min((totalRaised / (fundraiser.goalAmount || fundraiser.price)) * 100, 100)}%` }}
+                  />
+                </div>
+                <div className="text-sm text-purple-700 dark:text-purple-300 mt-2 font-medium">
+                  {Math.round((totalRaised / (fundraiser.goalAmount || fundraiser.price)) * 100)}% funded
+                </div>
+              </div>
             </div>
 
             <p className="text-zinc-700 dark:text-zinc-300 mb-6 whitespace-pre-wrap">
@@ -589,9 +613,31 @@ function FundraiserDetail({ params }: { params: Promise<{ id: string }> }) {
               </div>
             ) : (
               <>
+                {/* Custom Donation Amount Input */}
+                <div className="mb-4">
+                  <label className="block text-sm font-medium text-zinc-900 dark:text-zinc-50 mb-2">
+                    Donation Amount (USDC)
+                  </label>
+                  <div className="relative">
+                    <span className="absolute left-4 top-3 text-zinc-500 text-sm">$</span>
+                    <input
+                      type="number"
+                      step="0.01"
+                      min="0.10"
+                      value={customDonationAmount}
+                      onChange={(e) => setCustomDonationAmount(e.target.value)}
+                      placeholder="Enter amount (e.g. 10.00)"
+                      className="w-full rounded-lg border border-zinc-300 bg-white px-4 py-3 pl-8 text-sm text-zinc-900 placeholder-zinc-400 focus:border-purple-600 focus:outline-none focus:ring-2 focus:ring-purple-600 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-50 dark:placeholder-zinc-500"
+                    />
+                  </div>
+                  <p className="mt-1 text-xs text-zinc-500 dark:text-zinc-400">
+                    Choose your donation amount. Every contribution helps reach the ${fundraiser.goalAmount?.toFixed(2) || fundraiser.price.toFixed(2)} goal!
+                  </p>
+                </div>
+
                 <button
                   onClick={handleDonate}
-                  disabled={donating || !isConnected || !hasAcceptedTOS || !isTokenGated}
+                  disabled={donating || !isConnected || !hasAcceptedTOS || !isTokenGated || !customDonationAmount}
                   className="w-full rounded-lg bg-purple-600 px-6 py-3 text-sm font-medium text-white hover:bg-purple-700 disabled:cursor-not-allowed disabled:opacity-50 transition-colors mb-3"
                 >
                   {donating ? 'Processing...' : hasDonated ? '💝 Donate Again' : '💝 Support This Cause'}
@@ -616,7 +662,7 @@ function FundraiserDetail({ params }: { params: Promise<{ id: string }> }) {
             )}
 
             {/* Stats */}
-            <div className="mt-6 grid grid-cols-2 gap-4">
+            <div className="mt-6 grid grid-cols-2 sm:grid-cols-3 gap-4">
               <div className="rounded-lg border border-zinc-200 bg-white p-4 dark:border-zinc-800 dark:bg-zinc-900">
                 <div className="text-xs text-zinc-500 dark:text-zinc-400 mb-1">Views</div>
                 <span className="text-lg font-bold text-zinc-900 dark:text-zinc-50">
@@ -624,12 +670,23 @@ function FundraiserDetail({ params }: { params: Promise<{ id: string }> }) {
                 </span>
               </div>
 
-              {/* Organizer Info */}
               <div className="rounded-lg border border-zinc-200 bg-white p-4 dark:border-zinc-800 dark:bg-zinc-900">
+                <div className="text-xs text-zinc-500 dark:text-zinc-400 mb-1">Donations</div>
+                <span className="text-lg font-bold text-purple-600 dark:text-purple-400">
+                  {donationCount.toLocaleString()}
+                </span>
+              </div>
+
+              {/* Organizer Info */}
+              <div className="rounded-lg border border-zinc-200 bg-white p-4 dark:border-zinc-800 dark:bg-zinc-900 col-span-2 sm:col-span-1">
                 <div className="text-xs text-zinc-500 dark:text-zinc-400 mb-1">Organizer</div>
-                <div className="text-sm font-mono text-zinc-900 dark:text-zinc-50">
-                  {fundraiser.wallet.slice(0, 8)}...{fundraiser.wallet.slice(-6)}
-                </div>
+                <Link
+                  href={`/fundraisers?wallet=${fundraiser.wallet}`}
+                  className="text-xs font-mono text-purple-600 hover:text-purple-700 dark:text-purple-400 dark:hover:text-purple-300 transition-colors block truncate"
+                  title={fundraiser.wallet}
+                >
+                  {fundraiser.wallet.slice(0, 6)}...{fundraiser.wallet.slice(-4)}
+                </Link>
               </div>
             </div>
           </div>
@@ -721,6 +778,80 @@ function FundraiserDetail({ params }: { params: Promise<{ id: string }> }) {
                   Connect your wallet to report
                 </p>
               )}
+            </div>
+          </div>
+        )}
+
+        {/* Recent Donations */}
+        {transactions.length > 0 && (
+          <div className="mt-8">
+            <h2 className="text-2xl font-bold text-zinc-900 dark:text-zinc-50 mb-4">
+              💝 Recent Donations ({donationCount})
+            </h2>
+            <div className="rounded-lg border border-zinc-200 bg-white shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
+              <div className="max-h-96 overflow-y-auto">
+                {transactions.map((txn, index) => (
+                  <div
+                    key={txn._id}
+                    className={`flex items-center justify-between p-4 ${
+                      index !== transactions.length - 1 ? 'border-b border-zinc-200 dark:border-zinc-800' : ''
+                    } hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-colors`}
+                  >
+                    <div className="flex items-center gap-3 flex-1 min-w-0">
+                      <div className="flex h-10 w-10 items-center justify-center rounded-full bg-purple-100 dark:bg-purple-900 flex-shrink-0">
+                        <span className="text-lg">💝</span>
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 mb-1">
+                          <span className="text-sm font-mono text-zinc-900 dark:text-zinc-50 truncate">
+                            {txn.wallet.slice(0, 8)}...{txn.wallet.slice(-6)}
+                          </span>
+                          <span className="text-xs text-zinc-500 dark:text-zinc-400">
+                            {new Date(txn.createdAt).toLocaleDateString()}
+                          </span>
+                        </div>
+                        <div className="text-xs text-zinc-500 dark:text-zinc-400 flex items-center gap-1">
+                          <span>Tx:</span>
+                          <a
+                            href={`https://solscan.io/tx/${txn.txnHash}?cluster=${process.env.NEXT_PUBLIC_SOLANA_NETWORK === 'devnet' ? 'devnet' : 'mainnet'}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="font-mono hover:text-purple-600 dark:hover:text-purple-400 truncate max-w-[150px]"
+                            title={txn.txnHash}
+                          >
+                            {txn.txnHash.slice(0, 8)}...
+                          </a>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="text-right flex-shrink-0 ml-4">
+                      <div className="text-lg font-bold text-purple-600 dark:text-purple-400">
+                        ${txn.amount.toFixed(2)}
+                      </div>
+                      <div className="text-xs text-zinc-500 dark:text-zinc-400">
+                        USDC
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+              
+              {/* Summary Footer */}
+              <div className="border-t border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-800 p-4">
+                <div className="flex items-center justify-between">
+                  <span className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
+                    Total Raised
+                  </span>
+                  <div className="text-right">
+                    <div className="text-2xl font-bold text-purple-600 dark:text-purple-400">
+                      ${totalRaised.toFixed(2)}
+                    </div>
+                    <div className="text-xs text-zinc-500 dark:text-zinc-400">
+                      of ${fundraiser.goalAmount?.toFixed(2) || fundraiser.price.toFixed(2)} goal
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         )}

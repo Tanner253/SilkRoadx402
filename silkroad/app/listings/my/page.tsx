@@ -36,6 +36,7 @@ function MyListingsPageContent() {
   const [error, setError] = useState<string | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [updatingId, setUpdatingId] = useState<string | null>(null);
+  const [activeTab, setActiveTab] = useState<'market' | 'fundraisers'>('market');
   
   // Edit modal state
   const [editingListing, setEditingListing] = useState<Listing | null>(null);
@@ -268,7 +269,7 @@ function MyListingsPageContent() {
         ? `/api/fundraisers/${editingListing._id}/edit`
         : `/api/listings/${editingListing._id}/edit`;
       
-      await axios.post(endpoint, {
+      await axios.put(endpoint, {
         wallet: publicKey.toBase58(),
         title: editFormData.title,
         description: editFormData.description,
@@ -394,35 +395,87 @@ function MyListingsPageContent() {
           </div>
         )}
 
-        {/* Listings Table */}
-        {!loading && !error && listings.length > 0 && (
-          <div className="overflow-hidden rounded-lg border border-zinc-200 bg-white shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
-            <table className="w-full">
-              <thead className="border-b border-zinc-200 bg-zinc-50 dark:border-zinc-800 dark:bg-zinc-800">
-                <tr>
-                  <th className="px-6 py-4 text-left text-xs font-medium uppercase text-zinc-600 dark:text-zinc-400">
-                    Listing
-                  </th>
-                  <th className="px-6 py-4 text-left text-xs font-medium uppercase text-zinc-600 dark:text-zinc-400">
-                    Price
-                  </th>
-                  <th className="px-6 py-4 text-left text-xs font-medium uppercase text-zinc-600 dark:text-zinc-400">
-                    Revenue
-                  </th>
-                  <th className="px-6 py-4 text-left text-xs font-medium uppercase text-zinc-600 dark:text-zinc-400">
-                    Status
-                  </th>
-                  <th className="px-6 py-4 text-left text-xs font-medium uppercase text-zinc-600 dark:text-zinc-400">
-                    Created
-                  </th>
-                  <th className="px-6 py-4 text-right text-xs font-medium uppercase text-zinc-600 dark:text-zinc-400">
-                    Actions
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-zinc-200 dark:divide-zinc-800">
-                {listings.map((listing) => (
-                  <tr key={listing._id} className="hover:bg-zinc-50 dark:hover:bg-zinc-800">
+        {/* Tab Navigation */}
+        {!loading && !error && listings.length > 0 && (() => {
+          // Separate market listings and fundraisers
+          const marketListings = listings.filter(l => l.type !== 'fundraiser');
+          const fundraiserListings = listings.filter(l => l.type === 'fundraiser');
+
+          return (
+            <>
+              {/* Tabs */}
+              <div className="mb-6 border-b border-zinc-200 dark:border-zinc-800">
+                <nav className="flex gap-8" aria-label="Tabs">
+                  <button
+                    onClick={() => setActiveTab('market')}
+                    className={`flex items-center gap-2 border-b-2 pb-4 px-1 text-sm font-medium transition-colors ${
+                      activeTab === 'market'
+                        ? 'border-green-600 text-green-600 dark:text-green-400'
+                        : 'border-transparent text-zinc-500 hover:text-zinc-700 hover:border-zinc-300 dark:text-zinc-400 dark:hover:text-zinc-300'
+                    }`}
+                  >
+                    <span className="text-xl">🏪</span>
+                    <span>Market Items</span>
+                    <span className={`rounded-full px-2.5 py-0.5 text-xs font-medium ${
+                      activeTab === 'market'
+                        ? 'bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300'
+                        : 'bg-zinc-100 text-zinc-600 dark:bg-zinc-800 dark:text-zinc-400'
+                    }`}>
+                      {marketListings.length}
+                    </span>
+                  </button>
+                  <button
+                    onClick={() => setActiveTab('fundraisers')}
+                    className={`flex items-center gap-2 border-b-2 pb-4 px-1 text-sm font-medium transition-colors ${
+                      activeTab === 'fundraisers'
+                        ? 'border-purple-600 text-purple-600 dark:text-purple-400'
+                        : 'border-transparent text-zinc-500 hover:text-zinc-700 hover:border-zinc-300 dark:text-zinc-400 dark:hover:text-zinc-300'
+                    }`}
+                  >
+                    <span className="text-xl">💝</span>
+                    <span>Fundraisers</span>
+                    <span className={`rounded-full px-2.5 py-0.5 text-xs font-medium ${
+                      activeTab === 'fundraisers'
+                        ? 'bg-purple-100 text-purple-700 dark:bg-purple-900 dark:text-purple-300'
+                        : 'bg-zinc-100 text-zinc-600 dark:bg-zinc-800 dark:text-zinc-400'
+                    }`}>
+                      {fundraiserListings.length}
+                    </span>
+                  </button>
+                </nav>
+              </div>
+
+              {/* Tab Content */}
+              <div>
+                {/* Market Items Section */}
+                {activeTab === 'market' && marketListings.length > 0 && (
+                  <div className="overflow-hidden rounded-lg border border-zinc-200 bg-white shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
+                    <table className="w-full">
+                      <thead className="border-b border-zinc-200 bg-zinc-50 dark:border-zinc-800 dark:bg-zinc-800">
+                        <tr>
+                          <th className="px-6 py-4 text-left text-xs font-medium uppercase text-zinc-600 dark:text-zinc-400">
+                            Listing
+                          </th>
+                          <th className="px-6 py-4 text-left text-xs font-medium uppercase text-zinc-600 dark:text-zinc-400">
+                            Price
+                          </th>
+                          <th className="px-6 py-4 text-left text-xs font-medium uppercase text-zinc-600 dark:text-zinc-400">
+                            Revenue
+                          </th>
+                          <th className="px-6 py-4 text-left text-xs font-medium uppercase text-zinc-600 dark:text-zinc-400">
+                            Status
+                          </th>
+                          <th className="px-6 py-4 text-left text-xs font-medium uppercase text-zinc-600 dark:text-zinc-400">
+                            Created
+                          </th>
+                          <th className="px-6 py-4 text-right text-xs font-medium uppercase text-zinc-600 dark:text-zinc-400">
+                            Actions
+                          </th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-zinc-200 dark:divide-zinc-800">
+                        {marketListings.map((listing) => (
+                          <tr key={listing._id} className="hover:bg-zinc-50 dark:hover:bg-zinc-800">
                     <td className="px-6 py-4">
                       <div className="flex items-center space-x-3">
                         <div className="relative h-12 w-12 flex-shrink-0 overflow-hidden rounded-lg">
@@ -515,11 +568,181 @@ function MyListingsPageContent() {
                       </div>
                     </td>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
+
+                {activeTab === 'market' && marketListings.length === 0 && (
+                  <div className="rounded-lg border border-zinc-200 bg-white p-12 text-center dark:border-zinc-800 dark:bg-zinc-900">
+                    <div className="mb-4 text-5xl">🏪</div>
+                    <h2 className="text-xl font-semibold text-zinc-900 dark:text-zinc-50 mb-2">
+                      No market items yet
+                    </h2>
+                    <p className="text-zinc-600 dark:text-zinc-400 mb-6">
+                      Create your first market listing
+                    </p>
+                    <Link
+                      href="/listings/new"
+                      className="inline-flex items-center justify-center rounded-lg bg-green-600 px-6 py-3 text-sm font-medium text-white hover:bg-green-700 transition-colors"
+                    >
+                      Create Market Listing
+                    </Link>
+                  </div>
+                )}
+
+                {/* Fundraisers Section */}
+                {activeTab === 'fundraisers' && fundraiserListings.length > 0 && (
+                  <div>
+                    <div className="mb-4 flex items-center gap-3">
+                      <h2 className="text-2xl font-bold text-zinc-900 dark:text-zinc-50">
+                        💝 Fundraisers
+                      </h2>
+                      <span className="rounded-full bg-purple-100 px-3 py-1 text-sm font-medium text-purple-700 dark:bg-purple-900 dark:text-purple-300">
+                        {fundraiserListings.length}
+                      </span>
+                    </div>
+                    <div className="overflow-hidden rounded-lg border border-zinc-200 bg-white shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
+                    <table className="w-full">
+                      <thead className="border-b border-zinc-200 bg-zinc-50 dark:border-zinc-800 dark:bg-zinc-800">
+                        <tr>
+                          <th className="px-6 py-4 text-left text-xs font-medium uppercase text-zinc-600 dark:text-zinc-400">
+                            Fundraiser
+                          </th>
+                          <th className="px-6 py-4 text-left text-xs font-medium uppercase text-zinc-600 dark:text-zinc-400">
+                            Donation Amount
+                          </th>
+                          <th className="px-6 py-4 text-left text-xs font-medium uppercase text-zinc-600 dark:text-zinc-400">
+                            Revenue
+                          </th>
+                          <th className="px-6 py-4 text-left text-xs font-medium uppercase text-zinc-600 dark:text-zinc-400">
+                            Status
+                          </th>
+                          <th className="px-6 py-4 text-left text-xs font-medium uppercase text-zinc-600 dark:text-zinc-400">
+                            Created
+                          </th>
+                          <th className="px-6 py-4 text-right text-xs font-medium uppercase text-zinc-600 dark:text-zinc-400">
+                            Actions
+                          </th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-zinc-200 dark:divide-zinc-800">
+                        {fundraiserListings.map((listing) => (
+                          <tr key={listing._id} className="hover:bg-zinc-50 dark:hover:bg-zinc-800">
+                            <td className="px-6 py-4">
+                              <div className="flex items-center space-x-3">
+                                <div className="relative h-12 w-12 flex-shrink-0 overflow-hidden rounded-lg">
+                                  <Image
+                                    src={listing.imageUrl}
+                                    alt={listing.title}
+                                    fill
+                                    className="object-cover"
+                                  />
+                                </div>
+                                <div>
+                                  <div className="font-medium text-zinc-900 dark:text-zinc-50">
+                                    {listing.title}
+                                  </div>
+                                  <div className="text-sm text-zinc-500 dark:text-zinc-400">
+                                    {listing.category}
+                                  </div>
+                                </div>
+                              </div>
+                            </td>
+                            <td className="px-6 py-4">
+                              <div className="text-sm font-medium text-zinc-900 dark:text-zinc-50">
+                                ${listing.price.toFixed(2)} USDC
+                              </div>
+                            </td>
+                            <td className="px-6 py-4">
+                              <div className="text-sm font-medium text-green-600 dark:text-green-400">
+                                ${(listing.revenue || 0).toFixed(2)} USDC
+                              </div>
+                              <div className="text-xs text-zinc-500 dark:text-zinc-400">
+                                {listing.salesCount || 0} {listing.salesCount === 1 ? 'donation' : 'donations'}
+                              </div>
+                            </td>
+                            <td className="px-6 py-4">
+                              <span className={`inline-flex rounded-full px-2.5 py-0.5 text-xs font-medium ${getStateColor(listing.state, listing.approved)}`}>
+                                {getStateText(listing.state, listing.approved)}
+                              </span>
+                            </td>
+                            <td className="px-6 py-4">
+                              <div className="text-sm text-zinc-600 dark:text-zinc-400">
+                                {new Date(listing.createdAt).toLocaleDateString()}
+                              </div>
+                            </td>
+                            <td className="px-6 py-4">
+                              <div className="flex items-center justify-end space-x-2">
+                                <Link
+                                  href={`/fundraisers/${listing._id}?from=my-listings`}
+                                  className="text-sm text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300"
+                                >
+                                  View
+                                </Link>
+                                <button
+                                  onClick={() => openEditModal(listing)}
+                                  className="text-sm text-green-600 hover:text-green-700 dark:text-green-400 dark:hover:text-green-300"
+                                >
+                                  Edit
+                                </button>
+                                {listing.state === 'on_market' && listing.approved && (
+                                  <button
+                                    onClick={() => handleDeactivate(listing._id, listing.type)}
+                                    disabled={updatingId === listing._id}
+                                    className="text-sm text-orange-600 hover:text-orange-700 disabled:opacity-50 dark:text-orange-400 dark:hover:text-orange-300"
+                                  >
+                                    {updatingId === listing._id ? 'Updating...' : 'Deactivate'}
+                                  </button>
+                                )}
+                                {listing.state === 'pulled' && (
+                                  <button
+                                    onClick={() => handleReactivate(listing._id, listing.type)}
+                                    disabled={updatingId === listing._id}
+                                    className="text-sm text-green-600 hover:text-green-700 disabled:opacity-50 dark:text-green-400 dark:hover:text-green-300"
+                                  >
+                                    {updatingId === listing._id ? 'Updating...' : 'Reactivate'}
+                                  </button>
+                                )}
+                                <button
+                                  onClick={() => handleDelete(listing._id, listing.type)}
+                                  disabled={deletingId === listing._id}
+                                  className="text-sm text-red-600 hover:text-red-700 disabled:opacity-50 dark:text-red-400 dark:hover:text-red-300"
+                                >
+                                  {deletingId === listing._id ? 'Deleting...' : 'Delete'}
+                                </button>
+                              </div>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                    </div>
+                  </div>
+                )}
+
+                {activeTab === 'fundraisers' && fundraiserListings.length === 0 && (
+                  <div className="rounded-lg border border-zinc-200 bg-white p-12 text-center dark:border-zinc-800 dark:bg-zinc-900">
+                    <div className="mb-4 text-5xl">💝</div>
+                    <h2 className="text-xl font-semibold text-zinc-900 dark:text-zinc-50 mb-2">
+                      No fundraisers yet
+                    </h2>
+                    <p className="text-zinc-600 dark:text-zinc-400 mb-6">
+                      Create your first fundraiser campaign
+                    </p>
+                    <Link
+                      href="/listings/new"
+                      className="inline-flex items-center justify-center rounded-lg bg-purple-600 px-6 py-3 text-sm font-medium text-white hover:bg-purple-700 transition-colors"
+                    >
+                      Create Fundraiser
+                    </Link>
+                  </div>
+                )}
+              </div>
+            </>
+          );
+        })()}
 
         {/* Edit Modal */}
         {editingListing && (
@@ -620,38 +843,59 @@ function MyListingsPageContent() {
                       className="w-full rounded-lg border border-zinc-300 bg-white px-4 py-2 text-zinc-900 focus:border-green-600 focus:ring-2 focus:ring-green-600 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-50"
                       required
                     >
-                      <optgroup label="🤖 Software & Tools">
-                        <option value="Trading Bot">Trading Bot</option>
-                        <option value="API Tool">API Tool</option>
-                        <option value="Script">Script</option>
-                        <option value="NFT Tools">NFT Tools</option>
-                        <option value="Data & Analytics">Data & Analytics</option>
-                        <option value="Marketing Tools">Marketing Tools</option>
-                      </optgroup>
-                      <optgroup label="🎨 Creative Content">
-                        <option value="Art & Design">Art & Design</option>
-                        <option value="Music">Music</option>
-                        <option value="Video Content">Video Content</option>
-                      </optgroup>
-                      <optgroup label="🎮 Gaming">
-                        <option value="Games">Games</option>
-                        <option value="Mods">Mods</option>
-                      </optgroup>
-                      <optgroup label="💼 Services & Access">
-                        <option value="Jobs/Services">Jobs/Services</option>
-                        <option value="Private Access">Private Access</option>
-                        <option value="Call Groups">Call Groups</option>
-                        <option value="Courses & Tutorials">Courses & Tutorials</option>
-                      </optgroup>
-                      <optgroup label="💬 Community Services">
-                        <option value="Telegram Groups">Telegram Groups</option>
-                        <option value="Discord Services">Discord Services</option>
-                        <option value="Social Media">Social Media</option>
-                        <option value="Raid Services">Raid Services</option>
-                      </optgroup>
-                      <optgroup label="⚡ Other">
-                        <option value="Custom">Custom</option>
-                      </optgroup>
+                      {editingListing?.type === 'fundraiser' ? (
+                        <>
+                          <option value="Medical">🏥 Medical</option>
+                          <option value="Education">📚 Education</option>
+                          <option value="Community">🤝 Community</option>
+                          <option value="Emergency">🚨 Emergency</option>
+                          <option value="Animal Welfare">🐾 Animal Welfare</option>
+                          <option value="Environmental">🌍 Environmental</option>
+                          <option value="Arts & Culture">🎭 Arts & Culture</option>
+                          <option value="Technology">💻 Technology</option>
+                          <option value="Sports">⚽ Sports</option>
+                          <option value="Religious">🙏 Religious</option>
+                          <option value="Memorial">🕯️ Memorial</option>
+                          <option value="Business">💼 Business</option>
+                          <option value="Personal">👤 Personal</option>
+                          <option value="Other">⚡ Other</option>
+                        </>
+                      ) : (
+                        <>
+                          <optgroup label="🤖 Software & Tools">
+                            <option value="Trading Bot">Trading Bot</option>
+                            <option value="API Tool">API Tool</option>
+                            <option value="Script">Script</option>
+                            <option value="NFT Tools">NFT Tools</option>
+                            <option value="Data & Analytics">Data & Analytics</option>
+                            <option value="Marketing Tools">Marketing Tools</option>
+                          </optgroup>
+                          <optgroup label="🎨 Creative Content">
+                            <option value="Art & Design">Art & Design</option>
+                            <option value="Music">Music</option>
+                            <option value="Video Content">Video Content</option>
+                          </optgroup>
+                          <optgroup label="🎮 Gaming">
+                            <option value="Games">Games</option>
+                            <option value="Mods">Mods</option>
+                          </optgroup>
+                          <optgroup label="💼 Services & Access">
+                            <option value="Jobs/Services">Jobs/Services</option>
+                            <option value="Private Access">Private Access</option>
+                            <option value="Call Groups">Call Groups</option>
+                            <option value="Courses & Tutorials">Courses & Tutorials</option>
+                          </optgroup>
+                          <optgroup label="💬 Community Services">
+                            <option value="Telegram Groups">Telegram Groups</option>
+                            <option value="Discord Services">Discord Services</option>
+                            <option value="Social Media">Social Media</option>
+                            <option value="Raid Services">Raid Services</option>
+                          </optgroup>
+                          <optgroup label="⚡ Other">
+                            <option value="Custom">Custom</option>
+                          </optgroup>
+                        </>
+                      )}
                     </select>
                   </div>
                 </div>

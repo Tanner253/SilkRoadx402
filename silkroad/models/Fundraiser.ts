@@ -49,6 +49,18 @@ const FundraiserSchema = new Schema<IListing>({
     required: true,
     min: 0.10,
   },
+  goalAmount: {
+    type: Number,
+    required: true,
+    default: 500,
+    min: 1,
+  },
+  raisedAmount: {
+    type: Number,
+    required: true,
+    default: 0,
+    min: 0,
+  },
   category: {
     type: String,
     required: true,

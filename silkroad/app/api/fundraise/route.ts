@@ -31,13 +31,24 @@ import { createLog, getIpFromRequest } from '@/lib/logger';
 
 export async function POST(req: NextRequest) {
   try {
-    const { fundraiserId } = await req.json();
+    const { fundraiserId, customAmount } = await req.json();
 
     if (!fundraiserId) {
       return NextResponse.json(
         { error: 'Fundraiser ID is required' },
         { status: 400 }
       );
+    }
+
+    // Validate custom amount if provided
+    if (customAmount !== undefined) {
+      const amount = parseFloat(customAmount);
+      if (isNaN(amount) || amount < 0.10) {
+        return NextResponse.json(
+          { error: 'Custom donation amount must be at least $0.10 USDC' },
+          { status: 400 }
+        );
+      }
     }
 
     // Check for payment header (indicates this is an actual donation attempt)
@@ -121,6 +132,9 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    // Use custom amount if provided, otherwise use goal amount (price)
+    const donationAmount = customAmount ? parseFloat(customAmount) : fundraiser.price;
+
     // ============================================
     // STEP 1: No payment header → Return 402 Payment Required
     // ============================================
@@ -128,7 +142,7 @@ export async function POST(req: NextRequest) {
       const paymentRequired = createPaymentRequired(
         fundraiserId,
         fundraiser.title,
-        fundraiser.price,
+        donationAmount, // Use custom/specified donation amount
         fundraiser.wallet,
         fundraiser.description
       );
@@ -155,14 +169,14 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Create payment requirements for verification
-    const paymentRequirements = createPaymentRequired(
-      fundraiserId,
-      fundraiser.title,
-      fundraiser.price,
-      fundraiser.wallet,
-      fundraiser.description
-    ).accepts[0];
+        // Create payment requirements for verification (use custom amount)
+        const paymentRequirements = createPaymentRequired(
+          fundraiserId,
+          fundraiser.title,
+          donationAmount, // Use custom/specified donation amount
+          fundraiser.wallet,
+          fundraiser.description
+        ).accepts[0];
 
     // Verify payment via facilitator
     const verifyResult = await verifyPayment({
@@ -215,7 +229,7 @@ export async function POST(req: NextRequest) {
     // Record transaction
     const solanaPayload = paymentPayload.payload as SolanaExactPayload;
     
-    await Transaction.create({
+    const newTransaction = await Transaction.create({
       listingId: fundraiserId,  // Store fundraiser ID in listingId field
       buyerWallet: solanaPayload.from,
       sellerWallet: solanaPayload.to,
@@ -225,20 +239,27 @@ export async function POST(req: NextRequest) {
       status: 'success',
     });
 
-    // Log successful donation
+    // Update fundraiser raised amount (use actual donation amount)
+    await Fundraiser.findByIdAndUpdate(fundraiserId, {
+      $inc: { raisedAmount: donationAmount },
+    });
+
+    console.log(`✅ Updated fundraiser raised amount: +$${donationAmount}`);
+
+    // Log successful donation (use actual amount)
     await createLog(
       'fundraiser_donated',
-      `Donation of $${fundraiser.price} to fundraiser "${fundraiser.title}"`,
+      `Donation of $${donationAmount} to fundraiser "${fundraiser.title}"`,
       solanaPayload.from,
       getIpFromRequest(req)
     );
 
     console.log('✅ Transaction recorded successfully');
 
-    // Return success with thank you/reward URL
+    // Return success with transaction ID for redirect
     return NextResponse.json({
       success: true,
-      deliveryUrl: decryptedUrl,
+      transactionId: newTransaction._id.toString(),
       txHash: solanaPayload.signature,
     }, {
       headers: createPaymentResponseHeaders({

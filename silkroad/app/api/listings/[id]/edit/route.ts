@@ -67,14 +67,46 @@ export async function PUT(
       );
     }
 
-    // Validate category
-    const validCategories = ['Trading Bot', 'API Tool', 'Script', 'Jobs/Services', 'Custom'];
-    if (!validCategories.includes(category)) {
-      return NextResponse.json(
-        { error: 'Invalid category' },
-        { status: 400 }
-      );
-    }
+    // Define valid categories (we'll validate after we know the type)
+    const listingCategories = [
+      'Trading Bot',
+      'API Tool',
+      'Script',
+      'Jobs/Services',
+      'Music',
+      'Games',
+      'Mods',
+      'Private Access',
+      'Call Groups',
+      'Raid Services',
+      'Telegram Groups',
+      'Discord Services',
+      'Art & Design',
+      'Video Content',
+      'Courses & Tutorials',
+      'Data & Analytics',
+      'Marketing Tools',
+      'Social Media',
+      'NFT Tools',
+      'Custom',
+    ];
+    
+    const fundraiserCategories = [
+      'Medical',
+      'Education',
+      'Community',
+      'Emergency',
+      'Animal Welfare',
+      'Environmental',
+      'Arts & Culture',
+      'Technology',
+      'Sports',
+      'Religious',
+      'Memorial',
+      'Business',
+      'Personal',
+      'Other',
+    ];
 
     // Sanitize inputs
     const sanitizedTitle = sanitizeString(title);
@@ -130,10 +162,12 @@ export async function PUT(
 
     // Try to find in Listing collection first
     let listing = await Listing.findById(id);
+    let isFundraiser = false;
     
     // If not found, try Fundraiser collection
     if (!listing) {
       listing = await Fundraiser.findById(id);
+      isFundraiser = true;
     }
     
     if (!listing) {
@@ -151,10 +185,23 @@ export async function PUT(
       );
     }
 
-    // Update the listing
+    // Validate category based on item type
+    const validCategories = isFundraiser ? fundraiserCategories : listingCategories;
+    if (!validCategories.includes(category)) {
+      return NextResponse.json(
+        { error: `Invalid category for this ${isFundraiser ? 'fundraiser' : 'listing'}` },
+        { status: 400 }
+      );
+    }
+
+    // Update the listing/fundraiser
     listing.title = sanitizedTitle;
     listing.description = sanitizedDescription;
     listing.price = priceNum;
+    if (isFundraiser) {
+      // @ts-ignore - Fundraiser has goalAmount field
+      listing.goalAmount = priceNum; // Update goalAmount for fundraisers
+    }
     listing.category = category;
     listing.imageUrl = imageUrl;
     listing.demoVideoUrl = demoVideoUrl ? demoVideoUrl.trim() : listing.demoVideoUrl;

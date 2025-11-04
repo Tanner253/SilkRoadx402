@@ -82,8 +82,25 @@ export async function GET(req: NextRequest) {
       .select('-deliveryUrl') // Never expose delivery URL in list
       .lean();
 
+    // Calculate actual raised amounts from transactions for each fundraiser
+    const fundraisersWithActualAmounts = await Promise.all(
+      rawFundraisers.map(async (fundraiser: any) => {
+        const transactions = await Transaction.find({
+          listingId: fundraiser._id.toString(),
+          status: 'success',
+        });
+        
+        const actualRaisedAmount = transactions.reduce((sum, txn) => sum + txn.amount, 0);
+        
+        return {
+          ...fundraiser,
+          raisedAmount: actualRaisedAmount, // Override with actual amount from transactions
+        };
+      })
+    );
+
     // Sort fundraisers: pinned first (by pinnedAt desc), then unpinned (by createdAt desc)
-    const fundraisers = rawFundraisers.sort((a: any, b: any) => {
+    const fundraisers = fundraisersWithActualAmounts.sort((a: any, b: any) => {
       const aPinned = a.pinned === true;
       const bPinned = b.pinned === true;
       
@@ -257,7 +274,9 @@ export async function POST(req: NextRequest) {
       wallet,
       title: sanitizedTitle,
       description: sanitizedDescription,
-      price: priceNum,
+      price: priceNum, // Store as price for compatibility
+      goalAmount: priceNum, // Use the user's input as the goal amount
+      raisedAmount: 0, // Initialize at 0
       category,
       imageUrl,
       deliveryUrl: encryptedDeliveryUrl,  // Store encrypted

@@ -15,6 +15,7 @@ function NewListingPageContent() {
   const { publicKey } = useWallet();
   const router = useRouter();
 
+  const [listingType, setListingType] = useState<'market' | 'fundraiser'>('market');
   const [formData, setFormData] = useState({
     title: '',
     description: '',
@@ -165,9 +166,11 @@ function NewListingPageContent() {
       console.log('✅ Seller has a valid USDC account');
 
       // ====================================
-      // CREATE LISTING
+      // CREATE LISTING OR FUNDRAISER
       // ====================================
-      const response = await axios.post('/api/listings', {
+      const endpoint = listingType === 'fundraiser' ? '/api/fundraisers' : '/api/listings';
+      
+      const response = await axios.post(endpoint, {
         wallet: publicKey.toBase58(),
         title: formData.title,
         description: formData.description,
@@ -235,11 +238,65 @@ function NewListingPageContent() {
         {/* Header */}
         <div className="mb-8">
           <h1 className="text-4xl font-bold text-zinc-900 dark:text-zinc-50 mb-2">
-            List Your Product
+            {listingType === 'fundraiser' ? 'Create Fundraiser' : 'List Your Product'}
           </h1>
           <p className="text-lg text-zinc-600 dark:text-zinc-400">
-            Create a new listing for the marketplace
+            {listingType === 'fundraiser' ? 'Start a fundraising campaign' : 'Create a new listing for the marketplace'}
           </p>
+        </div>
+
+        {/* Listing Type Selector */}
+        <div className="mb-6 rounded-lg border border-zinc-200 bg-white p-6 shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
+          <label className="mb-3 block text-sm font-medium text-zinc-900 dark:text-zinc-50">
+            Listing Type <span className="text-red-600">*</span>
+          </label>
+          <div className="grid grid-cols-2 gap-4">
+            <button
+              type="button"
+              onClick={() => {
+                setListingType('market');
+                setFormData(prev => ({ ...prev, category: 'Trading Bot' }));
+              }}
+              className={`flex flex-col items-center gap-3 rounded-lg border-2 p-6 transition-all ${
+                listingType === 'market'
+                  ? 'border-green-600 bg-green-50 dark:bg-green-950'
+                  : 'border-zinc-300 hover:border-zinc-400 dark:border-zinc-700 dark:hover:border-zinc-600'
+              }`}
+            >
+              <span className="text-4xl">🏪</span>
+              <div className="text-center">
+                <div className="text-lg font-semibold text-zinc-900 dark:text-zinc-50">
+                  Market Item
+                </div>
+                <div className="text-sm text-zinc-600 dark:text-zinc-400">
+                  Sell software, tools, services
+                </div>
+              </div>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => {
+                setListingType('fundraiser');
+                setFormData(prev => ({ ...prev, category: 'Medical' }));
+              }}
+              className={`flex flex-col items-center gap-3 rounded-lg border-2 p-6 transition-all ${
+                listingType === 'fundraiser'
+                  ? 'border-purple-600 bg-purple-50 dark:bg-purple-950'
+                  : 'border-zinc-300 hover:border-zinc-400 dark:border-zinc-700 dark:hover:border-zinc-600'
+              }`}
+            >
+              <span className="text-4xl">💝</span>
+              <div className="text-center">
+                <div className="text-lg font-semibold text-zinc-900 dark:text-zinc-50">
+                  Fundraiser
+                </div>
+                <div className="text-sm text-zinc-600 dark:text-zinc-400">
+                  Raise funds for a cause
+                </div>
+              </div>
+            </button>
+          </div>
         </div>
 
         {/* Token Gating Warning */}
@@ -327,25 +384,29 @@ function NewListingPageContent() {
             <p className="mt-1 text-xs text-zinc-500">{formData.description.length}/2000 characters (min 50)</p>
           </div>
 
-          {/* Price */}
+          {/* Price / Goal Amount */}
           <div className="mb-6">
             <label className="mb-2 block text-sm font-medium text-zinc-900 dark:text-zinc-50">
-              Price (USDC) <span className="text-red-600">*</span>
+              {listingType === 'fundraiser' ? 'Fundraising Goal (USDC)' : 'Price (USDC)'} <span className="text-red-600">*</span>
             </label>
             <div className="relative">
               <span className="absolute left-4 top-2 text-zinc-500">$</span>
               <input
                 type="number"
                 step="0.01"
-                min="0.10"
+                min={listingType === 'fundraiser' ? '1' : '0.10'}
                 value={formData.price}
                 onChange={(e) => setFormData({ ...formData, price: e.target.value })}
-                placeholder="0.00"
+                placeholder={listingType === 'fundraiser' ? '500.00' : '0.00'}
                 className="w-full rounded-lg border border-zinc-300 bg-white px-4 py-2 pl-8 text-zinc-900 placeholder-zinc-400 focus:border-green-600 focus:outline-none focus:ring-2 focus:ring-green-600 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-50 dark:placeholder-zinc-500"
                 required
               />
             </div>
-            <p className="mt-1 text-xs text-zinc-500">Minimum $0.10 USDC</p>
+            <p className="mt-1 text-xs text-zinc-500">
+              {listingType === 'fundraiser' 
+                ? 'Your fundraising target amount. Donors can contribute any amount they choose.' 
+                : 'Minimum $0.10 USDC'}
+            </p>
           </div>
 
           {/* Category */}
@@ -359,39 +420,61 @@ function NewListingPageContent() {
               className="w-full rounded-lg border border-zinc-300 bg-white px-4 py-2 text-zinc-900 focus:border-green-600 focus:outline-none focus:ring-2 focus:ring-green-600 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-50"
               required
             >
-              <option value="">Select a category...</option>
-              <optgroup label="🤖 Software & Tools">
-                <option value="Trading Bot">Trading Bot</option>
-                <option value="API Tool">API Tool</option>
-                <option value="Script">Script</option>
-                <option value="NFT Tools">NFT Tools</option>
-                <option value="Data & Analytics">Data & Analytics</option>
-                <option value="Marketing Tools">Marketing Tools</option>
-              </optgroup>
-              <optgroup label="🎨 Creative Content">
-                <option value="Art & Design">Art & Design</option>
-                <option value="Music">Music</option>
-                <option value="Video Content">Video Content</option>
-              </optgroup>
-              <optgroup label="🎮 Gaming">
-                <option value="Games">Games</option>
-                <option value="Mods">Mods</option>
-              </optgroup>
-              <optgroup label="💼 Services & Access">
-                <option value="Jobs/Services">Jobs/Services</option>
-                <option value="Private Access">Private Access</option>
-                <option value="Call Groups">Call Groups</option>
-                <option value="Courses & Tutorials">Courses & Tutorials</option>
-              </optgroup>
-              <optgroup label="💬 Community Services">
-                <option value="Telegram Groups">Telegram Groups</option>
-                <option value="Discord Services">Discord Services</option>
-                <option value="Social Media">Social Media</option>
-                <option value="Raid Services">Raid Services</option>
-              </optgroup>
-              <optgroup label="⚡ Other">
-                <option value="Custom">Custom</option>
-              </optgroup>
+              {listingType === 'market' ? (
+                <>
+                  <option value="">Select a category...</option>
+                  <optgroup label="🤖 Software & Tools">
+                    <option value="Trading Bot">Trading Bot</option>
+                    <option value="API Tool">API Tool</option>
+                    <option value="Script">Script</option>
+                    <option value="NFT Tools">NFT Tools</option>
+                    <option value="Data & Analytics">Data & Analytics</option>
+                    <option value="Marketing Tools">Marketing Tools</option>
+                  </optgroup>
+                  <optgroup label="🎨 Creative Content">
+                    <option value="Art & Design">Art & Design</option>
+                    <option value="Music">Music</option>
+                    <option value="Video Content">Video Content</option>
+                  </optgroup>
+                  <optgroup label="🎮 Gaming">
+                    <option value="Games">Games</option>
+                    <option value="Mods">Mods</option>
+                  </optgroup>
+                  <optgroup label="💼 Services & Access">
+                    <option value="Jobs/Services">Jobs/Services</option>
+                    <option value="Private Access">Private Access</option>
+                    <option value="Call Groups">Call Groups</option>
+                    <option value="Courses & Tutorials">Courses & Tutorials</option>
+                  </optgroup>
+                  <optgroup label="💬 Community Services">
+                    <option value="Telegram Groups">Telegram Groups</option>
+                    <option value="Discord Services">Discord Services</option>
+                    <option value="Social Media">Social Media</option>
+                    <option value="Raid Services">Raid Services</option>
+                  </optgroup>
+                  <optgroup label="⚡ Other">
+                    <option value="Custom">Custom</option>
+                  </optgroup>
+                </>
+              ) : (
+                <>
+                  <option value="">Select a category...</option>
+                  <option value="Medical">🏥 Medical</option>
+                  <option value="Education">📚 Education</option>
+                  <option value="Community">🤝 Community</option>
+                  <option value="Emergency">🚨 Emergency</option>
+                  <option value="Animal Welfare">🐾 Animal Welfare</option>
+                  <option value="Environmental">🌍 Environmental</option>
+                  <option value="Arts & Culture">🎭 Arts & Culture</option>
+                  <option value="Technology">💻 Technology</option>
+                  <option value="Sports">⚽ Sports</option>
+                  <option value="Religious">🙏 Religious</option>
+                  <option value="Memorial">🕯️ Memorial</option>
+                  <option value="Business">💼 Business</option>
+                  <option value="Personal">👤 Personal</option>
+                  <option value="Other">⚡ Other</option>
+                </>
+              )}
             </select>
           </div>
 

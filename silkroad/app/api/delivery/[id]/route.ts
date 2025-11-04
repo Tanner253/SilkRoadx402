@@ -3,6 +3,8 @@ import { CONFIG } from '@/config/constants';
 import { mockStore } from '@/lib/mockStore';
 import { connectDB } from '@/lib/db';
 import { Transaction } from '@/models/Transaction';
+import { Listing } from '@/models/Listing';
+import { Fundraiser } from '@/models/Fundraiser';
 import { safeDecrypt } from '@/lib/crypto/encryption';
 
 export async function GET(
@@ -59,11 +61,33 @@ export async function GET(
     // safeDecrypt handles legacy unencrypted data without errors
     const decryptedUrl = safeDecrypt(transaction.deliveryUrl);
 
+    // Fetch listing or fundraiser details
+    let itemDetails = null;
+    let itemType = 'listing';
+    
+    // Try to find as listing first
+    let item = await Listing.findById(transaction.listingId);
+    
+    // If not found, try fundraiser
+    if (!item) {
+      item = await Fundraiser.findById(transaction.listingId);
+      itemType = 'fundraiser';
+    }
+    
+    if (item) {
+      itemDetails = {
+        title: item.title,
+        category: item.category,
+        type: itemType,
+      };
+    }
+
     return NextResponse.json({
       success: true,
       transaction: {
         ...transaction.toObject(),
         deliveryUrl: decryptedUrl,
+        itemDetails,
       },
     });
   } catch (error: any) {

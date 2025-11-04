@@ -12,6 +12,11 @@ interface Transaction {
   deliveryUrl: string;
   amount: number;
   createdAt: Date;
+  itemDetails?: {
+    title: string;
+    category: string;
+    type: string;
+  };
 }
 
 export default function DeliveryPage({ params }: { params: Promise<{ id: string }> }) {
@@ -95,10 +100,22 @@ export default function DeliveryPage({ params }: { params: Promise<{ id: string 
             </div>
           </div>
           <h1 className="text-3xl font-bold text-zinc-900 dark:text-zinc-50 mb-2">
-            Purchase Successful!
+            {transaction.itemDetails?.type === 'fundraiser' ? 'Donation Successful!' : 'Purchase Successful!'}
           </h1>
-          <p className="text-zinc-600 dark:text-zinc-400">
-            Your software is ready for download
+          {transaction.itemDetails && (
+            <div className="mt-3">
+              <p className="text-lg font-semibold text-zinc-900 dark:text-zinc-50">
+                {transaction.itemDetails.title}
+              </p>
+              <p className="text-sm text-zinc-600 dark:text-zinc-400 mt-1">
+                <span className="inline-flex items-center rounded-full bg-zinc-100 px-3 py-1 text-xs font-medium text-zinc-800 dark:bg-zinc-800 dark:text-zinc-200">
+                  {transaction.itemDetails.type === 'fundraiser' ? '💝' : '📦'} {transaction.itemDetails.category}
+                </span>
+              </p>
+            </div>
+          )}
+          <p className="text-zinc-600 dark:text-zinc-400 mt-2">
+            Thank you for your support
           </p>
         </div>
 
@@ -106,10 +123,10 @@ export default function DeliveryPage({ params }: { params: Promise<{ id: string 
         <div className="mb-6 rounded-lg border border-zinc-200 bg-white p-8 shadow-lg dark:border-zinc-800 dark:bg-zinc-900">
           <div className="mb-4">
             <h2 className="text-lg font-semibold text-zinc-900 dark:text-zinc-50 mb-2">
-              Download Link
+              Reward / Thank You Link
             </h2>
             <p className="text-sm text-zinc-600 dark:text-zinc-400 mb-4">
-              Click the link below or copy it to download your software:
+              Click the link below or copy it to access your content:
             </p>
           </div>
 
@@ -138,9 +155,9 @@ export default function DeliveryPage({ params }: { params: Promise<{ id: string 
             href={transaction.deliveryUrl}
             target="_blank"
             rel="noopener noreferrer"
-            className="block w-full rounded-lg bg-blue-600 py-3 text-center text-sm font-medium text-white hover:bg-blue-700 transition-colors"
+            className="block w-full rounded-lg bg-green-600 py-3 text-center text-sm font-medium text-white hover:bg-green-700 transition-colors"
           >
-            Download Now
+            Access Now
           </a>
         </div>
 
@@ -168,7 +185,7 @@ export default function DeliveryPage({ params }: { params: Promise<{ id: string 
               <dd className="font-mono text-zinc-900 dark:text-zinc-50">{transaction._id}</dd>
             </div>
             <div className="flex justify-between">
-              <dt className="text-zinc-600 dark:text-zinc-400">Amount Paid:</dt>
+              <dt className="text-zinc-600 dark:text-zinc-400">Amount:</dt>
               <dd className="font-medium text-zinc-900 dark:text-zinc-50">${transaction.amount.toFixed(2)} USDC</dd>
             </div>
             <div className="flex justify-between">

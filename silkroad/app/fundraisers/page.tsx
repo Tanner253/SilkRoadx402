@@ -15,6 +15,8 @@ interface Fundraiser {
   description: string;
   imageUrl: string;
   price: number;
+  goalAmount?: number;
+  raisedAmount?: number;
   category: string;
   riskLevel: 'standard' | 'high-risk';
   pinned?: boolean;
@@ -352,7 +354,7 @@ function FundraisersPageContent() {
                 {filteredFundraisers.map((fundraiser) => (
                   <div
                     key={fundraiser._id}
-                    className="group overflow-hidden rounded-lg border border-zinc-200 bg-white shadow-sm transition-all hover:shadow-md dark:border-zinc-800 dark:bg-zinc-900"
+                    className="group relative overflow-hidden rounded-lg border border-zinc-200 bg-white shadow-sm transition-all hover:shadow-md dark:border-zinc-800 dark:bg-zinc-900"
                   >
                     {/* Image */}
                     <div className="relative h-48 w-full overflow-hidden bg-zinc-100 dark:bg-zinc-800">
@@ -386,19 +388,29 @@ function FundraisersPageContent() {
                         {fundraiser.description}
                       </p>
 
-                      <div className="flex items-center justify-between">
-                        <div>
-                          <span className="text-xs text-zinc-500 dark:text-zinc-500">Amount</span>
-                          <p className="text-lg font-bold text-zinc-900 dark:text-zinc-50">
-                            ${fundraiser.price.toFixed(2)} USDC
-                          </p>
+                      {/* Progress Bar */}
+                      <div className="mb-4">
+                        <div className="flex items-center justify-between text-xs text-zinc-600 dark:text-zinc-400 mb-1">
+                          <span className="font-medium">${(fundraiser.raisedAmount || 0).toFixed(2)} raised</span>
+                          <span>of ${(fundraiser.goalAmount || fundraiser.price).toFixed(2)}</span>
                         </div>
+                        <div className="h-2 w-full rounded-full bg-zinc-200 dark:bg-zinc-700 overflow-hidden">
+                          <div 
+                            className="h-full bg-gradient-to-r from-purple-600 to-pink-600 transition-all duration-500"
+                            style={{ width: `${Math.min(((fundraiser.raisedAmount || 0) / (fundraiser.goalAmount || fundraiser.price)) * 100, 100)}%` }}
+                          />
+                        </div>
+                        <div className="text-xs text-purple-600 dark:text-purple-400 mt-1 font-medium">
+                          {Math.round(((fundraiser.raisedAmount || 0) / (fundraiser.goalAmount || fundraiser.price)) * 100)}% funded
+                        </div>
+                      </div>
 
+                      <div className="flex items-center justify-end">
                         <Link
                           href={`/fundraisers/${fundraiser._id}`}
-                          className="rounded-lg bg-green-600 px-4 py-2 text-sm font-medium text-white hover:bg-green-700 transition-colors"
+                          className="rounded-lg bg-purple-600 px-6 py-2 text-sm font-medium text-white hover:bg-purple-700 transition-colors"
                         >
-                          View Details
+                          💝 Donate Now
                         </Link>
                       </div>
 
@@ -416,6 +428,15 @@ function FundraisersPageContent() {
                         </span>
                       </div>
                     </div>
+
+                    {/* Bottom Progress Bar - Visual indicator at card bottom */}
+                    <div className="absolute bottom-0 left-0 right-0 h-1.5 bg-zinc-200 dark:bg-zinc-700 overflow-hidden">
+                      <div 
+                        className="h-full bg-gradient-to-r from-green-500 to-emerald-600 transition-all duration-500"
+                        style={{ width: `${Math.min(((fundraiser.raisedAmount || 0) / (fundraiser.goalAmount || fundraiser.price)) * 100, 100)}%` }}
+                        title={`${Math.round(((fundraiser.raisedAmount || 0) / (fundraiser.goalAmount || fundraiser.price)) * 100)}% funded`}
+                      />
+                    </div>
                   </div>
                 ))}
               </div>
@@ -428,7 +449,15 @@ function FundraisersPageContent() {
                     href={`/fundraisers/${fundraiser._id}`}
                     className="group block"
                   >
-                    <div className="flex items-center gap-3 rounded-lg border border-zinc-200 bg-white px-4 py-2 transition-all hover:border-green-500 hover:bg-green-50 dark:border-zinc-800 dark:bg-zinc-900 dark:hover:border-green-500 dark:hover:bg-green-950/30 max-h-[50px]">
+                    <div className="relative flex items-center gap-3 rounded-lg border border-zinc-200 bg-white px-4 py-2 transition-all hover:border-purple-500 hover:bg-purple-50 dark:border-zinc-800 dark:bg-zinc-900 dark:hover:border-purple-500 dark:hover:bg-purple-950/30 overflow-hidden">
+                      {/* Background Progress Bar */}
+                      <div className="absolute bottom-0 left-0 right-0 h-1 bg-zinc-200 dark:bg-zinc-700">
+                        <div 
+                          className="h-full bg-gradient-to-r from-purple-600 to-pink-600 transition-all duration-500"
+                          style={{ width: `${Math.min(((fundraiser.raisedAmount || 0) / (fundraiser.goalAmount || fundraiser.price)) * 100, 100)}%` }}
+                        />
+                      </div>
+
                       {/* Status Badges */}
                       <div className="flex items-center gap-1 flex-shrink-0">
                         {fundraiser.pinned === true && (
@@ -441,32 +470,39 @@ function FundraisersPageContent() {
 
                       {/* Title */}
                       <div className="flex-1 min-w-0">
-                        <h3 className="text-sm font-semibold text-zinc-900 dark:text-zinc-50 truncate group-hover:text-green-600 dark:group-hover:text-green-400">
+                        <h3 className="text-sm font-semibold text-zinc-900 dark:text-zinc-50 truncate group-hover:text-purple-600 dark:group-hover:text-purple-400">
                           {fundraiser.title}
                         </h3>
                       </div>
 
+                      {/* Progress Amount (Mobile & Up) */}
+                      <div className="flex items-center gap-1 text-xs text-purple-600 dark:text-purple-400 font-medium flex-shrink-0">
+                        <span className="hidden sm:inline">${(fundraiser.raisedAmount || 0).toFixed(0)}</span>
+                        <span className="hidden sm:inline text-zinc-400">/</span>
+                        <span className="hidden sm:inline">${(fundraiser.goalAmount || fundraiser.price).toFixed(0)}</span>
+                      </div>
+
                       {/* Category */}
-                      <span className="hidden sm:inline-flex items-center rounded-full bg-zinc-100 px-2 py-0.5 text-xs font-medium text-zinc-700 dark:bg-zinc-800 dark:text-zinc-300 flex-shrink-0">
+                      <span className="hidden md:inline-flex items-center rounded-full bg-zinc-100 px-2 py-0.5 text-xs font-medium text-zinc-700 dark:bg-zinc-800 dark:text-zinc-300 flex-shrink-0">
                         {fundraiser.category}
                       </span>
 
                       {/* Organizer */}
-                      <span className="hidden md:block text-xs text-zinc-500 dark:text-zinc-400 font-mono flex-shrink-0">
+                      <span className="hidden lg:block text-xs text-zinc-500 dark:text-zinc-400 font-mono flex-shrink-0">
                         {truncateWallet(fundraiser.wallet)}
                       </span>
 
                       {/* Views */}
-                      <span className="hidden lg:flex items-center gap-1 text-xs text-zinc-500 dark:text-zinc-400 flex-shrink-0">
+                      <span className="hidden xl:flex items-center gap-1 text-xs text-zinc-500 dark:text-zinc-400 flex-shrink-0">
                         👁️ {fundraiser.views || 0}
                       </span>
 
-                      {/* Amount */}
+                      {/* Percentage */}
                       <div className="flex items-center gap-2 flex-shrink-0">
-                        <span className="text-sm font-bold text-zinc-900 dark:text-zinc-50">
-                          ${fundraiser.price.toFixed(2)}
+                        <span className="text-xs text-purple-600 dark:text-purple-400 font-bold">
+                          {Math.round(((fundraiser.raisedAmount || 0) / (fundraiser.goalAmount || fundraiser.price)) * 100)}%
                         </span>
-                        <svg className="w-4 h-4 text-zinc-400 group-hover:text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <svg className="w-4 h-4 text-zinc-400 group-hover:text-purple-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                         </svg>
                       </div>

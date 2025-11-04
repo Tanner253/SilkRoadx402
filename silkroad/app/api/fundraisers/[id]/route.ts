@@ -38,9 +38,21 @@ export async function GET(
       );
     }
 
+    // Calculate actual raised amount from transactions (source of truth)
+    const { Transaction } = await import('@/models/Transaction');
+    const transactions = await Transaction.find({
+      listingId: id,
+      status: 'success',
+    });
+    
+    const actualRaisedAmount = transactions.reduce((sum: number, txn: any) => sum + txn.amount, 0);
+
     return NextResponse.json({
       success: true,
-      fundraiser,
+      fundraiser: {
+        ...fundraiser.toObject(),
+        raisedAmount: actualRaisedAmount, // Override with actual amount from transactions
+      },
     });
   } catch (error: any) {
     console.error('Get fundraiser error:', error);
