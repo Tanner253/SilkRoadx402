@@ -30,6 +30,8 @@ export interface IListing extends Document {
   failedPurchaseCount: number;
   lastFailureAt?: Date;
   views: number;
+  goalAmount?: number; // For fundraisers
+  raisedAmount?: number; // For fundraisers
   createdAt: Date;
   updatedAt: Date;
 }

@@ -70,14 +70,14 @@ export default function AdminDashboardPage() {
   // Auto-refresh listings every 30 seconds (logs handle their own refresh)
   useEffect(() => {
     if (!autoRefresh) return;
-    
-    if (activeTab === 'listings' || activeTab === 'fundraisers') {
-      const interval = setInterval(() => {
-        console.log('🔄 Auto-refreshing listings...');
-        fetchListings();
-      }, 30000); // 30 seconds
 
-      return () => clearInterval(interval);
+    if (activeTab === 'listings' || activeTab === 'fundraisers') {
+    const interval = setInterval(() => {
+      console.log('🔄 Auto-refreshing listings...');
+      fetchListings();
+    }, 30000); // 30 seconds
+
+    return () => clearInterval(interval);
     } else if (activeTab === 'reports') {
       const interval = setInterval(() => {
         console.log('🔄 Auto-refreshing reports...');

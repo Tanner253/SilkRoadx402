@@ -449,33 +449,33 @@ function MyListingsPageContent() {
               <div>
                 {/* Market Items Section */}
                 {activeTab === 'market' && marketListings.length > 0 && (
-                  <div className="overflow-hidden rounded-lg border border-zinc-200 bg-white shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
-                    <table className="w-full">
-                      <thead className="border-b border-zinc-200 bg-zinc-50 dark:border-zinc-800 dark:bg-zinc-800">
-                        <tr>
-                          <th className="px-6 py-4 text-left text-xs font-medium uppercase text-zinc-600 dark:text-zinc-400">
-                            Listing
-                          </th>
-                          <th className="px-6 py-4 text-left text-xs font-medium uppercase text-zinc-600 dark:text-zinc-400">
-                            Price
-                          </th>
-                          <th className="px-6 py-4 text-left text-xs font-medium uppercase text-zinc-600 dark:text-zinc-400">
-                            Revenue
-                          </th>
-                          <th className="px-6 py-4 text-left text-xs font-medium uppercase text-zinc-600 dark:text-zinc-400">
-                            Status
-                          </th>
-                          <th className="px-6 py-4 text-left text-xs font-medium uppercase text-zinc-600 dark:text-zinc-400">
-                            Created
-                          </th>
-                          <th className="px-6 py-4 text-right text-xs font-medium uppercase text-zinc-600 dark:text-zinc-400">
-                            Actions
-                          </th>
-                        </tr>
-                      </thead>
-                      <tbody className="divide-y divide-zinc-200 dark:divide-zinc-800">
+          <div className="overflow-hidden rounded-lg border border-zinc-200 bg-white shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
+            <table className="w-full">
+              <thead className="border-b border-zinc-200 bg-zinc-50 dark:border-zinc-800 dark:bg-zinc-800">
+                <tr>
+                  <th className="px-6 py-4 text-left text-xs font-medium uppercase text-zinc-600 dark:text-zinc-400">
+                    Listing
+                  </th>
+                  <th className="px-6 py-4 text-left text-xs font-medium uppercase text-zinc-600 dark:text-zinc-400">
+                    Price
+                  </th>
+                  <th className="px-6 py-4 text-left text-xs font-medium uppercase text-zinc-600 dark:text-zinc-400">
+                    Revenue
+                  </th>
+                  <th className="px-6 py-4 text-left text-xs font-medium uppercase text-zinc-600 dark:text-zinc-400">
+                    Status
+                  </th>
+                  <th className="px-6 py-4 text-left text-xs font-medium uppercase text-zinc-600 dark:text-zinc-400">
+                    Created
+                  </th>
+                  <th className="px-6 py-4 text-right text-xs font-medium uppercase text-zinc-600 dark:text-zinc-400">
+                    Actions
+                  </th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-zinc-200 dark:divide-zinc-800">
                         {marketListings.map((listing) => (
-                          <tr key={listing._id} className="hover:bg-zinc-50 dark:hover:bg-zinc-800">
+                  <tr key={listing._id} className="hover:bg-zinc-50 dark:hover:bg-zinc-800">
                     <td className="px-6 py-4">
                       <div className="flex items-center space-x-3">
                         <div className="relative h-12 w-12 flex-shrink-0 overflow-hidden rounded-lg">
@@ -488,8 +488,8 @@ function MyListingsPageContent() {
                         </div>
                         <div>
                           <div className="flex items-center gap-2">
-                            <div className="font-medium text-zinc-900 dark:text-zinc-50">
-                              {listing.title}
+                          <div className="font-medium text-zinc-900 dark:text-zinc-50">
+                            {listing.title}
                             </div>
                             {listing.type === 'fundraiser' && (
                               <span className="inline-flex items-center gap-1 rounded-full bg-purple-100 px-2 py-0.5 text-xs font-medium text-purple-700 dark:bg-purple-900 dark:text-purple-300">
@@ -560,7 +560,7 @@ function MyListingsPageContent() {
                         )}
                         <button
                         onClick={() => handleDelete(listing._id, listing.type)}
-                        disabled={deletingId === listing._id}
+                          disabled={deletingId === listing._id}
                           className="text-sm text-red-600 hover:text-red-700 disabled:opacity-50 dark:text-red-400 dark:hover:text-red-300"
                         >
                           {deletingId === listing._id ? 'Deleting...' : 'Delete'}
@@ -568,11 +568,11 @@ function MyListingsPageContent() {
                       </div>
                     </td>
                   </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-                )}
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
 
                 {activeTab === 'market' && marketListings.length === 0 && (
                   <div className="rounded-lg border border-zinc-200 bg-white p-12 text-center dark:border-zinc-800 dark:bg-zinc-900">
@@ -862,38 +862,38 @@ function MyListingsPageContent() {
                         </>
                       ) : (
                         <>
-                          <optgroup label="🤖 Software & Tools">
-                            <option value="Trading Bot">Trading Bot</option>
-                            <option value="API Tool">API Tool</option>
-                            <option value="Script">Script</option>
-                            <option value="NFT Tools">NFT Tools</option>
-                            <option value="Data & Analytics">Data & Analytics</option>
-                            <option value="Marketing Tools">Marketing Tools</option>
-                          </optgroup>
-                          <optgroup label="🎨 Creative Content">
-                            <option value="Art & Design">Art & Design</option>
-                            <option value="Music">Music</option>
-                            <option value="Video Content">Video Content</option>
-                          </optgroup>
-                          <optgroup label="🎮 Gaming">
-                            <option value="Games">Games</option>
-                            <option value="Mods">Mods</option>
-                          </optgroup>
-                          <optgroup label="💼 Services & Access">
-                            <option value="Jobs/Services">Jobs/Services</option>
-                            <option value="Private Access">Private Access</option>
-                            <option value="Call Groups">Call Groups</option>
-                            <option value="Courses & Tutorials">Courses & Tutorials</option>
-                          </optgroup>
-                          <optgroup label="💬 Community Services">
-                            <option value="Telegram Groups">Telegram Groups</option>
-                            <option value="Discord Services">Discord Services</option>
-                            <option value="Social Media">Social Media</option>
-                            <option value="Raid Services">Raid Services</option>
-                          </optgroup>
-                          <optgroup label="⚡ Other">
-                            <option value="Custom">Custom</option>
-                          </optgroup>
+                      <optgroup label="🤖 Software & Tools">
+                        <option value="Trading Bot">Trading Bot</option>
+                        <option value="API Tool">API Tool</option>
+                        <option value="Script">Script</option>
+                        <option value="NFT Tools">NFT Tools</option>
+                        <option value="Data & Analytics">Data & Analytics</option>
+                        <option value="Marketing Tools">Marketing Tools</option>
+                      </optgroup>
+                      <optgroup label="🎨 Creative Content">
+                        <option value="Art & Design">Art & Design</option>
+                        <option value="Music">Music</option>
+                        <option value="Video Content">Video Content</option>
+                      </optgroup>
+                      <optgroup label="🎮 Gaming">
+                        <option value="Games">Games</option>
+                        <option value="Mods">Mods</option>
+                      </optgroup>
+                      <optgroup label="💼 Services & Access">
+                        <option value="Jobs/Services">Jobs/Services</option>
+                        <option value="Private Access">Private Access</option>
+                        <option value="Call Groups">Call Groups</option>
+                        <option value="Courses & Tutorials">Courses & Tutorials</option>
+                      </optgroup>
+                      <optgroup label="💬 Community Services">
+                        <option value="Telegram Groups">Telegram Groups</option>
+                        <option value="Discord Services">Discord Services</option>
+                        <option value="Social Media">Social Media</option>
+                        <option value="Raid Services">Raid Services</option>
+                      </optgroup>
+                      <optgroup label="⚡ Other">
+                        <option value="Custom">Custom</option>
+                      </optgroup>
                         </>
                       )}
                     </select>

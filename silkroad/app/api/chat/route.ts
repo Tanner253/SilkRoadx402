@@ -40,7 +40,7 @@ export async function GET(req: NextRequest) {
       .sort({ createdAt: -1 })
       .limit(limit)
       .lean();
-    
+
     const messagesWithReplies = messages.filter((m: any) => m.replyTo);
     if (messagesWithReplies.length > 0) {
       console.log(`📬 Found ${messagesWithReplies.length} messages with replyTo field before enrichment`);
@@ -76,10 +76,10 @@ export async function GET(req: NextRequest) {
           }
           
           enriched.listing = listing ? {
-            _id: listing._id.toString(),
-            title: listing.title,
-            price: listing.price,
-            imageUrl: listing.imageUrl,
+              _id: listing._id.toString(),
+              title: listing.title,
+              price: listing.price,
+              imageUrl: listing.imageUrl,
             type: listing ? (await Listing.findById(msg.listingId) ? 'listing' : 'fundraiser') : undefined,
           } : null;
         }
@@ -233,7 +233,7 @@ export async function POST(req: NextRequest) {
     };
     
     console.log(`💬 Creating chat message with data:`, chatMessageData);
-    
+
     const chatMessage = await ChatMessage.create(chatMessageData);
     
     console.log(`✅ Chat message created with ID: ${chatMessage._id}, replyTo: ${chatMessage.replyTo || 'none'}`);

@@ -72,8 +72,8 @@ export function Navbar() {
         {/* Navigation Links */}
         <div className="hidden md:flex items-center space-x-6">
           {/* Market, Fundraisers & Leaderboard - Always visible */}
-          <Link
-            href="/browse"
+          <Link 
+            href="/browse" 
             className="text-sm font-medium text-orange-200 hover:text-orange-100 transition-colors"
           >
             Market
@@ -237,8 +237,8 @@ export function Navbar() {
               {/* Navigation Links */}
               <nav className="flex flex-col space-y-2">
                 {/* Market, Fundraisers & Leaderboard - Always visible */}
-                <Link
-                  href="/browse"
+                <Link 
+                  href="/browse" 
                   className={`flex items-center gap-3 rounded-lg px-4 py-3 text-base font-medium transition-colors ${
                     pathname === '/browse'
                       ? 'bg-green-50 text-green-600 dark:bg-green-900/20 dark:text-green-400'

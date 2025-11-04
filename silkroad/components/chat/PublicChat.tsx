@@ -347,8 +347,8 @@ export function PublicChat() {
                   />
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-1">
-                      <div className="text-yellow-300 font-bold truncate text-xs">
-                        {msg.listing.title}
+                    <div className="text-yellow-300 font-bold truncate text-xs">
+                      {msg.listing.title}
                       </div>
                       {msg.listing.type === 'fundraiser' && (
                         <span className="text-purple-400 text-[10px]">💝</span>
