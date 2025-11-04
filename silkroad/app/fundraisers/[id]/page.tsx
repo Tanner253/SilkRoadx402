@@ -131,10 +131,39 @@ function FundraiserDetail({ params }: { params: Promise<{ id: string }> }) {
   }, [mounted, id]);
 
   useEffect(() => {
+    if (mounted && id && publicKey) {
+      checkDonationStatus();
+    }
+  }, [mounted, id, publicKey, comments]);
+
+  useEffect(() => {
     if (fundraiser && fundraiser.riskLevel === 'high-risk') {
       setShowWarning(true);
     }
   }, [fundraiser]);
+
+  const checkDonationStatus = async () => {
+    if (!publicKey) return;
+    
+    try {
+      const response = await axios.get('/api/transactions', {
+        params: {
+          wallet: publicKey.toBase58(),
+          type: 'purchases',
+        },
+      });
+      
+      const purchases = response.data.transactions || [];
+      const donated = purchases.some((tx: any) => tx.listingId === id && tx.status === 'success');
+      setHasDonated(donated);
+      
+      // Check if already commented
+      const commented = comments.some((c: any) => c.buyerWallet === publicKey.toBase58());
+      setHasCommented(commented);
+    } catch (err: any) {
+      console.error('Failed to check donation status:', err);
+    }
+  };
 
   const handleDonate = async () => {
     if (!publicKey || !fundraiser) return;
@@ -421,7 +450,7 @@ function FundraiserDetail({ params }: { params: Promise<{ id: string }> }) {
     try {
       setSubmittingComment(true);
       await axios.post(`/api/fundraisers/${fundraiser._id}/comments`, {
-        buyerWallet: publicKey.toBase58(),
+        wallet: publicKey.toBase58(),
         comment: newComment.trim(),
       });
       setNewComment('');
@@ -925,23 +954,28 @@ function FundraiserDetail({ params }: { params: Promise<{ id: string }> }) {
 
           {/* Comment Form */}
           {hasDonated && !hasCommented && (
-            <form onSubmit={handleSubmitComment} className="mt-6">
-              <textarea
-                value={newComment}
-                onChange={(e) => setNewComment(e.target.value)}
-                placeholder="Share your thoughts about this fundraiser (max 200 characters)"
-                maxLength={200}
-                rows={3}
-                className="w-full rounded-lg border border-zinc-300 bg-white px-4 py-3 text-sm text-zinc-900 placeholder-zinc-400 focus:border-purple-600 focus:outline-none focus:ring-2 focus:ring-purple-600 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-50 dark:placeholder-zinc-500 mb-3"
-              />
-              <button
-                type="submit"
-                disabled={submittingComment || !newComment.trim()}
-                className="rounded-lg bg-purple-600 px-6 py-2 text-sm font-medium text-white hover:bg-purple-700 disabled:cursor-not-allowed disabled:opacity-50 transition-colors"
-              >
-                {submittingComment ? 'Submitting...' : 'Post Review'}
-              </button>
-            </form>
+            <div className="mt-6 rounded-lg border-2 border-purple-200 bg-purple-50 p-6 dark:border-purple-900 dark:bg-purple-950">
+              <h3 className="text-lg font-bold text-purple-900 dark:text-purple-100 mb-3">
+                Leave a Review
+              </h3>
+              <form onSubmit={handleSubmitComment}>
+                <textarea
+                  value={newComment}
+                  onChange={(e) => setNewComment(e.target.value)}
+                  placeholder="Share your thoughts about this fundraiser... (max 200 characters)"
+                  maxLength={200}
+                  rows={3}
+                  className="w-full rounded-lg border border-zinc-300 bg-white px-4 py-3 text-sm text-zinc-900 placeholder-zinc-400 focus:border-purple-600 focus:outline-none focus:ring-2 focus:ring-purple-600 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-50 dark:placeholder-zinc-500 mb-3"
+                />
+                <button
+                  type="submit"
+                  disabled={submittingComment || !newComment.trim()}
+                  className="rounded-lg bg-purple-600 px-6 py-2 text-sm font-medium text-white hover:bg-purple-700 disabled:cursor-not-allowed disabled:opacity-50 transition-colors"
+                >
+                  {submittingComment ? 'Submitting...' : 'Post Review'}
+                </button>
+              </form>
+            </div>
           )}
 
           {!hasDonated && isConnected && (
