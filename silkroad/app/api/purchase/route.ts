@@ -214,7 +214,6 @@ export async function POST(req: NextRequest) {
     );
 
     // Decrypt delivery URL for buyer (ephemeral, shown once)
-    // safeDecrypt handles legacy unencrypted data without errors
     const decryptedDeliveryUrl = safeDecrypt(listing.deliveryUrl);
 
     // Create payment response headers

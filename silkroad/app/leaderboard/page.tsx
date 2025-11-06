@@ -65,30 +65,6 @@ function LeaderboardPageContent() {
           </p>
         </div>
 
-        {/* Giveaway Banner */}
-        <div className="mb-6 relative overflow-hidden rounded-lg border-2 border-green-500 bg-gradient-to-r from-green-50 via-emerald-50 to-green-50 dark:from-green-950 dark:via-emerald-950 dark:to-green-950 p-6 shadow-lg">
-          <div className="absolute inset-0 bg-gradient-to-r from-green-400/10 via-emerald-400/10 to-green-400/10 animate-pulse"></div>
-          <div className="relative flex flex-col sm:flex-row items-center justify-between gap-4">
-            <div className="flex items-center gap-3">
-              <span className="text-3xl animate-bounce">🎁</span>
-              <div>
-                <h2 className="text-lg font-bold text-zinc-900 dark:text-zinc-50">
-                  🎉 GIVEAWAY ACTIVE!
-                </h2>
-                <p className="text-sm text-zinc-700 dark:text-zinc-300">
-                  <span className="font-semibold text-green-600 dark:text-green-400">Top 10</span> eligible to win! 3 winners in 48 hours.
-                </p>
-              </div>
-            </div>
-            <Link
-              href="/"
-              className="whitespace-nowrap rounded-lg bg-green-600 hover:bg-green-700 px-4 py-2 text-sm font-bold text-white shadow-md transition-all transform hover:scale-105"
-            >
-              View Details →
-            </Link>
-          </div>
-        </div>
-
         {/* Info Banners */}
         {!isConnected ? (
           <div className="mb-6 rounded-lg border border-blue-200 bg-blue-50 p-4 dark:border-blue-900 dark:bg-blue-950">
@@ -190,14 +166,6 @@ function LeaderboardPageContent() {
                               #{index + 1}
                             </span>
                           </div>
-                          {isTopTen && (
-                            <div className="inline-flex items-center gap-1 rounded-full bg-gradient-to-r from-green-500 to-emerald-500 px-2 py-0.5 shadow-sm animate-pulse">
-                              <span className="text-xs">🎁</span>
-                              <span className="text-xs font-bold text-white uppercase tracking-wide">
-                                Eligible
-                              </span>
-                            </div>
-                          )}
                         </div>
                       </td>
 
@@ -286,7 +254,7 @@ function LeaderboardPageContent() {
         )}
 
         {/* Info Box */}
-        <div className="mt-8 grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="mt-8">
           <div className="rounded-lg border border-green-200 bg-green-50 p-6 dark:border-green-800 dark:bg-green-950">
             <h3 className="mb-2 text-sm font-bold text-green-900 dark:text-green-100">
               📊 How Rankings Work
@@ -296,19 +264,6 @@ function LeaderboardPageContent() {
               <li>• Updated in real-time as transactions complete</li>
               <li>• Only successful (completed) transactions count toward revenue</li>
               <li>• Your rank is highlighted when you're on the leaderboard</li>
-            </ul>
-          </div>
-
-          <div className="relative overflow-hidden rounded-lg border-2 border-green-400 bg-gradient-to-br from-green-100 to-emerald-100 p-6 dark:border-green-600 dark:from-green-900 dark:to-emerald-900">
-            <div className="absolute top-0 right-0 text-6xl opacity-10">🎁</div>
-            <h3 className="relative mb-2 text-sm font-bold text-green-900 dark:text-green-100">
-              🎉 Giveaway Eligibility
-            </h3>
-            <ul className="relative space-y-1 text-sm text-green-800 dark:text-green-200">
-              <li>• <strong>Top 10 sellers</strong> eligible to win prizes</li>
-              <li>• <strong>3 winners</strong> selected by admin in 48 hours</li>
-              <li>• Winners receive: <strong>1 guaranteed purchase</strong></li>
-              <li>• Plus: <strong>3-day featured pin</strong> at top of browse!</li>
             </ul>
           </div>
         </div>

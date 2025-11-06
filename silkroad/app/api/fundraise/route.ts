@@ -216,15 +216,6 @@ export async function POST(req: NextRequest) {
 
     // Decrypt thank you/reward URL
     const decryptedUrl = safeDecrypt(fundraiser.deliveryUrl);
-    
-    if (!decryptedUrl) {
-      console.error('❌ Failed to decrypt delivery URL for fundraiser:', fundraiserId);
-      
-      return NextResponse.json(
-        { error: 'Failed to retrieve reward URL. Please contact support.' },
-        { status: 500 }
-      );
-    }
 
     // Record transaction
     const solanaPayload = paymentPayload.payload as SolanaExactPayload;

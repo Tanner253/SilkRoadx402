@@ -59,23 +59,37 @@ export function decrypt(ciphertext: string): string {
  * @returns string - Decrypted plaintext or original string if not encrypted
  */
 export function safeDecrypt(potentialCiphertext: string): string {
+  if (!potentialCiphertext) {
+    return potentialCiphertext;
+  }
+
   if (!CONFIG.APP_SECRET) {
     return potentialCiphertext;
   }
 
+  // Trim any whitespace
+  const trimmedCiphertext = potentialCiphertext.trim();
+
   try {
-    const bytes = CryptoJS.AES.decrypt(potentialCiphertext, CONFIG.APP_SECRET);
+    const bytes = CryptoJS.AES.decrypt(trimmedCiphertext, CONFIG.APP_SECRET);
     const plaintext = bytes.toString(CryptoJS.enc.Utf8);
 
-    // If decryption produced valid UTF-8, return it
+    // Check if decryption produced valid UTF-8 text
+    // Valid decryption should produce readable text, not empty or gibberish
     if (plaintext && plaintext.length > 0) {
-      return plaintext;
+      // Additional check: if it looks like a URL or readable text, it's probably decrypted
+      // If it's all weird characters, decryption likely failed
+      const hasReadableChars = /[\w\-\/:\.@]/.test(plaintext);
+      
+      if (hasReadableChars) {
+        return plaintext;
+      }
     }
 
-    // Empty result = not encrypted, return original
+    // Empty result or gibberish = not encrypted or wrong key, return original
     return potentialCiphertext;
   } catch (error) {
-    // Decryption failed (malformed UTF-8) = not encrypted, return original
+    // Decryption failed = not encrypted, return original
     return potentialCiphertext;
   }
 }

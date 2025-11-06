@@ -31,7 +31,6 @@ export async function GET(
       }
 
       // Decrypt delivery URL before sending to client
-      // safeDecrypt handles legacy unencrypted data without errors
       const decryptedUrl = safeDecrypt(transaction.deliveryUrl);
 
       return NextResponse.json({
@@ -57,8 +56,7 @@ export async function GET(
       );
     }
 
-    // Decrypt delivery URL
-    // safeDecrypt handles legacy unencrypted data without errors
+    // Decrypt delivery URL (safeDecrypt handles both encrypted and plain text)
     const decryptedUrl = safeDecrypt(transaction.deliveryUrl);
 
     // Fetch listing or fundraiser details
