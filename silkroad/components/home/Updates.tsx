@@ -7,6 +7,26 @@
 export function Updates() {
   const updates = [
     {
+      date: 'November 8, 2025',
+      version: 'v0.9.0',
+      title: '✨ Major UX Overhaul - Professional Polish & Enhanced Browsing',
+      items: [
+        '🎊 Professional toast notification system replacing all browser alerts',
+        '💬 Beautiful confirmation dialogs with backdrop blur replacing confirm() popups',
+        '🧭 Breadcrumb navigation added to all major pages for better orientation',
+        '💀 Content-aware loading skeletons replacing generic spinners (cards, tables, stats)',
+        '🔍 Advanced browse filters: Sort by Recent/Price/Views + Price range filtering',
+        '📊 Price range options: Under $10, $10-$50, $50-$100, Over $100',
+        '🔗 External link icons added to transaction hashes with hover animations',
+        '🎨 Toast variants: success (green), error (red), warning (yellow), info (blue)',
+        '⚡ Real-time sorting and filtering without page reloads',
+        '✅ Smooth zoom-in animations for confirmation dialogs',
+        '🎯 Auto-dismiss toasts after 5 seconds with manual close option',
+        '💎 Consistent design language across all user interactions',
+        '🛠️ Reusable component architecture for future enhancements',
+      ],
+    },
+    {
       date: 'November 4, 2025',
       version: 'v0.8.1',
       title: '📊 Fundraiser Progress Tracking & UX Improvements',

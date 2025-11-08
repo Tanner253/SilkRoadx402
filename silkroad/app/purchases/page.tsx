@@ -5,6 +5,8 @@ import { useWallet } from '@solana/wallet-adapter-react';
 import axios from 'axios';
 import Link from 'next/link';
 import { ProtectedContent } from '@/components/auth/ProtectedContent';
+import { Breadcrumbs } from '@/components/ui/Breadcrumbs';
+import { TableSkeleton, StatCardSkeleton } from '@/components/ui/LoadingSkeleton';
 
 interface Transaction {
   _id: string;
@@ -61,6 +63,9 @@ function PurchasesPageContent() {
   return (
     <div className="min-h-screen bg-gradient-to-b from-zinc-50 to-zinc-100 dark:from-zinc-950 dark:to-black py-12 px-4">
       <div className="mx-auto max-w-7xl">
+        {/* Breadcrumbs */}
+        <Breadcrumbs />
+        
         {/* Header */}
         <div className="mb-8">
           <h1 className="text-4xl font-bold text-zinc-900 dark:text-zinc-50 mb-2">
@@ -99,9 +104,14 @@ function PurchasesPageContent() {
 
         {/* Loading */}
         {loading && (
-          <div className="flex justify-center py-12">
-            <div className="h-8 w-8 animate-spin rounded-full border-4 border-blue-600 border-t-transparent"></div>
-          </div>
+          <>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+              <StatCardSkeleton />
+              <StatCardSkeleton />
+              <StatCardSkeleton />
+            </div>
+            <TableSkeleton rows={5} cols={6} />
+          </>
         )}
 
         {/* Error */}
@@ -202,9 +212,12 @@ function PurchasesPageContent() {
                           href={`https://solscan.io/tx/${purchase.txnHash}`}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 font-mono"
+                          className="inline-flex items-center gap-1.5 text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 font-mono transition-colors"
                         >
-                          {purchase.txnHash.slice(0, 8)}...
+                          <span>{purchase.txnHash.slice(0, 8)}...</span>
+                          <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                          </svg>
                         </a>
                       </td>
                     </tr>

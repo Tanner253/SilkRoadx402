@@ -7,6 +7,10 @@ import { useRouter } from 'next/navigation';
 import axios from 'axios';
 import Link from 'next/link';
 import Image from 'next/image';
+import { useToast } from '@/components/ui/Toast';
+import { useConfirm } from '@/components/ui/ConfirmDialog';
+import { Breadcrumbs } from '@/components/ui/Breadcrumbs';
+import { CommentSkeleton } from '@/components/ui/LoadingSkeleton';
 import { 
   Connection,
   PublicKey,
@@ -46,6 +50,8 @@ function FundraiserDetail({ params }: { params: Promise<{ id: string }> }) {
   const { isConnected, hasAcceptedTOS, isTokenGated, mounted } = useAuth();
   const { publicKey, signTransaction } = useWallet();
   const router = useRouter();
+  const toast = useToast();
+  const { confirm } = useConfirm();
   const [fundraiser, setFundraiser] = useState<Fundraiser | null>(null);
   const [loading, setLoading] = useState(true);
   const [donating, setDonating] = useState(false);
@@ -169,18 +175,18 @@ function FundraiserDetail({ params }: { params: Promise<{ id: string }> }) {
     if (!publicKey || !fundraiser) return;
 
     if (!isConnected || !hasAcceptedTOS) {
-      alert('Please connect your wallet and accept TOS first');
+      toast.warning('Please connect your wallet and accept TOS first');
       router.push('/');
       return;
     }
 
     if (!isTokenGated) {
-      alert('You need ≥50k $SRx402 tokens to make donations');
+      toast.warning('You need ≥50k $SRx402 tokens to make donations');
       return;
     }
 
     if (!signTransaction) {
-      alert('Wallet does not support transaction signing');
+      toast.error('Wallet does not support transaction signing');
       return;
     }
 
@@ -191,7 +197,14 @@ function FundraiserDetail({ params }: { params: Promise<{ id: string }> }) {
       return;
     }
 
-    if (confirm(`Support "${fundraiser.title}" with $${donationAmount.toFixed(2)} USDC donation?`)) {
+    const confirmed = await confirm({
+      title: 'Confirm Donation',
+      message: `Support "${fundraiser.title}" with $${donationAmount.toFixed(2)} USDC donation?`,
+      confirmLabel: 'Donate Now',
+      variant: 'info',
+    });
+
+    if (confirmed) {
       try {
         setDonating(true);
         setError(null);
@@ -386,11 +399,11 @@ function FundraiserDetail({ params }: { params: Promise<{ id: string }> }) {
           return; // Don't show alert, user knows they cancelled
         } else if (err.response?.status === 402) {
           setError('Payment verification failed: ' + (err.response.data.error || 'Unknown error'));
-          alert('❌ Payment verification failed. Please try again.');
+          toast.error('Payment verification failed. Please try again.');
         } else {
           const errorMsg = err.response?.data?.error || err.message || 'Donation failed';
           setError(errorMsg);
-          alert(`❌ ${errorMsg}`);
+          toast.error(errorMsg);
         }
       } finally {
         setDonating(false);
@@ -400,11 +413,18 @@ function FundraiserDetail({ params }: { params: Promise<{ id: string }> }) {
 
   const handleReport = async () => {
     if (!isConnected || !publicKey || !fundraiser) {
-      alert('Please connect your wallet to report');
+      toast.warning('Please connect your wallet to report');
       return;
     }
 
-    if (confirm('Report this fundraiser? This will be reviewed by administrators.')) {
+    const confirmed = await confirm({
+      title: 'Report Fundraiser',
+      message: 'Report this fundraiser? This will be reviewed by administrators.',
+      confirmLabel: 'Submit Report',
+      variant: 'danger',
+    });
+
+    if (confirmed) {
       try {
         setReporting(true);
         await axios.post('/api/reports', {
@@ -412,12 +432,12 @@ function FundraiserDetail({ params }: { params: Promise<{ id: string }> }) {
           wallet: publicKey.toBase58(),
           reason: reportReason.trim() || undefined,
         });
-        alert('✅ Report submitted successfully. Thank you for helping keep the community safe!');
+        toast.success('Report submitted successfully. Thank you for helping keep the community safe!');
         setShowReportForm(false);
         setReportReason('');
       } catch (err: any) {
         const errorMsg = err.response?.data?.error || 'Failed to submit report';
-        alert(`❌ ${errorMsg}`);
+        toast.error(errorMsg);
       } finally {
         setReporting(false);
       }
@@ -428,22 +448,22 @@ function FundraiserDetail({ params }: { params: Promise<{ id: string }> }) {
     e.preventDefault();
 
     if (!isConnected || !publicKey || !fundraiser) {
-      alert('Please connect your wallet to leave a review');
+      toast.warning('Please connect your wallet to leave a review');
       return;
     }
 
     if (!hasDonated) {
-      alert('You must donate to this fundraiser before leaving a review');
+      toast.warning('You must donate to this fundraiser before leaving a review');
       return;
     }
 
     if (hasCommented) {
-      alert('You have already left a review for this fundraiser');
+      toast.info('You have already left a review for this fundraiser');
       return;
     }
 
     if (!newComment.trim()) {
-      alert('Please enter a comment');
+      toast.warning('Please enter a comment');
       return;
     }
 
@@ -453,11 +473,12 @@ function FundraiserDetail({ params }: { params: Promise<{ id: string }> }) {
         wallet: publicKey.toBase58(),
         comment: newComment.trim(),
       });
+      toast.success('Review submitted successfully!');
       setNewComment('');
       setHasCommented(true);
       fetchComments();
     } catch (err: any) {
-      alert(err.response?.data?.error || 'Failed to submit review');
+      toast.error(err.response?.data?.error || 'Failed to submit review');
     } finally {
       setSubmittingComment(false);
     }

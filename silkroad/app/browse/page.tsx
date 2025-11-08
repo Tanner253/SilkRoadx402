@@ -7,6 +7,8 @@ import { useSearchParams } from 'next/navigation';
 import axios from 'axios';
 import Link from 'next/link';
 import Image from 'next/image';
+import { ListingGridSkeleton, ListingListSkeleton } from '@/components/ui/LoadingSkeleton';
+import { Breadcrumbs } from '@/components/ui/Breadcrumbs';
 
 interface Listing {
   _id: string;
@@ -35,6 +37,8 @@ function BrowsePageContent() {
   const [walletSearch, setWalletSearch] = useState<string>('');
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [sortBy, setSortBy] = useState<'recent' | 'price-low' | 'price-high' | 'views'>('recent');
+  const [priceRange, setPriceRange] = useState<'all' | 'under-10' | '10-50' | '50-100' | 'over-100'>('all');
 
   // Pre-fill wallet search from URL params (e.g., from leaderboard)
   useEffect(() => {
@@ -107,6 +111,43 @@ function BrowsePageContent() {
       l.wallet.toLowerCase().includes(walletSearch.toLowerCase().trim())
     );
   }
+  
+  // Filter by price range
+  if (priceRange !== 'all') {
+    filteredListings = filteredListings.filter(l => {
+      const price = l.price;
+      switch (priceRange) {
+        case 'under-10':
+          return price < 10;
+        case '10-50':
+          return price >= 10 && price < 50;
+        case '50-100':
+          return price >= 50 && price < 100;
+        case 'over-100':
+          return price >= 100;
+        default:
+          return true;
+      }
+    });
+  }
+  
+  // Sort listings
+  filteredListings = [...filteredListings].sort((a, b) => {
+    switch (sortBy) {
+      case 'price-low':
+        return a.price - b.price;
+      case 'price-high':
+        return b.price - a.price;
+      case 'views':
+        return (b.views || 0) - (a.views || 0);
+      case 'recent':
+      default:
+        // Pinned items first, then by recent (assuming _id is chronological)
+        if (a.pinned && !b.pinned) return -1;
+        if (!a.pinned && b.pinned) return 1;
+        return 0; // Keep original order for recent
+    }
+  });
 
   // Utility to truncate wallet address
   const truncateWallet = (wallet: string) => {
@@ -117,6 +158,9 @@ function BrowsePageContent() {
   return (
     <div className="min-h-screen bg-gradient-to-b from-zinc-50 to-zinc-100 dark:from-zinc-950 dark:to-black py-6 px-4 pb-20 relative">
       <div className="mx-auto max-w-[1600px]">
+        {/* Breadcrumbs */}
+        <Breadcrumbs />
+        
         {/* Page Header */}
         <div className="mb-6">
           <h1 className="text-3xl font-bold text-zinc-900 dark:text-zinc-50 mb-2">
@@ -250,7 +294,8 @@ function BrowsePageContent() {
           <div className="flex-1 min-w-0 w-full lg:w-auto">
             {/* Toolbar */}
             <div className="mb-4 rounded-lg border border-zinc-200 bg-white p-4 shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
-              <div className="flex flex-col md:flex-row gap-4 items-start md:items-center justify-between">
+              {/* Row 1: Search and Controls */}
+              <div className="flex flex-col md:flex-row gap-4 items-start md:items-center justify-between mb-4">
                 {/* Left: Search */}
                 <div className="flex-1 w-full md:max-w-md">
                   <input
@@ -312,8 +357,46 @@ function BrowsePageContent() {
                 </div>
               </div>
 
+              {/* Row 2: Sort & Price Filter */}
+              <div className="flex flex-col sm:flex-row gap-3 pb-3 border-b border-zinc-200 dark:border-zinc-800">
+                {/* Sort By */}
+                <div className="flex-1">
+                  <label className="block text-xs font-medium text-zinc-600 dark:text-zinc-400 mb-1.5">
+                    Sort By
+                  </label>
+                  <select
+                    value={sortBy}
+                    onChange={(e) => setSortBy(e.target.value as any)}
+                    className="w-full rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-900 focus:border-green-600 focus:outline-none focus:ring-2 focus:ring-green-600 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-50"
+                  >
+                    <option value="recent">Most Recent</option>
+                    <option value="price-low">Price: Low to High</option>
+                    <option value="price-high">Price: High to Low</option>
+                    <option value="views">Most Viewed</option>
+                  </select>
+                </div>
+
+                {/* Price Range */}
+                <div className="flex-1">
+                  <label className="block text-xs font-medium text-zinc-600 dark:text-zinc-400 mb-1.5">
+                    Price Range
+                  </label>
+                  <select
+                    value={priceRange}
+                    onChange={(e) => setPriceRange(e.target.value as any)}
+                    className="w-full rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-900 focus:border-green-600 focus:outline-none focus:ring-2 focus:ring-green-600 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-50"
+                  >
+                    <option value="all">All Prices</option>
+                    <option value="under-10">Under $10</option>
+                    <option value="10-50">$10 - $50</option>
+                    <option value="50-100">$50 - $100</option>
+                    <option value="over-100">Over $100</option>
+                  </select>
+                </div>
+              </div>
+
               {/* Results Count */}
-              <div className="mt-3 pt-3 border-t border-zinc-200 dark:border-zinc-800">
+              <div className="mt-3">
                 <p className="text-sm text-zinc-600 dark:text-zinc-400">
                   <span className="font-semibold text-zinc-900 dark:text-zinc-50">{filteredListings.length}</span> {filteredListings.length === 1 ? 'listing' : 'listings'} found
                   {selectedCategory !== 'all' && <span> in <strong>{categories.find(c => c.id === selectedCategory)?.label}</strong></span>}
@@ -323,9 +406,7 @@ function BrowsePageContent() {
 
             {/* Loading State */}
             {loading && (
-              <div className="flex justify-center py-16">
-                <div className="h-8 w-8 animate-spin rounded-full border-4 border-green-600 border-t-transparent"></div>
-              </div>
+              viewMode === 'grid' ? <ListingGridSkeleton count={9} /> : <ListingListSkeleton count={10} />
             )}
 
             {/* Error State */}

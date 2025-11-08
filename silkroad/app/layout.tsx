@@ -7,6 +7,7 @@ import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
 import { PublicChat } from "@/components/chat/PublicChat";
 import { AppInitializer } from "@/components/providers/AppInitializer";
+import { UIProviders } from "@/components/providers/UIProviders";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -37,14 +38,16 @@ export default function RootLayout({
         <AppInitializer />
         <SolanaWalletProvider>
           <AuthProvider>
-            <div className="relative">
-              <Navbar />
-              <main className="pt-16 pb-16">
-                {children}
-              </main>
-              <Footer />
-              <PublicChat />
-            </div>
+            <UIProviders>
+              <div className="relative">
+                <Navbar />
+                <main className="pt-16 pb-16">
+                  {children}
+                </main>
+                <Footer />
+                <PublicChat />
+              </div>
+            </UIProviders>
           </AuthProvider>
         </SolanaWalletProvider>
       </body>

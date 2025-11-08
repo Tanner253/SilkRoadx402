@@ -7,6 +7,10 @@ import { useRouter } from 'next/navigation';
 import axios from 'axios';
 import Link from 'next/link';
 import Image from 'next/image';
+import { useToast } from '@/components/ui/Toast';
+import { useConfirm } from '@/components/ui/ConfirmDialog';
+import { Breadcrumbs } from '@/components/ui/Breadcrumbs';
+import { CommentSkeleton } from '@/components/ui/LoadingSkeleton';
 import { 
   Connection,
   PublicKey,
@@ -44,6 +48,8 @@ function ListingDetail({ params }: { params: Promise<{ id: string }> }) {
   const { isConnected, hasAcceptedTOS, isTokenGated, mounted } = useAuth();
   const { publicKey, signTransaction } = useWallet();
   const router = useRouter();
+  const toast = useToast();
+  const { confirm } = useConfirm();
   const [listing, setListing] = useState<Listing | null>(null);
   const [loading, setLoading] = useState(true);
   const [purchasing, setPurchasing] = useState(false);
@@ -151,7 +157,7 @@ function ListingDetail({ params }: { params: Promise<{ id: string }> }) {
         comment: newComment.trim(),
       });
       
-      alert('✅ Review submitted successfully!');
+      toast.success('Review submitted successfully!');
       setNewComment('');
       setHasCommented(true);
       
@@ -159,7 +165,7 @@ function ListingDetail({ params }: { params: Promise<{ id: string }> }) {
       await fetchComments();
     } catch (err: any) {
       const errorMsg = err.response?.data?.error || 'Failed to submit review';
-      alert(`❌ ${errorMsg}`);
+      toast.error(errorMsg);
     } finally {
       setSubmittingComment(false);
     }
@@ -188,12 +194,19 @@ function ListingDetail({ params }: { params: Promise<{ id: string }> }) {
     if (!publicKey || !listing) return;
 
     if (!isConnected || !hasAcceptedTOS) {
-      alert('Please connect your wallet and accept TOS first');
+      toast.warning('Please connect your wallet and accept TOS first');
       router.push('/');
       return;
     }
 
-    if (confirm('Report this listing? This will be reviewed by administrators.')) {
+    const confirmed = await confirm({
+      title: 'Report Listing',
+      message: 'Report this listing? This will be reviewed by administrators.',
+      confirmLabel: 'Submit Report',
+      variant: 'danger',
+    });
+
+    if (confirmed) {
       try {
         setReporting(true);
         await axios.post('/api/reports', {
@@ -201,11 +214,12 @@ function ListingDetail({ params }: { params: Promise<{ id: string }> }) {
           wallet: publicKey.toBase58(),
           reason: reportReason.trim() || undefined,
         });
-        alert('✅ Report submitted successfully. Thank you for helping keep the marketplace safe!');
+        toast.success('Report submitted successfully. Thank you for helping keep the marketplace safe!');
         setReportReason('');
+        setShowReportForm(false);
       } catch (err: any) {
         const errorMsg = err.response?.data?.error || 'Failed to submit report';
-        alert(`❌ ${errorMsg}`);
+        toast.error(errorMsg);
       } finally {
         setReporting(false);
       }
@@ -216,22 +230,29 @@ function ListingDetail({ params }: { params: Promise<{ id: string }> }) {
     if (!publicKey || !listing) return;
 
     if (!isConnected || !hasAcceptedTOS) {
-      alert('Please connect your wallet and accept TOS first');
+      toast.warning('Please connect your wallet and accept TOS first');
       router.push('/');
       return;
     }
 
     if (!isTokenGated) {
-      alert('You need ≥50k $SRx402 tokens to make purchases');
+      toast.warning('You need ≥50k $SRx402 tokens to make purchases');
       return;
     }
 
     if (!signTransaction) {
-      alert('Wallet does not support transaction signing');
+      toast.error('Wallet does not support transaction signing');
       return;
     }
 
-    if (confirm(`Purchase "${listing.title}" for $${listing.price.toFixed(2)} USDC?`)) {
+    const confirmed = await confirm({
+      title: 'Confirm Purchase',
+      message: `Purchase "${listing.title}" for $${listing.price.toFixed(2)} USDC? Payment will be sent directly to the seller.`,
+      confirmLabel: 'Purchase Now',
+      variant: 'info',
+    });
+
+    if (confirmed) {
       try {
         setPurchasing(true);
         setError(null);
@@ -414,14 +435,14 @@ function ListingDetail({ params }: { params: Promise<{ id: string }> }) {
         if (err.code === 4001 || err.name === 'WalletSignTransactionError' || err.message?.includes('rejected')) {
           console.log('ℹ️ User cancelled transaction');
           setError('Transaction cancelled');
-          return; // Don't show alert, user knows they cancelled
+          return; // Don't show toast, user knows they cancelled
         } else if (err.response?.status === 402) {
           setError('Payment verification failed: ' + (err.response.data.error || 'Unknown error'));
-          alert('❌ Payment verification failed. Please try again.');
+          toast.error('Payment verification failed. Please try again.');
         } else {
           const errorMsg = err.response?.data?.error || err.message || 'Purchase failed';
           setError(errorMsg);
-          alert(`❌ ${errorMsg}`);
+          toast.error(errorMsg);
         }
       } finally {
         setPurchasing(false);
@@ -462,6 +483,13 @@ function ListingDetail({ params }: { params: Promise<{ id: string }> }) {
   return (
     <div className="min-h-screen bg-gradient-to-b from-zinc-50 to-zinc-100 dark:from-zinc-950 dark:to-black py-12 px-4">
       <div className="mx-auto max-w-5xl">
+        {/* Breadcrumbs */}
+        <Breadcrumbs items={[
+          { label: 'Home', href: '/' },
+          { label: 'Browse', href: '/browse' },
+          { label: listing?.title || 'Loading...', href: undefined },
+        ]} />
+        
         {/* Back Button */}
         <Link
           href={backUrl}

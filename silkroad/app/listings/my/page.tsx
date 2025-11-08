@@ -7,6 +7,9 @@ import axios from 'axios';
 import Link from 'next/link';
 import Image from 'next/image';
 import { ProtectedContent } from '@/components/auth/ProtectedContent';
+import { useToast } from '@/components/ui/Toast';
+import { useConfirm } from '@/components/ui/ConfirmDialog';
+import { Breadcrumbs } from '@/components/ui/Breadcrumbs';
 
 interface Listing {
   _id: string;
@@ -31,6 +34,8 @@ interface Listing {
 function MyListingsPageContent() {
   const { isConnected, hasAcceptedTOS, isTokenGated, mounted } = useAuth();
   const { publicKey } = useWallet();
+  const toast = useToast();
+  const { confirm } = useConfirm();
   const [listings, setListings] = useState<Listing[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -99,17 +104,23 @@ function MyListingsPageContent() {
 
   const handleDelete = async (id: string, type?: 'listing' | 'fundraiser') => {
     const itemType = type === 'fundraiser' ? 'fundraiser' : 'listing';
-    if (!confirm(`Are you sure you want to delete this ${itemType}?`)) {
-      return;
-    }
+    const confirmed = await confirm({
+      title: `Delete ${itemType}`,
+      message: `Are you sure you want to delete this ${itemType}? This action cannot be undone.`,
+      confirmLabel: 'Delete',
+      variant: 'danger',
+    });
+    
+    if (!confirmed) return;
 
     try {
       setDeletingId(id);
       const endpoint = type === 'fundraiser' ? `/api/fundraisers/${id}` : `/api/listings/${id}`;
       await axios.delete(endpoint);
       setListings(prev => prev.filter(l => l._id !== id));
+      toast.success(`${itemType.charAt(0).toUpperCase() + itemType.slice(1)} deleted successfully`);
     } catch (err: any) {
-      alert(err.response?.data?.error || `Failed to delete ${itemType}`);
+      toast.error(err.response?.data?.error || `Failed to delete ${itemType}`);
     } finally {
       setDeletingId(null);
     }
@@ -117,17 +128,23 @@ function MyListingsPageContent() {
 
   const handleDeactivate = async (id: string, type?: 'listing' | 'fundraiser') => {
     const itemType = type === 'fundraiser' ? 'fundraiser' : 'listing';
-    if (!confirm(`Take this ${itemType} off the market? You can reactivate it later.`)) {
-      return;
-    }
+    const confirmed = await confirm({
+      title: `Deactivate ${itemType}`,
+      message: `Take this ${itemType} off the market? You can reactivate it later.`,
+      confirmLabel: 'Deactivate',
+      variant: 'warning',
+    });
+    
+    if (!confirmed) return;
 
     try {
       setUpdatingId(id);
       const endpoint = type === 'fundraiser' ? `/api/fundraisers/${id}` : `/api/listings/${id}`;
       await axios.patch(endpoint, { state: 'pulled' });
       await fetchMyListings(); // Refresh list
+      toast.success(`${itemType.charAt(0).toUpperCase() + itemType.slice(1)} deactivated successfully`);
     } catch (err: any) {
-      alert(err.response?.data?.error || `Failed to deactivate ${itemType}`);
+      toast.error(err.response?.data?.error || `Failed to deactivate ${itemType}`);
     } finally {
       setUpdatingId(null);
     }
@@ -135,9 +152,14 @@ function MyListingsPageContent() {
 
   const handleReactivate = async (id: string, type?: 'listing' | 'fundraiser') => {
     const itemType = type === 'fundraiser' ? 'fundraiser' : 'listing';
-    if (!confirm(`Reactivate this ${itemType}? It will need admin approval again.`)) {
-      return;
-    }
+    const confirmed = await confirm({
+      title: `Reactivate ${itemType}`,
+      message: `Reactivate this ${itemType}? It will need admin approval again.`,
+      confirmLabel: 'Reactivate',
+      variant: 'info',
+    });
+    
+    if (!confirmed) return;
 
     try {
       setUpdatingId(id);
@@ -147,8 +169,9 @@ function MyListingsPageContent() {
         approved: false 
       });
       await fetchMyListings(); // Refresh list
+      toast.success(`${itemType.charAt(0).toUpperCase() + itemType.slice(1)} reactivated successfully`);
     } catch (err: any) {
-      alert(err.response?.data?.error || `Failed to reactivate ${itemType}`);
+      toast.error(err.response?.data?.error || `Failed to reactivate ${itemType}`);
     } finally {
       setUpdatingId(null);
     }
@@ -284,7 +307,7 @@ function MyListingsPageContent() {
       closeEditModal();
       await fetchMyListings(); // Refresh list
       const itemType = editingListing.type === 'fundraiser' ? 'Fundraiser' : 'Listing';
-      alert(`${itemType} updated successfully!`);
+      toast.success(`${itemType} updated successfully!`);
     } catch (err: any) {
       const itemType = editingListing.type === 'fundraiser' ? 'fundraiser' : 'listing';
       setEditError(err.response?.data?.error || `Failed to update ${itemType}`);
