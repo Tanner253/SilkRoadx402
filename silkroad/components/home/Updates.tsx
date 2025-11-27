@@ -7,6 +7,29 @@
 export function Updates() {
   const updates = [
     {
+      date: 'November 27, 2025',
+      version: 'v1.0.0',
+      title: '🎄 x403 Anti-Bot Security & Holiday Theme Launch',
+      items: [
+        '🔐 x403 wallet authentication - cryptographic proof of human verification',
+        '🛡️ Automatic security check before wallet connection (30-min sessions)',
+        '🤖 Prevents bot spam, fake accounts, and automated marketplace abuse',
+        '✍️ Message signing only (no gas fees, no blockchain transactions)',
+        '📖 Educational modal explains x403 benefits clearly to users',
+        '🔒 Session-based auth with localStorage cleanup on disconnect',
+        '❄️ Christmas/Holiday theme with gentle falling snow particles',
+        '🎅 Festive red and green color scheme throughout the platform',
+        '🎁 Holiday-themed icons, emojis, and messaging',
+        '💎 Contract address display on homepage (copyable $SRx402 CA)',
+        '🎨 Enhanced modal designs with holiday gradient backgrounds',
+        '⚡ Simple Canvas-based snow (replaced laggy particle system)',
+        '🎄 "Happy Holidays" hero section with animated elements',
+        '🎊 "0% Fees" banner styled as a gift to sellers',
+        '🌨️ Smooth 60fps snow animation with proper cleanup',
+        '📱 Fully responsive holiday theme across all devices',
+      ],
+    },
+    {
       date: 'November 8, 2025',
       version: 'v0.9.0',
       title: '✨ Major UX Overhaul - Professional Polish & Enhanced Browsing',
