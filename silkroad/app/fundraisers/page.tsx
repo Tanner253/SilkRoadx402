@@ -139,7 +139,7 @@ function FundraisersPageContent() {
         ) : !isTokenGated ? (
           <div className="mb-4 rounded-lg border border-yellow-200 bg-yellow-50 p-3 dark:border-yellow-900 dark:bg-yellow-950">
             <p className="text-sm text-yellow-800 dark:text-yellow-200">
-              <strong>👀 Browse Mode:</strong> Need 50,000 $SRx402 tokens to donate/create.
+              <strong>👀 Browse Mode:</strong> Need 50,000 $SR tokens to donate/create.
             </p>
           </div>
         ) : null}

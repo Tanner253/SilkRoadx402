@@ -16,25 +16,25 @@ body {
 }
 
 ::selection {
-  background-color: #4ade80;
-  color: #000;
+  background-color: #9945FF;
+  color: #fff;
 }
 
 .gradient-text {
-  background: linear-gradient(90deg, #4ade80 0%, #22d3ee 100%);
+  background: linear-gradient(90deg, #9945FF 0%, #14F195 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
 }
 
 .border-glow {
-  border: 1px solid rgba(74, 222, 128, 0.3);
-  box-shadow: 0 0 20px rgba(74, 222, 128, 0.1);
+  border: 1px solid rgba(153, 69, 255, 0.3);
+  box-shadow: 0 0 20px rgba(153, 69, 255, 0.1);
 }
 
 .border-glow:hover {
-  border-color: rgba(74, 222, 128, 0.6);
-  box-shadow: 0 0 30px rgba(74, 222, 128, 0.2);
+  border-color: rgba(153, 69, 255, 0.6);
+  box-shadow: 0 0 30px rgba(153, 69, 255, 0.2);
 }
 
 #dexscreener-embed {

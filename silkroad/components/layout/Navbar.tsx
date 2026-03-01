@@ -40,13 +40,13 @@ export function Navbar() {
 
   return (
     <>
-      <nav className="fixed top-0 z-50 w-full border-b border-green-700/30 bg-gradient-to-r from-green-800 via-green-600 to-green-800 backdrop-blur-sm shadow-lg shadow-green-900/20">
+      <nav className="fixed top-0 z-50 w-full border-b border-purple-900/30 bg-[#0f0f14]/95 backdrop-blur-md shadow-lg shadow-purple-900/10">
         <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
           {/* Mobile Menu Button - Always show */}
           {mounted && (
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="md:hidden rounded-lg p-2 text-white hover:bg-green-700/50 transition-colors"
+              className="md:hidden rounded-lg p-2 text-white hover:bg-purple-900/30 transition-colors"
               aria-label="Toggle menu"
             >
               {mobileMenuOpen ? (
@@ -63,47 +63,58 @@ export function Navbar() {
 
           {/* Logo */}
           <Link href="/" className="flex items-center space-x-2 sm:space-x-3">
-            <span className="text-2xl christmas-present">🎁</span>
             <div className="text-lg sm:text-xl font-bold tracking-tight text-white">
-              SilkRoad<span className="text-red-300">x402</span>
+              <span>SOL</span><span className="gradient-text">k Road</span>
             </div>
           </Link>
 
         {/* Navigation Links */}
         <div className="hidden md:flex items-center space-x-6">
           {/* Market, Fundraisers & Leaderboard - Always visible */}
-          <Link 
-            href="/browse" 
-            className="text-sm font-medium text-white/90 hover:text-white transition-colors"
+          <Link
+            href="/browse"
+            className={`text-sm font-medium transition-colors ${
+              pathname === '/browse' ? 'text-[#9945FF]' : 'text-white/80 hover:text-white'
+            }`}
           >
             Market
           </Link>
-          <Link 
-            href="/fundraisers" 
-            className="text-sm font-medium text-white/90 hover:text-white transition-colors"
+          <Link
+            href="/fundraisers"
+            className={`text-sm font-medium transition-colors ${
+              pathname === '/fundraisers' || pathname?.startsWith('/fundraisers/')
+                ? 'text-[#9945FF]'
+                : 'text-white/80 hover:text-white'
+            }`}
           >
             Fundraisers
           </Link>
-          <Link 
-            href="/leaderboard" 
-            className="text-sm font-medium text-white/90 hover:text-white transition-colors flex items-center gap-1"
+          <Link
+            href="/leaderboard"
+            className={`text-sm font-medium transition-colors flex items-center gap-1 ${
+              pathname === '/leaderboard' ? 'text-[#9945FF]' : 'text-white/80 hover:text-white'
+            }`}
           >
             <span>🏆</span>
             Leaderboard
           </Link>
-          
+
           {/* Sell & My Listings - Only when wallet connected */}
           {publicKey && (
             <>
-              <Link 
-                href="/sell" 
-                className="text-sm font-medium text-white/90 hover:text-white transition-colors"
+              <Link
+                href="/sell"
+                className={`text-sm font-medium transition-colors ${
+                  pathname === '/sell' ? 'text-[#9945FF]' : 'text-white/80 hover:text-white'
+                }`}
               >
                 Sell
               </Link>
-              <Link 
-                href="/my-listings" 
-                className="text-sm font-medium text-white/90 hover:text-white transition-colors"
+              <Link
+                href="/my-listings"
+                className={`text-sm font-medium transition-colors ${
+                  pathname === '/my-listings' ? 'text-[#9945FF]' : 'text-white/80 hover:text-white'
+                }`}
               >
                 My Listings
               </Link>
@@ -115,12 +126,12 @@ export function Navbar() {
           <div className="flex items-center gap-2 sm:gap-3">
             {/* Active Users Counter - Hidden on mobile (shown in hamburger menu) */}
             {mounted && (
-              <div className="hidden md:flex items-center gap-1.5 rounded-lg border border-green-700/50 bg-white/10 px-2 sm:px-3 py-2">
+              <div className="hidden md:flex items-center gap-1.5 rounded-lg border border-purple-900/50 bg-purple-950/30 px-2 sm:px-3 py-2">
                 <span className="text-red-400 text-xs sm:text-sm">🔴</span>
                 <span className="text-xs sm:text-sm font-semibold text-white">
                   {activeUsers}
                 </span>
-                <span className="hidden sm:inline text-xs text-white/80">
+                <span className="hidden sm:inline text-xs text-white/70">
                   online
                 </span>
               </div>
@@ -128,11 +139,11 @@ export function Navbar() {
 
             {/* USDC Balance - Hidden on mobile when connected */}
             {mounted && publicKey && (
-              <div className="hidden sm:flex items-center gap-2 rounded-lg border border-green-700/50 bg-white/10 px-3 py-2">
-                <svg 
-                  className="h-5 w-5 text-blue-400" 
-                  viewBox="0 0 40 40" 
-                  fill="none" 
+              <div className="hidden sm:flex items-center gap-2 rounded-lg border border-purple-900/50 bg-purple-950/30 px-3 py-2">
+                <svg
+                  className="h-5 w-5 text-blue-400"
+                  viewBox="0 0 40 40"
+                  fill="none"
                   xmlns="http://www.w3.org/2000/svg"
                 >
                   <circle cx="20" cy="20" r="20" fill="#2775CA"/>
@@ -140,7 +151,7 @@ export function Navbar() {
                   <path d="M21 23H16V26H21C22.933 26 24.5 24.433 24.5 22.5C24.5 21.567 22.933 23 21 23Z" fill="white"/>
                 </svg>
                 <div className="flex flex-col">
-                  <span className="text-xs text-white/80">USDC</span>
+                  <span className="text-xs text-white/70">USDC</span>
                   {loading ? (
                     <span className="text-sm font-semibold text-white">
                       Loading...
@@ -150,7 +161,7 @@ export function Navbar() {
                       ${balance.toFixed(2)}
                     </span>
                   ) : (
-                    <span className="text-sm font-semibold text-white/70">
+                    <span className="text-sm font-semibold text-white/50">
                       --
                     </span>
                   )}
@@ -162,7 +173,7 @@ export function Navbar() {
             {mounted && publicKey && (
               <Link
                 href="/profile"
-                className="flex items-center gap-2 rounded-lg border border-green-700/50 bg-white/10 px-2 sm:px-3 py-2 hover:bg-white/20 transition-colors"
+                className="flex items-center gap-2 rounded-lg border border-purple-900/50 bg-purple-950/30 px-2 sm:px-3 py-2 hover:bg-purple-900/40 transition-colors"
                 title="View Profile & Analytics"
               >
                 <svg className="h-5 w-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -173,7 +184,7 @@ export function Navbar() {
 
             {/* Wallet Button - Compact on mobile */}
             {mounted && (
-              <WalletMultiButton className="!bg-red-600 hover:!bg-red-700 !rounded-lg !h-10 !px-3 sm:!px-4 !text-xs sm:!text-sm !font-medium transition-colors" />
+              <WalletMultiButton className="!bg-gradient-to-r !from-[#9945FF] !to-[#14F195] hover:!opacity-90 !rounded-lg !h-10 !px-3 sm:!px-4 !text-xs sm:!text-sm !font-medium transition-opacity" />
             )}
           </div>
         </div>
@@ -183,20 +194,20 @@ export function Navbar() {
       {mounted && mobileMenuOpen && (
         <>
           {/* Backdrop */}
-          <div 
-            className="fixed inset-0 z-40 bg-black/50 backdrop-blur-sm md:hidden"
+          <div
+            className="fixed inset-0 z-40 bg-black/60 backdrop-blur-sm md:hidden"
             onClick={() => setMobileMenuOpen(false)}
           />
-          
+
           {/* Menu Panel */}
-          <div className="fixed top-16 left-0 right-0 bottom-0 z-40 bg-white dark:bg-zinc-900 md:hidden overflow-y-auto">
+          <div className="fixed top-16 left-0 right-0 bottom-0 z-40 bg-[#0f0f14] md:hidden overflow-y-auto">
             <div className="flex flex-col p-6 space-y-6">
               {/* Active Users on Mobile - Always visible */}
-              <div className="flex items-center gap-3 rounded-lg border border-zinc-200 bg-zinc-50 p-4 dark:border-zinc-800 dark:bg-zinc-800">
+              <div className="flex items-center gap-3 rounded-lg border border-purple-900/50 bg-purple-950/20 p-4">
                 <span className="text-2xl">🟢</span>
                 <div className="flex flex-col">
-                  <span className="text-sm text-zinc-500 dark:text-zinc-400">Active Users</span>
-                  <span className="text-lg font-semibold text-zinc-900 dark:text-zinc-50">
+                  <span className="text-sm text-white/60">Active Users</span>
+                  <span className="text-lg font-semibold text-white">
                     {activeUsers} online
                   </span>
                 </div>
@@ -204,11 +215,11 @@ export function Navbar() {
 
               {/* USDC Balance on Mobile - Only show when wallet connected */}
               {publicKey && (
-                <div className="flex items-center gap-3 rounded-lg border border-zinc-200 bg-zinc-50 p-4 dark:border-zinc-800 dark:bg-zinc-800">
-                <svg 
-                  className="h-6 w-6 text-blue-600" 
-                  viewBox="0 0 40 40" 
-                  fill="none" 
+                <div className="flex items-center gap-3 rounded-lg border border-purple-900/50 bg-purple-950/20 p-4">
+                <svg
+                  className="h-6 w-6 text-blue-400"
+                  viewBox="0 0 40 40"
+                  fill="none"
                   xmlns="http://www.w3.org/2000/svg"
                 >
                   <circle cx="20" cy="20" r="20" fill="#2775CA"/>
@@ -216,17 +227,17 @@ export function Navbar() {
                   <path d="M21 23H16V26H21C22.933 26 24.5 24.433 24.5 22.5C24.5 21.567 22.933 23 21 23Z" fill="white"/>
                 </svg>
                 <div className="flex flex-col">
-                  <span className="text-sm text-zinc-500 dark:text-zinc-400">USDC Balance</span>
+                  <span className="text-sm text-white/60">USDC Balance</span>
                   {loading ? (
-                    <span className="text-lg font-semibold text-zinc-900 dark:text-zinc-50">
+                    <span className="text-lg font-semibold text-white">
                       Loading...
                     </span>
                   ) : balance !== null ? (
-                    <span className="text-lg font-semibold text-zinc-900 dark:text-zinc-50">
+                    <span className="text-lg font-semibold text-white">
                       ${balance.toFixed(2)}
                     </span>
                   ) : (
-                    <span className="text-lg font-semibold text-zinc-500 dark:text-zinc-400">
+                    <span className="text-lg font-semibold text-white/50">
                       --
                     </span>
                   )}
@@ -237,12 +248,12 @@ export function Navbar() {
               {/* Navigation Links */}
               <nav className="flex flex-col space-y-2">
                 {/* Market, Fundraisers & Leaderboard - Always visible */}
-                <Link 
-                  href="/browse" 
+                <Link
+                  href="/browse"
                   className={`flex items-center gap-3 rounded-lg px-4 py-3 text-base font-medium transition-colors ${
                     pathname === '/browse'
-                      ? 'bg-green-50 text-green-600 dark:bg-green-900/20 dark:text-green-400'
-                      : 'text-zinc-700 hover:bg-zinc-100 dark:text-zinc-300 dark:hover:bg-zinc-800'
+                      ? 'bg-purple-900/30 text-[#9945FF]'
+                      : 'text-white/80 hover:bg-white/5'
                   }`}
                 >
                   <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -251,24 +262,24 @@ export function Navbar() {
                   Market
                 </Link>
 
-                <Link 
-                  href="/fundraisers" 
+                <Link
+                  href="/fundraisers"
                   className={`flex items-center gap-3 rounded-lg px-4 py-3 text-base font-medium transition-colors ${
                     pathname === '/fundraisers' || pathname?.startsWith('/fundraisers/')
-                      ? 'bg-green-50 text-green-600 dark:bg-green-900/20 dark:text-green-400'
-                      : 'text-zinc-700 hover:bg-zinc-100 dark:text-zinc-300 dark:hover:bg-zinc-800'
+                      ? 'bg-purple-900/30 text-[#9945FF]'
+                      : 'text-white/80 hover:bg-white/5'
                   }`}
                 >
                   <span className="text-xl">💝</span>
                   Fundraisers
                 </Link>
 
-                <Link 
-                  href="/leaderboard" 
+                <Link
+                  href="/leaderboard"
                   className={`flex items-center gap-3 rounded-lg px-4 py-3 text-base font-medium transition-colors ${
                     pathname === '/leaderboard'
-                      ? 'bg-green-50 text-green-600 dark:bg-green-900/20 dark:text-green-400'
-                      : 'text-zinc-700 hover:bg-zinc-100 dark:text-zinc-300 dark:hover:bg-zinc-800'
+                      ? 'bg-purple-900/30 text-[#9945FF]'
+                      : 'text-white/80 hover:bg-white/5'
                   }`}
                 >
                   <span className="text-xl">🏆</span>
@@ -278,12 +289,12 @@ export function Navbar() {
                 {/* Sell, My Listings, Profile - Only when wallet connected */}
                 {publicKey && (
                   <>
-                    <Link 
-                      href="/sell" 
+                    <Link
+                      href="/sell"
                       className={`flex items-center gap-3 rounded-lg px-4 py-3 text-base font-medium transition-colors ${
                         pathname === '/sell'
-                          ? 'bg-green-50 text-green-600 dark:bg-green-900/20 dark:text-green-400'
-                          : 'text-zinc-700 hover:bg-zinc-100 dark:text-zinc-300 dark:hover:bg-zinc-800'
+                          ? 'bg-purple-900/30 text-[#9945FF]'
+                          : 'text-white/80 hover:bg-white/5'
                       }`}
                     >
                       <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -292,12 +303,12 @@ export function Navbar() {
                       List Product
                     </Link>
 
-                    <Link 
-                      href="/my-listings" 
+                    <Link
+                      href="/my-listings"
                       className={`flex items-center gap-3 rounded-lg px-4 py-3 text-base font-medium transition-colors ${
                         pathname === '/my-listings'
-                          ? 'bg-green-50 text-green-600 dark:bg-green-900/20 dark:text-green-400'
-                          : 'text-zinc-700 hover:bg-zinc-100 dark:text-zinc-300 dark:hover:bg-zinc-800'
+                          ? 'bg-purple-900/30 text-[#9945FF]'
+                          : 'text-white/80 hover:bg-white/5'
                       }`}
                     >
                       <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -306,12 +317,12 @@ export function Navbar() {
                       My Listings
                     </Link>
 
-                    <Link 
-                      href="/profile" 
+                    <Link
+                      href="/profile"
                       className={`flex items-center gap-3 rounded-lg px-4 py-3 text-base font-medium transition-colors ${
                         pathname === '/profile'
-                          ? 'bg-green-50 text-green-600 dark:bg-green-900/20 dark:text-green-400'
-                          : 'text-zinc-700 hover:bg-zinc-100 dark:text-zinc-300 dark:hover:bg-zinc-800'
+                          ? 'bg-purple-900/30 text-[#9945FF]'
+                          : 'text-white/80 hover:bg-white/5'
                       }`}
                     >
                       <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -324,39 +335,39 @@ export function Navbar() {
               </nav>
 
               {/* Footer Links in Mobile Menu */}
-              <div className="pt-6 border-t border-zinc-200 dark:border-zinc-800">
+              <div className="pt-6 border-t border-purple-900/30">
                 <div className="flex flex-col space-y-2">
-                  <Link 
-                    href="/faq" 
-                    className="flex items-center gap-3 rounded-lg px-4 py-3 text-sm font-medium text-zinc-600 hover:bg-zinc-100 dark:text-zinc-400 dark:hover:bg-zinc-800 transition-colors"
+                  <Link
+                    href="/faq"
+                    className="flex items-center gap-3 rounded-lg px-4 py-3 text-sm font-medium text-white/60 hover:bg-white/5 transition-colors"
                   >
                     <span className="text-base">❓</span>
                     FAQ
                   </Link>
 
-                  <Link 
-                    href="/updates" 
-                    className="flex items-center gap-3 rounded-lg px-4 py-3 text-sm font-medium text-zinc-600 hover:bg-zinc-100 dark:text-zinc-400 dark:hover:bg-zinc-800 transition-colors"
+                  <Link
+                    href="/updates"
+                    className="flex items-center gap-3 rounded-lg px-4 py-3 text-sm font-medium text-white/60 hover:bg-white/5 transition-colors"
                   >
                     <span className="text-base">📋</span>
                     Updates
                   </Link>
 
-                  <a 
-                    href="https://silk-roadx402.vercel.app" 
-                    target="_blank" 
+                  <a
+                    href="https://silk-roadx402.vercel.app"
+                    target="_blank"
                     rel="noopener noreferrer"
-                    className="flex items-center gap-3 rounded-lg px-4 py-3 text-sm font-medium text-zinc-600 hover:bg-zinc-100 dark:text-zinc-400 dark:hover:bg-zinc-800 transition-colors"
+                    className="flex items-center gap-3 rounded-lg px-4 py-3 text-sm font-medium text-white/60 hover:bg-white/5 transition-colors"
                   >
                     <span className="text-base">📄</span>
                     Whitepaper
                   </a>
 
-                  <a 
-                    href="https://github.com/Tanner253?tab=repositories" 
-                    target="_blank" 
+                  <a
+                    href="https://github.com/Tanner253?tab=repositories"
+                    target="_blank"
                     rel="noopener noreferrer"
-                    className="flex items-center gap-3 rounded-lg px-4 py-3 text-sm font-medium text-zinc-600 hover:bg-zinc-100 dark:text-zinc-400 dark:hover:bg-zinc-800 transition-colors"
+                    className="flex items-center gap-3 rounded-lg px-4 py-3 text-sm font-medium text-white/60 hover:bg-white/5 transition-colors"
                   >
                     <span className="text-base">💻</span>
                     GitHub
@@ -370,4 +381,3 @@ export function Navbar() {
     </>
   );
 }
-

@@ -20,8 +20,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "SilkRoadx402 - Anonymous Software Marketplace",
-  description: "Peer-to-peer marketplace for private software using x402 micropayments on Solana",
+  title: "SOLk Road - Anonymous Digital Marketplace",
+  description: "Peer-to-peer anonymous marketplace using x402 micropayments on Solana",
 };
 
 export default function RootLayout({

@@ -2,8 +2,8 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "SilkRoadx402 - Anonymous Software Marketplace",
-  description: "The first decentralized marketplace for private software sales using x402 payments on Solana",
+  title: "SOLk Road - Anonymous Digital Marketplace",
+  description: "The first decentralized anonymous marketplace using x402 payments on Solana",
   icons: {
     icon: '/correcto.png',
     shortcut: '/correcto.png',

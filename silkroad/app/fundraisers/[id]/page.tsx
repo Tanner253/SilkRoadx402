@@ -181,7 +181,7 @@ function FundraiserDetail({ params }: { params: Promise<{ id: string }> }) {
     }
 
     if (!isTokenGated) {
-      toast.warning('You need ≥50k $SRx402 tokens to make donations');
+      toast.warning('You need ≥50k $SR tokens to make donations');
       return;
     }
 
@@ -707,7 +707,7 @@ function FundraiserDetail({ params }: { params: Promise<{ id: string }> }) {
             )}
             {isConnected && hasAcceptedTOS && !isTokenGated && publicKey && fundraiser.wallet !== publicKey.toBase58() && (
               <p className="text-xs text-center text-red-500 dark:text-red-400">
-                Hold 50,000+ $SRx402 tokens to donate
+                Hold 50,000+ $SR tokens to donate
               </p>
             )}
 

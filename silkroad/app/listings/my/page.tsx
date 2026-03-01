@@ -380,7 +380,7 @@ function MyListingsPageContent() {
         {!isTokenGated && (
           <div className="mb-6 rounded-lg border border-yellow-200 bg-yellow-50 p-4 dark:border-yellow-900 dark:bg-yellow-950">
             <p className="text-sm text-yellow-800 dark:text-yellow-200">
-              ⚠️ You don't have enough $SRx402 tokens. Some features may be restricted.
+              ⚠️ You don't have enough $SR tokens. Some features may be restricted.
             </p>
           </div>
         )}
@@ -407,7 +407,7 @@ function MyListingsPageContent() {
               No listings yet
             </h2>
             <p className="text-zinc-600 dark:text-zinc-400 mb-6">
-              Create your first listing to start selling on SilkRoadx402
+              Create your first listing to start selling on SOLk Road
             </p>
             <Link
               href="/listings/new"

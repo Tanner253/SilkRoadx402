@@ -236,7 +236,7 @@ function ListingDetail({ params }: { params: Promise<{ id: string }> }) {
     }
 
     if (!isTokenGated) {
-      toast.warning('You need ≥50k $SRx402 tokens to make purchases');
+      toast.warning('You need ≥50k $SR tokens to make purchases');
       return;
     }
 
@@ -600,7 +600,7 @@ function ListingDetail({ params }: { params: Promise<{ id: string }> }) {
               ) : !isTokenGated ? (
                 <div className="rounded-lg border border-yellow-200 bg-yellow-50 p-4 dark:border-yellow-900 dark:bg-yellow-950">
                   <p className="text-sm text-yellow-800 dark:text-yellow-200">
-                    ⚠️ You need ≥50k $SRx402 tokens to make purchases
+                    ⚠️ You need ≥50k $SR tokens to make purchases
                   </p>
                 </div>
               ) : (

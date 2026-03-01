@@ -20,7 +20,7 @@ export function Updates() {
         '❄️ Christmas/Holiday theme with gentle falling snow particles',
         '🎅 Festive red and green color scheme throughout the platform',
         '🎁 Holiday-themed icons, emojis, and messaging',
-        '💎 Contract address display on homepage (copyable $SRx402 CA)',
+        '💎 Contract address display on homepage (copyable $SR CA)',
         '🎨 Enhanced modal designs with holiday gradient backgrounds',
         '⚡ Simple Canvas-based snow (replaced laggy particle system)',
         '🎄 "Happy Holidays" hero section with animated elements',
@@ -182,7 +182,7 @@ export function Updates() {
       items: [
         'x402 micropayment protocol integration',
         'Anonymous P2P software marketplace',
-        'Token gating (50k $SRx402 required)',
+        'Token gating (50k $SR required)',
         'Solana USDC payments',
         'Admin approval system',
       ],

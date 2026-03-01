@@ -229,7 +229,7 @@ function ProfilePageContent() {
         {!isTokenGated && (
           <div className="mb-6 rounded-lg border border-yellow-200 bg-yellow-50 p-4 dark:border-yellow-900 dark:bg-yellow-950">
             <p className="text-sm text-yellow-800 dark:text-yellow-200">
-              ⚠️ You don't have enough $SRx402 tokens. Some features may be restricted.
+              ⚠️ You don't have enough $SR tokens. Some features may be restricted.
             </p>
           </div>
         )}

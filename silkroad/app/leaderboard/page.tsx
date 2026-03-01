@@ -61,7 +61,7 @@ function LeaderboardPageContent() {
             🏆 Top Sellers Leaderboard
           </h1>
           <p className="text-lg text-zinc-600 dark:text-zinc-400">
-            The highest earning vendors on SilkRoadx402
+            The highest earning vendors on SOLk Road
           </p>
         </div>
 
@@ -81,7 +81,7 @@ function LeaderboardPageContent() {
         ) : !isTokenGated ? (
           <div className="mb-6 rounded-lg border border-yellow-200 bg-yellow-50 p-4 dark:border-yellow-900 dark:bg-yellow-950">
             <p className="text-sm text-yellow-800 dark:text-yellow-200">
-              <strong>👀 Browse Mode:</strong> You're viewing the leaderboard. Hold <strong>50,000 $SRx402</strong> tokens to create listings and make purchases.
+              <strong>👀 Browse Mode:</strong> You're viewing the leaderboard. Hold <strong>50,000 $SR</strong> tokens to create listings and make purchases.
             </p>
           </div>
         ) : null}

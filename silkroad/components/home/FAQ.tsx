@@ -13,7 +13,7 @@ export function FAQ() {
 
   const faqs = [
     {
-      question: 'Do I need a USDC account to use SilkRoadx402?',
+      question: 'Do I need a USDC account to use SOLk Road?',
       answer: (
         <>
           <p className="mb-3">
@@ -45,11 +45,11 @@ export function FAQ() {
       ),
     },
     {
-      question: 'What is the $SRx402 token and why is it required?',
+      question: 'What is the $SR token and why is it required?',
       answer: (
         <>
           <p className="mb-3">
-            $SRx402 is our platform token used for <strong>token gating</strong>. You need to hold <strong>50,000+ $SRx402</strong> in your wallet to access the marketplace.
+            $SR is our platform token used for <strong>token gating</strong>. You need to hold <strong>50,000+ $SR</strong> in your wallet to access the marketplace.
           </p>
           <p className="mb-3">
             <strong>Why token gating?</strong>
@@ -60,7 +60,7 @@ export function FAQ() {
             <li>Holders have "skin in the game"</li>
           </ul>
           <p className="text-sm text-zinc-600 dark:text-zinc-400 mt-3">
-            Note: Transactions are paid in USDC, not $SRx402. The token is only for access.
+            Note: Transactions are paid in USDC, not $SR. The token is only for access.
           </p>
         </>
       ),
@@ -109,7 +109,7 @@ export function FAQ() {
       answer: (
         <>
           <ol className="list-decimal list-inside space-y-2">
-            <li><strong>Connect your wallet</strong> and hold 50k+ $SRx402</li>
+            <li><strong>Connect your wallet</strong> and hold 50k+ $SR</li>
             <li><strong>Ensure you have a USDC account</strong> to receive payments</li>
             <li>Go to "New Listing" and fill out the form</li>
             <li>Upload product image (max 5MB)</li>

@@ -39,7 +39,7 @@ export async function POST(request: NextRequest) {
       issuedAt: now,
       expiresAt,
       message: [
-        '🔐 SilkRoadx402 Security Verification',
+        '🔐 SOLk Road Security Verification',
         '',
         'This signature proves you are human and helps protect',
         'our platform from bots, scammers, and automated attacks.',

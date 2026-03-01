@@ -78,16 +78,14 @@ export default function Home() {
           <div className="flex items-center gap-3">
             <Image 
               src="/correcto.png" 
-              alt="SilkRoadx402 Logo" 
+              alt="SOLk Road Logo" 
               width={40} 
               height={40}
               className="rounded"
               style={{ maxWidth: '40px', maxHeight: '40px' }}
             />
             <div className="text-2xl font-bold">
-              <span className="text-green-400">Silk</span>
-              <span className="text-cyan-400">Road</span>
-              <span className="text-gray-500">x402</span>
+              <span className="text-white">SOL</span><span className="gradient-text">k Road</span>
             </div>
           </div>
           <div className="flex items-center gap-4">
@@ -95,7 +93,7 @@ export default function Home() {
               href="https://www.silkroadx402.com/" 
               target="_blank" 
               rel="noopener noreferrer"
-              className="px-6 py-2 bg-gradient-to-r from-green-500 to-cyan-500 text-black font-bold hover:from-green-400 hover:to-cyan-400 transition-all rounded shadow-lg"
+              className="px-6 py-2 bg-gradient-to-r from-[#9945FF] to-[#14F195] text-black font-bold hover:opacity-90 transition-all rounded shadow-lg"
             >
               🚀 Launch App
             </a>
@@ -124,8 +122,8 @@ export default function Home() {
 
       {/* Hero */}
       <section className="max-w-6xl mx-auto px-4 py-20 text-center">
-        <div className="inline-block mb-6 px-4 py-2 bg-green-500/10 border border-green-500/30 rounded-full">
-          <span className="text-green-400 font-bold text-sm">🟢 LIVE NOW AT SILKROADX402.COM</span>
+        <div className="inline-block mb-6 px-4 py-2 bg-[#9945FF]/10 border border-[#9945FF]/30 rounded-full">
+          <span className="gradient-text font-bold text-sm">🟢 SOLk Road IS LIVE ON SOLANA</span>
         </div>
         <h1 className="text-5xl md:text-7xl font-bold mb-6 leading-tight">
           The <span className="gradient-text">Anonymous</span> Marketplace<br />
@@ -145,7 +143,7 @@ export default function Home() {
             href="https://www.silkroadx402.com/browse" 
             target="_blank" 
             rel="noopener noreferrer"
-            className="inline-block px-12 py-4 bg-gradient-to-r from-green-500 to-cyan-500 text-black font-bold text-lg rounded hover:from-green-400 hover:to-cyan-400 transition-all shadow-lg"
+            className="inline-block px-12 py-4 bg-gradient-to-r from-[#9945FF] to-[#14F195] text-black font-bold text-lg rounded hover:opacity-90 transition-all shadow-lg"
           >
             🛍️ Browse Marketplace →
           </a>
@@ -239,10 +237,10 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Why SilkRoadx402? */}
+      {/* Why SOLk Road? */}
       <section className="border-t border-gray-800">
         <div className="max-w-6xl mx-auto px-4 py-20">
-          <h2 className="text-4xl font-bold mb-4">Why <span className="gradient-text">SilkRoadx402</span>?</h2>
+          <h2 className="text-4xl font-bold mb-4">Why <span className="gradient-text">SOLk Road</span>?</h2>
           <p className="text-gray-400 mb-12 max-w-3xl">
             Most marketplaces force you to reveal your identity and wait days for payments. 
             We&apos;re building the first truly anonymous, instant-settlement, zero-fee marketplace for developers.
@@ -254,7 +252,7 @@ export default function Home() {
               <h3 className="text-lg font-bold mb-2 text-green-400">Zero KYC Required</h3>
               <p className="text-gray-400 text-sm">
                 No identity verification, no bank accounts, no tax forms. Just connect your Solana wallet and start selling. 
-                Unlike traditional platforms (Gumroad, Stripe, PayPal) that require full KYC for sellers, SilkRoadx402 
+                Unlike traditional platforms (Gumroad, Stripe, PayPal) that require full KYC for sellers, SOLk Road 
                 keeps you completely anonymous. Your wallet address is your only fingerprint.
               </p>
             </div>
@@ -374,7 +372,7 @@ export default function Home() {
               href="https://www.silkroadx402.com/listings/new" 
               target="_blank" 
               rel="noopener noreferrer"
-              className="inline-block px-12 py-4 bg-gradient-to-r from-green-500 to-cyan-500 text-black font-bold text-lg rounded hover:from-green-400 hover:to-cyan-400 transition-all shadow-lg"
+              className="inline-block px-12 py-4 bg-gradient-to-r from-[#9945FF] to-[#14F195] text-black font-bold text-lg rounded hover:opacity-90 transition-all shadow-lg"
             >
               🚀 List Your Software Now →
             </a>
@@ -412,7 +410,7 @@ export default function Home() {
           <div className="mt-8 p-6 bg-red-900/10 border border-red-500/30 rounded-lg">
             <h3 className="text-lg font-bold mb-2 text-red-400">⚠️ Legal Software Only</h3>
             <p className="text-gray-400 text-sm">
-              SilkRoadx402 strictly prohibits the sale of any illegal software, malware, hacking tools intended for 
+              SOLk Road strictly prohibits the sale of any illegal software, malware, hacking tools intended for 
               unauthorized access, or software that violates United States regulations. All listings must comply with 
               applicable laws. Violators will be permanently banned and reported to authorities.
             </p>
@@ -444,7 +442,7 @@ export default function Home() {
                 <span className="gradient-text">Exclusive</span> Marketplace Access
               </h2>
               <p className="text-gray-400 text-lg">
-                SilkRoadx402 is a premium marketplace. Token holdings required to enter.
+                SOLk Road is a premium marketplace. Token holdings required to enter.
               </p>
             </div>
 
@@ -452,10 +450,10 @@ export default function Home() {
               <div className="flex items-start gap-6">
                 <div className="text-6xl">🔐</div>
                 <div className="flex-1">
-                  <h3 className="text-2xl font-bold mb-3 text-cyan-400">50,000 $SRx402 Required</h3>
+                  <h3 className="text-2xl font-bold mb-3 text-cyan-400">50,000 $SR Required</h3>
                   <p className="text-gray-300 text-lg mb-4">
-                    To access the SilkRoadx402 marketplace—whether to browse, purchase, or list software—you must hold a minimum of{' '}
-                    <span className="text-green-400 font-bold text-xl">50,000 $SRx402</span> tokens in your connected wallet.
+                    To access the SOLk Road marketplace—whether to browse, purchase, or list software—you must hold a minimum of{' '}
+                    <span className="text-green-400 font-bold text-xl">50,000 $SR</span> tokens in your connected wallet.
                   </p>
                   <p className="text-gray-400 mb-4">
                     This paywall ensures only serious buyers and quality sellers participate on the platform. 
@@ -472,7 +470,7 @@ export default function Home() {
                   <h3 className="text-xl font-bold text-green-400">For Buyers</h3>
                 </div>
                 <p className="text-gray-400 text-sm">
-                  Hold 50,000+ $SRx402 to browse the marketplace, view listings, and purchase software. 
+                  Hold 50,000+ $SR to browse the marketplace, view listings, and purchase software. 
                   No holdings = no access to any products. This creates a premium buyer pool and reduces platform spam.
                 </p>
               </div>
@@ -483,7 +481,7 @@ export default function Home() {
                   <h3 className="text-xl font-bold text-cyan-400">For Sellers</h3>
                 </div>
             <p className="text-gray-400 text-sm">
-                  Hold 50,000+ $SRx402 to list your software on the marketplace. 
+                  Hold 50,000+ $SR to list your software on the marketplace. 
                   This requirement filters out low-effort listings and ensures sellers have skin in the game, 
                   protecting the platform&apos;s reputation.
                 </p>
@@ -522,9 +520,9 @@ export default function Home() {
                 href="https://dexscreener.com/solana/4dqugrpzcjskmshtifagpugumfy37ywknmnbg4f54fnw" 
                 target="_blank" 
                 rel="noopener noreferrer"
-                  className="inline-block px-8 py-3 bg-gradient-to-r from-green-500 to-cyan-500 text-black font-bold text-lg rounded hover:from-green-400 hover:to-cyan-400 transition-all shadow-lg"
+                  className="inline-block px-8 py-3 bg-gradient-to-r from-[#9945FF] to-[#14F195] text-black font-bold text-lg rounded hover:opacity-90 transition-all shadow-lg"
               >
-                  💰 Buy $SRx402 →
+                  💰 Buy $SR →
                 </a>
                 <a 
                   href="https://www.silkroadx402.com/" 
@@ -547,7 +545,7 @@ export default function Home() {
       <section className="border-t border-gray-800 bg-gray-950/50">
         <div className="max-w-6xl mx-auto px-4 py-20">
           <h2 className="text-4xl font-bold mb-4 text-center">
-            <span className="gradient-text">$SRx402</span> Token
+            <span className="gradient-text">$SR</span> Token
           </h2>
           <p className="text-gray-400 text-center mb-12 max-w-2xl mx-auto">
             Platform governance and access token. Hold 50,000+ tokens to access the marketplace.
@@ -587,7 +585,7 @@ export default function Home() {
                 <div className="space-y-3">
                   <div className="flex justify-between items-center">
                     <span className="text-gray-500">Symbol</span>
-                    <span className="text-gray-300 font-bold">$SRx402</span>
+                    <span className="text-gray-300 font-bold">$SR</span>
                   </div>
                   <div className="flex justify-between items-center">
                     <span className="text-gray-500">Network</span>
@@ -627,7 +625,7 @@ export default function Home() {
               <div className="bg-gradient-to-br from-purple-900/20 to-pink-900/20 border border-purple-500/30 rounded-lg p-6">
                 <h3 className="text-lg font-bold mb-2 text-purple-400">🔐 Access Token</h3>
                 <p className="text-sm text-gray-400">
-                  $SRx402 serves as the exclusive access key to the marketplace. 
+                  $SR serves as the exclusive access key to the marketplace. 
                   Hold 50,000+ tokens to browse, buy, and list software. This creates sustainable demand 
                   and ensures only serious participants access the platform.
                 </p>
@@ -657,9 +655,9 @@ export default function Home() {
               href="https://www.silkroadx402.com/" 
               target="_blank" 
               rel="noopener noreferrer"
-              className="inline-block px-8 py-3 bg-green-500 text-black font-bold text-xl rounded hover:bg-green-400 transition-all shadow-lg mb-4"
+              className="inline-block px-8 py-3 bg-gradient-to-r from-[#9945FF] to-[#14F195] text-black font-bold text-xl rounded hover:opacity-90 transition-all shadow-lg mb-4"
             >
-              🟢 LIVE AT SILKROADX402.COM
+              🟢 SOLk Road IS LIVE
             </a>
             <p className="text-gray-400 max-w-2xl mx-auto">
               Platform is <strong className="text-green-400">FULLY OPERATIONAL</strong> with real x402 payment flows. 
@@ -681,7 +679,7 @@ export default function Home() {
                 </li>
                 <li className="flex gap-2">
                   <span className="text-green-500">✓</span>
-                  <span><strong>Token Gating:</strong> 50k $SRx402 requirement with balance checking</span>
+                  <span><strong>Token Gating:</strong> 50k $SR requirement with balance checking</span>
                 </li>
                 <li className="flex gap-2">
                   <span className="text-green-500">✓</span>
@@ -790,15 +788,15 @@ export default function Home() {
 
           {/* Launch Status */}
           <div className="mt-12 text-center">
-            <div className="inline-block bg-green-900/20 border border-green-500/50 rounded-lg px-8 py-6 mb-6">
+            <div className="inline-block bg-[#9945FF]/10 border border-[#9945FF]/40 rounded-lg px-8 py-6 mb-6">
               <div className="text-sm text-gray-400 mb-1">Platform Status</div>
-              <div className="text-3xl font-bold text-green-400 mb-2">✅ LIVE NOW</div>
+              <div className="text-3xl font-bold gradient-text mb-2">✅ LIVE NOW</div>
               <div className="text-sm text-gray-500 mb-4">Currently in BETA with real transactions</div>
-              <a 
-                href="https://www.silkroadx402.com/" 
-                target="_blank" 
+              <a
+                href="https://www.silkroadx402.com/"
+                target="_blank"
                 rel="noopener noreferrer"
-                className="inline-block px-6 py-2 bg-green-500 text-black font-bold rounded hover:bg-green-400 transition-all"
+                className="inline-block px-6 py-2 bg-gradient-to-r from-[#9945FF] to-[#14F195] text-black font-bold rounded hover:opacity-90 transition-all"
               >
                 Visit Marketplace →
               </a>
@@ -810,8 +808,8 @@ export default function Home() {
       {/* CTA */}
       <section className="border-t border-gray-800 bg-gradient-to-b from-black to-gray-950">
         <div className="max-w-4xl mx-auto px-4 py-20 text-center">
-          <div className="inline-block mb-6 px-6 py-3 bg-green-500/20 border border-green-500/50 rounded-full">
-            <span className="text-green-400 font-bold">🟢 PLATFORM IS LIVE</span>
+          <div className="inline-block mb-6 px-6 py-3 bg-[#9945FF]/10 border border-[#9945FF]/40 rounded-full">
+            <span className="gradient-text font-bold">🟢 SOLk Road IS LIVE</span>
           </div>
           
           <h2 className="text-5xl font-bold mb-6">Ready to Start <span className="gradient-text">Earning</span>?</h2>
@@ -819,9 +817,9 @@ export default function Home() {
             The future of anonymous software commerce is here. Turn your code into cash today.
           </p>
           
-          <div className="bg-cyan-900/20 border border-cyan-500/30 rounded-lg p-4 max-w-2xl mx-auto mb-10">
+          <div className="bg-[#9945FF]/10 border border-[#9945FF]/30 rounded-lg p-4 max-w-2xl mx-auto mb-10">
             <p className="text-sm text-gray-300">
-              <strong className="text-cyan-400">🔑 Access Requirement:</strong> Hold 50,000+ $SRx402 tokens to use the marketplace
+              <strong className="text-[#9945FF]">🔑 Access Requirement:</strong> Hold 50,000+ $SR tokens to use the marketplace
             </p>
           </div>
 
@@ -831,7 +829,7 @@ export default function Home() {
               href="https://www.silkroadx402.com/" 
               target="_blank" 
               rel="noopener noreferrer"
-              className="inline-block px-16 py-5 bg-gradient-to-r from-green-400 via-cyan-400 to-purple-500 text-black font-bold text-2xl rounded-lg hover:from-green-300 hover:via-cyan-300 hover:to-purple-400 transition-all shadow-2xl animate-pulse"
+              className="inline-block px-16 py-5 bg-gradient-to-r from-[#9945FF] via-purple-400 to-[#14F195] text-black font-bold text-2xl rounded-lg hover:opacity-90 transition-all shadow-2xl animate-pulse"
             >
               🚀 ENTER MARKETPLACE NOW →
             </a>
@@ -876,7 +874,7 @@ export default function Home() {
               rel="noopener noreferrer"
               className="inline-block px-10 py-3 bg-gradient-to-r from-purple-500 to-pink-500 text-white font-bold text-lg rounded hover:from-purple-600 hover:to-pink-600 transition-all"
             >
-              💎 Buy $SRx402
+              💎 Buy $SR
             </a>
           <a 
             href="https://x.com/i/communities/1982622474983637154" 
@@ -902,16 +900,16 @@ export default function Home() {
               <div className="flex items-center gap-2 mb-3">
                 <Image 
                   src="/correcto.png" 
-                  alt="SilkRoadx402 Logo" 
+                  alt="SOLk Road Logo" 
                   width={24} 
                   height={24}
                   className="rounded"
                   style={{ maxWidth: '24px', maxHeight: '24px' }}
                 />
-                <h3 className="font-bold text-green-400">SilkRoadx402</h3>
+                <h3 className="font-bold gradient-text">SOLk Road</h3>
               </div>
               <p className="text-sm text-gray-500">
-                The first decentralized marketplace for private software sales using x402 payments on Solana.
+                Anonymous digital marketplace using x402 payments on Solana. Zero fees, zero KYC.
               </p>
             </div>
             <div>
@@ -936,17 +934,17 @@ export default function Home() {
           
           <div className="border-t border-gray-900 pt-8">
             <p className="text-xs text-gray-600 text-center">
-              SilkRoadx402 operates as a decentralized peer-to-peer marketplace. We do not host, verify, or guarantee any software listings. 
+              SOLk Road operates as a decentralized peer-to-peer marketplace. We do not host, verify, or guarantee any software listings. 
               Buyers and sellers interact directly via smart contracts. All transactions are final and non-refundable due to blockchain immutability.
             </p>
             <p className="text-xs text-gray-600 text-center mt-4">
-              <strong>Zero Platform Fees:</strong> SilkRoadx402 charges no platform fees. Sellers keep 100% of revenue. 
+              <strong>Zero Platform Fees:</strong> SOLk Road charges no platform fees. Sellers keep 100% of revenue. 
               Only blockchain transaction costs apply (typically less than $0.01 per transaction). 
               Non-compliant or illegal software is strictly prohibited and will not be listed.
             </p>
             <div className="flex flex-col items-center gap-3 mt-6">
               <p className="text-xs text-gray-700 text-center">
-                © 2025 SilkRoadx402. All rights reserved. Not affiliated with the original Silk Road.
+                © 2025 SOLk Road. All rights reserved. Not affiliated with the original Silk Road.
               </p>
               <a 
                 href="https://github.com/Tanner253" 

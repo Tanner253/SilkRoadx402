@@ -37,7 +37,7 @@ interface Listing {
 }
 
 export function PublicChat() {
-  const { isConnected, hasAcceptedTOS, isTokenGated } = useAuth();
+  const { isConnected, hasAcceptedTOS } = useAuth();
   const { publicKey } = useWallet();
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
@@ -139,8 +139,8 @@ export function PublicChat() {
   const handleSend = async () => {
     if (!publicKey || !newMessage.trim()) return;
 
-    if (!isConnected || !hasAcceptedTOS || !isTokenGated) {
-      setError('Connect wallet and hold 50k+ $SRx402 to chat');
+    if (!isConnected || !hasAcceptedTOS) {
+      setError('Connect your wallet and accept TOS to chat');
       return;
     }
 
@@ -273,7 +273,7 @@ export function PublicChat() {
               onTouchMove={(e) => {
                 if (swipeStartX === null) return;
                 const swipeDistance = e.touches[0].clientX - swipeStartX;
-                if (swipeDistance > 80 && isConnected && isTokenGated) {
+                if (swipeDistance > 80 && isConnected && hasAcceptedTOS) {
                   setReplyingTo(msg);
                   setSwipeStartX(null);
                 }
@@ -324,7 +324,7 @@ export function PublicChat() {
                 {/* Reply button (desktop only, mobile uses swipe) */}
                 <button
                   onClick={() => setReplyingTo(msg)}
-                  disabled={!isConnected || !isTokenGated}
+                  disabled={!isConnected || !hasAcceptedTOS}
                   className="text-zinc-500 hover:text-green-500 transition-colors disabled:opacity-30 disabled:cursor-not-allowed hidden sm:block text-base"
                   title="Reply to this message"
                 >
@@ -373,14 +373,14 @@ export function PublicChat() {
                     <button
                       key={emoji}
                       onClick={() => handleReaction(msg._id, emoji)}
-                      disabled={!isConnected || !isTokenGated}
+                      disabled={!isConnected || !hasAcceptedTOS}
                       className={`
                         flex items-center space-x-1 rounded px-1.5 py-0.5 text-xs transition-all
-                        ${userReacted 
-                          ? 'bg-amber-700 border border-amber-600' 
+                        ${userReacted
+                          ? 'bg-amber-700 border border-amber-600'
                           : 'bg-zinc-800 border border-zinc-700 hover:bg-zinc-700'
                         }
-                        ${!isConnected || !isTokenGated ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}
+                        ${!isConnected || !hasAcceptedTOS ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}
                       `}
                       title={userReacted ? 'Remove reaction' : 'React'}
                     >
@@ -399,11 +399,11 @@ export function PublicChat() {
                       e.stopPropagation();
                       setShowReactionsFor(showReactionsFor === msg._id ? null : msg._id);
                     }}
-                    disabled={!isConnected || !isTokenGated}
+                    disabled={!isConnected || !hasAcceptedTOS}
                     className={`
                       flex items-center justify-center w-6 h-6 rounded text-xs transition-all
                       bg-zinc-800 border border-zinc-700 hover:bg-zinc-700 hover:border-amber-600
-                      ${!isConnected || !isTokenGated ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}
+                      ${!isConnected || !hasAcceptedTOS ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}
                     `}
                     title="Add reaction"
                   >
@@ -480,12 +480,12 @@ export function PublicChat() {
             onKeyPress={(e) => e.key === 'Enter' && !sending && cooldown === 0 && handleSend()}
             placeholder={cooldown > 0 ? `Wait ${cooldown}s...` : 'Type to trade...'}
             maxLength={280}
-            disabled={sending || cooldown > 0 || !isConnected || !isTokenGated}
+            disabled={sending || cooldown > 0 || !isConnected || !hasAcceptedTOS}
             className="flex-1 rounded border border-amber-700 bg-zinc-800 px-3 py-2 text-xs text-yellow-200 placeholder-zinc-600 focus:outline-none focus:ring-2 focus:ring-amber-600 disabled:opacity-50"
           />
           <button
             onClick={handleSend}
-            disabled={sending || cooldown > 0 || !newMessage.trim() || !isConnected || !isTokenGated}
+            disabled={sending || cooldown > 0 || !newMessage.trim() || !isConnected || !hasAcceptedTOS}
             className="rounded bg-amber-600 px-4 py-2 text-xs font-bold text-white hover:bg-amber-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
           >
             {cooldown > 0 ? `${cooldown}s` : sending ? '...' : '💰 Send'}
@@ -497,8 +497,8 @@ export function PublicChat() {
           <span className={`${newMessage.length > 250 ? 'text-red-400' : 'text-zinc-500'}`}>
             {newMessage.length}/280
           </span>
-          {!isConnected || !isTokenGated ? (
-            <span className="text-amber-500">Need 50k $SRx402 to chat</span>
+          {!isConnected || !hasAcceptedTOS ? (
+            <span className="text-amber-500">Connect wallet + accept TOS to chat</span>
           ) : null}
         </div>
 

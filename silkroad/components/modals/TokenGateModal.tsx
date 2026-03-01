@@ -29,13 +29,13 @@ export function TokenGateModal({ isOpen, currentBalance = 0, requiredBalance }: 
   const formattedShortage = shortage.toLocaleString();
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm">
-      <div className="relative w-full max-w-md rounded-lg bg-white p-6 shadow-2xl dark:bg-zinc-900 mx-4">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm">
+      <div className="relative w-full max-w-md rounded-xl border border-purple-900/50 bg-[#0f0f14] p-6 shadow-2xl shadow-purple-900/20 mx-4">
         {/* Icon */}
         <div className="mb-4 flex justify-center">
-          <div className="flex h-16 w-16 items-center justify-center rounded-full bg-yellow-100 dark:bg-yellow-900/30">
+          <div className="flex h-16 w-16 items-center justify-center rounded-full bg-purple-950/60 border border-purple-800/40">
             <svg
-              className="h-8 w-8 text-yellow-600 dark:text-yellow-500"
+              className="h-8 w-8 text-[#9945FF]"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -52,34 +52,34 @@ export function TokenGateModal({ isOpen, currentBalance = 0, requiredBalance }: 
 
         {/* Header */}
         <div className="mb-4 text-center">
-          <h2 className="text-2xl font-bold text-zinc-900 dark:text-zinc-50">
+          <h2 className="text-2xl font-bold text-white">
             🔒 Token Gating Required
           </h2>
-          <p className="mt-2 text-sm text-zinc-600 dark:text-zinc-400">
-            SilkRoadx402 requires holding $SRx402 tokens for access
+          <p className="mt-2 text-sm text-white/60">
+            SOLk Road requires holding $SR tokens for access
           </p>
         </div>
 
         {/* Balance Info */}
-        <div className="mb-6 rounded-lg border border-yellow-200 bg-yellow-50 p-4 dark:border-yellow-900/50 dark:bg-yellow-950/20">
+        <div className="mb-6 rounded-lg border border-purple-900/40 bg-purple-950/20 p-4">
           <div className="space-y-2 text-sm">
             <div className="flex justify-between">
-              <span className="text-zinc-700 dark:text-zinc-300">Your Balance:</span>
-              <span className="font-mono font-semibold text-zinc-900 dark:text-zinc-50">
-                {formattedBalance} $SRx402
+              <span className="text-white/60">Your Balance:</span>
+              <span className="font-mono font-semibold text-white">
+                {formattedBalance} $SR
               </span>
             </div>
             <div className="flex justify-between">
-              <span className="text-zinc-700 dark:text-zinc-300">Required:</span>
-              <span className="font-mono font-semibold text-zinc-900 dark:text-zinc-50">
-                {formattedRequired} $SRx402
+              <span className="text-white/60">Required:</span>
+              <span className="font-mono font-semibold text-white">
+                {formattedRequired} $SR
               </span>
             </div>
-            <div className="border-t border-yellow-300 pt-2 dark:border-yellow-900">
+            <div className="border-t border-purple-900/40 pt-2">
               <div className="flex justify-between">
-                <span className="font-medium text-yellow-800 dark:text-yellow-200">Need to Buy:</span>
-                <span className="font-mono font-bold text-yellow-900 dark:text-yellow-100">
-                  {formattedShortage} $SRx402
+                <span className="font-medium text-[#9945FF]">Need to Buy:</span>
+                <span className="font-mono font-bold text-[#9945FF]">
+                  {formattedShortage} $SR
                 </span>
               </div>
             </div>
@@ -87,12 +87,12 @@ export function TokenGateModal({ isOpen, currentBalance = 0, requiredBalance }: 
         </div>
 
         {/* Info */}
-        <div className="mb-6 rounded-lg bg-green-50 p-4 dark:bg-green-950/20">
-          <p className="text-sm text-green-800 dark:text-green-200">
+        <div className="mb-6 rounded-lg border border-[#14F195]/20 bg-[#14F195]/5 p-4">
+          <p className="text-sm text-[#14F195]">
             <strong>ℹ️ How to get access:</strong>
           </p>
-          <ol className="mt-2 ml-4 space-y-1 text-sm text-green-800 dark:text-green-200 list-decimal">
-            <li>Buy $SRx402 tokens on pump.fun</li>
+          <ol className="mt-2 ml-4 space-y-1 text-sm text-white/70 list-decimal">
+            <li>Buy $SR tokens on pump.fun</li>
             <li>Send tokens to your connected wallet</li>
             <li>Reconnect your wallet to refresh balance</li>
             <li>Accept TOS and start using the platform!</li>
@@ -103,24 +103,24 @@ export function TokenGateModal({ isOpen, currentBalance = 0, requiredBalance }: 
         <div className="space-y-3">
           <button
             onClick={handleBuyTokens}
-            className="w-full rounded-lg bg-gradient-to-r from-purple-600 to-pink-600 px-4 py-3 text-sm font-semibold text-white hover:from-purple-700 hover:to-pink-700 transition-all transform hover:scale-105 shadow-lg"
+            className="w-full rounded-lg bg-gradient-to-r from-[#9945FF] to-[#14F195] px-4 py-3 text-sm font-semibold text-white hover:opacity-90 transition-opacity shadow-lg"
           >
-            🚀 Buy $SRx402 on pump.fun
+            🚀 Buy $SR on pump.fun
           </button>
           <button
             onClick={handleDisconnect}
-            className="w-full rounded-lg border border-zinc-300 bg-white px-4 py-2 text-sm font-medium text-zinc-700 hover:bg-zinc-100 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-300 dark:hover:bg-zinc-700 transition-colors"
+            className="w-full rounded-lg border border-purple-900/50 bg-white/5 px-4 py-2 text-sm font-medium text-white/70 hover:bg-white/10 hover:text-white transition-colors"
           >
             Disconnect Wallet
           </button>
         </div>
 
         {/* Contract Info */}
-        <div className="mt-4 rounded border border-zinc-200 bg-zinc-50 p-3 dark:border-zinc-800 dark:bg-zinc-950">
-          <p className="text-xs text-zinc-500 dark:text-zinc-400 mb-1">
+        <div className="mt-4 rounded border border-purple-900/30 bg-black/30 p-3">
+          <p className="text-xs text-white/40 mb-1">
             <strong>Token Contract:</strong>
           </p>
-          <p className="text-xs font-mono text-zinc-700 dark:text-zinc-300 break-all">
+          <p className="text-xs font-mono text-white/60 break-all">
             49AfJsWb9E7VjBDTdZ2DjnSLFgSEvCoP1wdXuhHbpump
           </p>
         </div>
@@ -128,4 +128,3 @@ export function TokenGateModal({ isOpen, currentBalance = 0, requiredBalance }: 
     </div>
   );
 }
-
