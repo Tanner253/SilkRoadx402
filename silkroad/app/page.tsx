@@ -32,7 +32,7 @@ export default function Home() {
         <div className="mb-8">
           <div className="mb-4 flex items-center justify-center gap-3">
             <h1 className="text-5xl font-bold tracking-tight sm:text-6xl text-white">
-              SOL<span className="gradient-text">k Road</span>
+              <span className="gradient-text">SOL</span>k Road
             </h1>
           </div>
           <h2 className="mb-4 text-2xl font-semibold tracking-tight text-white/80">

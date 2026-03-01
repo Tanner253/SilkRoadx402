@@ -34,9 +34,9 @@ export default function Home() {
         if (data.pair) {
           setTokenData({
             priceUsd: data.pair.priceUsd,
-            marketCap: data.pair.fdv || data.pair.marketCap,
-            volume24h: data.pair.volume.h24,
-            priceChange24h: data.pair.priceChange.h24,
+            marketCap: data.pair.fdv ?? data.pair.marketCap ?? 0,
+            volume24h: data.pair.volume?.h24 ?? 0,
+            priceChange24h: data.pair.priceChange?.h24 ?? 0,
             liquidity: data.pair.liquidity?.usd
           });
         }
@@ -63,7 +63,8 @@ export default function Home() {
     setTimeout(() => setCopied(false), 2000);
   };
 
-  const formatNumber = (num: number): string => {
+  const formatNumber = (num: number | undefined | null): string => {
+    if (num == null || isNaN(num)) return 'N/A';
     if (num >= 1000000000) return `$${(num / 1000000000).toFixed(2)}B`;
     if (num >= 1000000) return `$${(num / 1000000).toFixed(2)}M`;
     if (num >= 1000) return `$${(num / 1000).toFixed(2)}K`;
@@ -85,7 +86,7 @@ export default function Home() {
               style={{ maxWidth: '40px', maxHeight: '40px' }}
             />
             <div className="text-2xl font-bold">
-              <span className="text-white">SOL</span><span className="gradient-text">k Road</span>
+              <span className="gradient-text">SOL</span><span className="text-white">k Road</span>
             </div>
           </div>
           <div className="flex items-center gap-4">

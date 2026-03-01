@@ -64,7 +64,7 @@ export function Navbar() {
           {/* Logo */}
           <Link href="/" className="flex items-center space-x-2 sm:space-x-3">
             <div className="text-lg sm:text-xl font-bold tracking-tight text-white">
-              <span>SOL</span><span className="gradient-text">k Road</span>
+              <span className="gradient-text">SOL</span><span>k Road</span>
             </div>
           </Link>
 
