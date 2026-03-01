@@ -1,5 +1,6 @@
 'use client';
 
+import { useState } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { WalletMultiButton } from '@solana/wallet-adapter-react-ui';
 import Link from 'next/link';
@@ -7,6 +8,14 @@ import Link from 'next/link';
 const CONTRACT_ADDRESS = '49AfJsWb9E7VjBDTdZ2DjnSLFgSEvCoP1wdXuhHbpump';
 
 export default function Home() {
+  const [copied, setCopied] = useState(false);
+
+  const copyCA = () => {
+    navigator.clipboard.writeText(CONTRACT_ADDRESS);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
   const {
     isConnected,
     hasAcceptedTOS,
@@ -54,13 +63,16 @@ export default function Home() {
             </p>
             <div className="flex flex-col sm:flex-row items-center gap-2 w-full">
               <div className="flex-1 rounded-lg bg-black/40 p-3 border border-purple-900/40 overflow-hidden">
-                <p className="font-mono text-xs sm:text-sm text-white/70 break-all text-center sm:text-left">
-                  {CONTRACT_ADDRESS}
+                <p className="text-xs sm:text-sm text-white/40 text-center sm:text-left italic">
+                  Coming Soon
                 </p>
               </div>
-              <span className="rounded-lg bg-purple-950/60 border border-purple-800/40 px-4 py-2.5 text-sm font-semibold text-purple-300 whitespace-nowrap">
-                Coming Soon
-              </span>
+              <button
+                onClick={copyCA}
+                className="rounded-lg bg-gradient-to-r from-[#9945FF] to-[#14F195] px-4 py-2.5 text-sm font-semibold text-black hover:opacity-90 transition-opacity whitespace-nowrap"
+              >
+                {copied ? '✓ Copied!' : '📋 Copy CA'}
+              </button>
             </div>
           </div>
         </div>
