@@ -41,7 +41,7 @@ export default function RootLayout({
             <UIProviders>
               <div className="relative">
                 <Navbar />
-                <main className="pt-16 pb-16">
+                <main className="pt-24 pb-16">
                   {children}
                 </main>
                 <Footer />

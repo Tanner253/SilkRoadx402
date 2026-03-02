@@ -38,10 +38,24 @@ export function Navbar() {
     };
   }, [mobileMenuOpen]);
 
+  const X_COMMUNITY_URL = 'https://x.com/i/communities/1982622474983637154';
+
   return (
     <>
-      <nav className="fixed top-0 z-50 w-full border-b border-purple-900/30 bg-[#0f0f14]/95 backdrop-blur-md shadow-lg shadow-purple-900/10">
-        <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
+      {/* Top banner: X community link */}
+      <a
+        href={X_COMMUNITY_URL}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="fixed top-0 left-0 right-0 z-[60] flex items-center justify-center gap-2 bg-[#0f0f14] border-b border-purple-900/20 py-1.5 text-xs font-medium text-white/70 hover:text-white hover:bg-purple-950/30 transition-colors"
+      >
+        <span>💬</span>
+        <span>Join the community on X</span>
+        <span className="text-white/50">→</span>
+      </a>
+
+      <nav className="fixed top-8 z-50 w-full border-b border-purple-900/30 bg-[#0f0f14]/95 backdrop-blur-md shadow-lg shadow-purple-900/10">
+        <div className="mx-auto flex h-14 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
           {/* Mobile Menu Button - Always show */}
           {mounted && (
             <button
@@ -200,7 +214,7 @@ export function Navbar() {
           />
 
           {/* Menu Panel */}
-          <div className="fixed top-16 left-0 right-0 bottom-0 z-40 bg-[#0f0f14] md:hidden overflow-y-auto">
+          <div className="fixed top-[5.5rem] left-0 right-0 bottom-0 z-40 bg-[#0f0f14] md:hidden overflow-y-auto">
             <div className="flex flex-col p-6 space-y-6">
               {/* Active Users on Mobile - Always visible */}
               <div className="flex items-center gap-3 rounded-lg border border-purple-900/50 bg-purple-950/20 p-4">
@@ -352,6 +366,16 @@ export function Navbar() {
                     <span className="text-base">📋</span>
                     Updates
                   </Link>
+
+                  <a
+                    href={X_COMMUNITY_URL}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-3 rounded-lg px-4 py-3 text-sm font-medium text-white/60 hover:bg-white/5 transition-colors"
+                  >
+                    <span className="text-base">💬</span>
+                    Community (X)
+                  </a>
 
                   <a
                     href="https://solkroadwp.vercel.app"
