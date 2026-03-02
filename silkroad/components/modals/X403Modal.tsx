@@ -89,7 +89,7 @@ export function X403Modal({ isOpen, onSign, onCancel, isLoading, error, challeng
               <strong className="text-red-400">Always check the domain before signing!</strong>
             </p>
             <div className="bg-black/50 rounded px-3 py-2 font-mono text-xs text-white break-all">
-              {typeof window !== 'undefined' ? window.location.hostname : 'solkroad.com'}
+              {typeof window !== 'undefined' ? window.location.hostname : 'solkroad.fun'}
             </div>
             <p className="text-xs text-red-400/80 mt-2">
               ✗ Never sign if the domain looks suspicious!

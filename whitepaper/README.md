@@ -1,6 +1,6 @@
 # 🏴‍☠️ SilkRoadx402
 
-## 🚀 **LIVE NOW AT [SILKROADX402.COM](https://www.silkroadx402.com/)**
+## 🚀 **LIVE NOW AT [SOLKROAD.FUN](https://solkroad.fun/)**
 
 **The world's first decentralized marketplace for private software sales using x402 micropayments on Solana.**
 
@@ -8,7 +8,7 @@
 
 ## ⚡ **EXPERIENCE IT LIVE**
 
-🌐 **Official Site:** [https://www.silkroadx402.com/](https://www.silkroadx402.com/)  
+🌐 **Official Site:** [https://solkroad.fun/](https://solkroad.fun/)  
 💎 **Token Required:** 50,000 $SRx402 (CA: coming soon)  
 ⚡ **Blockchain:** Solana Mainnet  
 💰 **Payment:** USDC via x402 Protocol  
@@ -29,27 +29,27 @@
 
 Sell your trading bots, private tools, scripts, and software anonymously. Buy exclusive tools others won't share publicly. All secured by blockchain, powered by x402.
 
-**[🚀 Start Buying & Selling Now →](https://www.silkroadx402.com/)**
+**[🚀 Start Buying & Selling Now →](https://solkroad.fun/)**
 
 ---
 
 ## 🎮 **LIVE FEATURES** - Try Them All!
 
-### 🛍️ **[Browse Marketplace](https://www.silkroadx402.com/browse)**
+### 🛍️ **[Browse Marketplace](https://solkroad.fun/browse)**
 - Discover exclusive software from verified sellers
 - Filter by category: Trading Bots, API Tools, Scripts, Custom
 - Search by vendor wallet address
 - View demo videos, whitepapers, and GitHub repos
 - See real-time pricing in USDC
 
-### 🏆 **[Leaderboard](https://www.silkroadx402.com/leaderboard)**
+### 🏆 **[Leaderboard](https://solkroad.fun/leaderboard)**
 - **NEW!** See top-earning vendors on the platform
 - Real-time revenue rankings
 - Total sales and active listings
 - Click any vendor to view their listings
 - Find trusted sellers with proven track records
 
-### 💸 **[Sell Software](https://www.silkroadx402.com/listings/new)**
+### 💸 **[Sell Software](https://solkroad.fun/listings/new)**
 - Create listings in minutes
 - Set your own prices (min $0.10 USDC)
 - Upload demo videos (YouTube embeds)
@@ -57,14 +57,14 @@ Sell your trading bots, private tools, scripts, and software anonymously. Buy ex
 - Track revenue per listing
 - **Anti-spam protected:** Max 3 active listings, rate-limited uploads
 
-### 👤 **[My Listings](https://www.silkroadx402.com/listings/my)**
+### 👤 **[My Listings](https://solkroad.fun/listings/my)**
 - Manage all your products
 - View revenue and sales count per listing
 - Deactivate/reactivate listings instantly
 - See transaction history
 - Pull listings from market when needed
 
-### 📊 **[Profile & Analytics](https://www.silkroadx402.com/profile)**
+### 📊 **[Profile & Analytics](https://solkroad.fun/profile)**
 - **NEW!** Dedicated analytics dashboard
 - Real-time USDC balance
 - Total revenue earned
@@ -154,7 +154,7 @@ Sell your trading bots, private tools, scripts, and software anonymously. Buy ex
 - **Instant** - Software delivered in seconds
 - **Trustless** - All payments verified on Solana blockchain
 
-**[🔥 Try It Live Now →](https://www.silkroadx402.com/)**
+**[🔥 Try It Live Now →](https://solkroad.fun/)**
 
 ---
 
@@ -213,7 +213,7 @@ The 50k token requirement creates **constant buying pressure** for $SRx402 while
 - Contract: `49AfJsWb9E7VjBDTdZ2DjnSLFgSEvCoP1wdXuhHbpump`
 
 ### 2️⃣ **Connect Your Wallet**
-- Visit [silkroadx402.com](https://www.silkroadx402.com/)
+- Visit [solkroad.fun](https://solkroad.fun/)
 - Click "Connect Wallet"
 - Approve with Phantom
 
@@ -221,7 +221,7 @@ The 50k token requirement creates **constant buying pressure** for $SRx402 while
 - **Buyers:** Browse listings, purchase with USDC
 - **Sellers:** Create listings, earn 100%
 
-**[🚀 GO LIVE NOW →](https://www.silkroadx402.com/)**
+**[🚀 GO LIVE NOW →](https://solkroad.fun/)**
 
 ---
 
@@ -276,7 +276,7 @@ The 50k token requirement creates **constant buying pressure** for $SRx402 while
 - **Power Users** monetizing their workflows
 - **Anonymous Creators** who value privacy
 
-**[💰 Start Earning Today →](https://www.silkroadx402.com/listings/new)**
+**[💰 Start Earning Today →](https://solkroad.fun/listings/new)**
 
 ---
 
@@ -293,7 +293,7 @@ This platform is in **BETA**. While transactions execute on Solana mainnet with 
 
 **USE AT YOUR OWN RISK.**
 
-**[📋 Read Full Terms →](https://www.silkroadx402.com/)**
+**[📋 Read Full Terms →](https://solkroad.fun/)**
 
 ---
 
@@ -320,13 +320,13 @@ This platform is in **BETA**. While transactions execute on Solana mainnet with 
 - ✅ Token holder access
 - ✅ Open-source codebase
 
-**[🔥 See Live Leaderboard →](https://www.silkroadx402.com/leaderboard)**
+**[🔥 See Live Leaderboard →](https://solkroad.fun/leaderboard)**
 
 ---
 
 ## 📱 **COMMUNITY**
 
-- **🌐 Website:** [silkroadx402.com](https://www.silkroadx402.com/)
+- **🌐 Website:** [solkroad.fun](https://solkroad.fun/)
 - **💬 Twitter:** [@SilkRoadx402](https://twitter.com/SilkRoadx402) *(if applicable)*
 - **📊 Chart:** coming soon
 - **🔗 GitHub:** [github.com/Tanner253/SilkRoadx402](https://github.com/Tanner253/SilkRoadx402)
@@ -337,14 +337,14 @@ This platform is in **BETA**. While transactions execute on Solana mainnet with 
 
 ### 👨‍💻 **For Sellers**
 1. Get 50k $SRx402 tokens
-2. Go to [silkroadx402.com/listings/new](https://www.silkroadx402.com/listings/new)
+2. Go to [solkroad.fun/listings/new](https://solkroad.fun/listings/new)
 3. Create your first listing
 4. Wait for admin approval (24-48hr)
 5. Start earning USDC!
 
 ### 🛍️ **For Buyers**
 1. Get 50k $SRx402 tokens
-2. Browse at [silkroadx402.com/browse](https://www.silkroadx402.com/browse)
+2. Browse at [solkroad.fun/browse](https://solkroad.fun/browse)
 3. Find what you need
 4. Purchase with USDC
 5. Download instantly!
@@ -363,7 +363,7 @@ This platform is in **BETA**. While transactions execute on Solana mainnet with 
 
 **This isn't vaporware. This isn't a concept. This is REAL.**
 
-**[🔥 EXPERIENCE IT NOW → SILKROADX402.COM](https://www.silkroadx402.com/)**
+**[🔥 EXPERIENCE IT NOW → SOLKROAD.FUN](https://solkroad.fun/)**
 
 ---
 
@@ -405,7 +405,7 @@ No middlemen taking cuts.
 No censorship.  
 Just code, crypto, and freedom.
 
-**[🚀 START NOW → SILKROADX402.COM](https://www.silkroadx402.com/)**
+**[🚀 START NOW → SOLKROAD.FUN](https://solkroad.fun/)**
 
 ---
 
@@ -418,4 +418,4 @@ Just code, crypto, and freedom.
 
 *SilkRoadx402 - Where Anonymous Commerce Meets Blockchain*
 
-🏴‍☠️ **[SILKROADX402.COM](https://www.silkroadx402.com/)** 🏴‍☠️
+🏴‍☠️ **[SOLKROAD.FUN](https://solkroad.fun/)** 🏴‍☠️

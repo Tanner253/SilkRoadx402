@@ -34,7 +34,7 @@ export default function Home() {
           </div>
           <div className="flex items-center gap-4">
             <a 
-              href="https://www.silkroadx402.com/" 
+              href="https://solkroad.fun/" 
               target="_blank" 
               rel="noopener noreferrer"
               className="px-6 py-2 bg-gradient-to-r from-[#9945FF] to-[#14F195] text-black font-bold hover:opacity-90 transition-all rounded shadow-lg"
@@ -84,7 +84,7 @@ export default function Home() {
         {/* HERO CTA */}
         <div className="flex flex-col sm:flex-row gap-4 justify-center mb-12">
           <a 
-            href="https://www.silkroadx402.com/browse" 
+            href="https://solkroad.fun/browse" 
             target="_blank" 
             rel="noopener noreferrer"
             className="inline-block px-12 py-4 bg-gradient-to-r from-[#9945FF] to-[#14F195] text-black font-bold text-lg rounded hover:opacity-90 transition-all shadow-lg"
@@ -92,7 +92,7 @@ export default function Home() {
             🛍️ Browse Marketplace →
           </a>
           <a 
-            href="https://www.silkroadx402.com/listings/new" 
+            href="https://solkroad.fun/listings/new" 
             target="_blank" 
             rel="noopener noreferrer"
             className="inline-block px-12 py-4 bg-gradient-to-r from-purple-500 to-pink-500 text-white font-bold text-lg rounded hover:from-purple-600 hover:to-pink-600 transition-all shadow-lg"
@@ -313,7 +313,7 @@ export default function Home() {
           {/* CTA: Start Earning */}
           <div className="mt-12 text-center">
             <a 
-              href="https://www.silkroadx402.com/listings/new" 
+              href="https://solkroad.fun/listings/new" 
               target="_blank" 
               rel="noopener noreferrer"
               className="inline-block px-12 py-4 bg-gradient-to-r from-[#9945FF] to-[#14F195] text-black font-bold text-lg rounded hover:opacity-90 transition-all shadow-lg"
@@ -363,7 +363,7 @@ export default function Home() {
           {/* CTA: Browse What's For Sale */}
           <div className="mt-12 text-center">
             <a 
-              href="https://www.silkroadx402.com/browse" 
+              href="https://solkroad.fun/browse" 
               target="_blank" 
               rel="noopener noreferrer"
               className="inline-block px-12 py-4 bg-gradient-to-r from-cyan-500 to-purple-500 text-white font-bold text-lg rounded hover:from-cyan-400 hover:to-purple-400 transition-all shadow-lg"
@@ -461,7 +461,7 @@ export default function Home() {
             <div className="mt-8 text-center space-y-4">
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
                 <a 
-                  href="https://www.silkroadx402.com/" 
+                  href="https://solkroad.fun/" 
                   target="_blank" 
                   rel="noopener noreferrer"
                   className="inline-block px-8 py-3 bg-gradient-to-r from-purple-500 to-pink-500 text-white font-bold text-lg rounded hover:from-purple-600 hover:to-pink-600 transition-all shadow-lg"
@@ -528,7 +528,7 @@ export default function Home() {
           </h2>
           <div className="text-center mb-8">
             <a 
-              href="https://www.silkroadx402.com/" 
+              href="https://solkroad.fun/" 
               target="_blank" 
               rel="noopener noreferrer"
               className="inline-block px-8 py-3 bg-gradient-to-r from-[#9945FF] to-[#14F195] text-black font-bold text-xl rounded hover:opacity-90 transition-all shadow-lg mb-4"
@@ -669,7 +669,7 @@ export default function Home() {
               <div className="text-3xl font-bold gradient-text mb-2">✅ LIVE NOW</div>
               <div className="text-sm text-gray-500 mb-4">Currently in BETA with real transactions</div>
               <a
-                href="https://www.silkroadx402.com/"
+                href="https://solkroad.fun/"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="inline-block px-6 py-2 bg-gradient-to-r from-[#9945FF] to-[#14F195] text-black font-bold rounded hover:opacity-90 transition-all"
@@ -702,7 +702,7 @@ export default function Home() {
           {/* PRIMARY CTA: Enter Marketplace */}
           <div className="mb-8">
             <a 
-              href="https://www.silkroadx402.com/" 
+              href="https://solkroad.fun/" 
               target="_blank" 
               rel="noopener noreferrer"
               className="inline-block px-16 py-5 bg-gradient-to-r from-[#9945FF] via-purple-400 to-[#14F195] text-black font-bold text-2xl rounded-lg hover:opacity-90 transition-all shadow-2xl animate-pulse"
@@ -717,7 +717,7 @@ export default function Home() {
           {/* SECONDARY CTAs */}
           <div className="flex flex-col sm:flex-row gap-4 justify-center mb-8">
             <a 
-              href="https://www.silkroadx402.com/browse" 
+              href="https://solkroad.fun/browse" 
               target="_blank" 
               rel="noopener noreferrer"
               className="inline-block px-10 py-3 bg-cyan-500/20 border border-cyan-500/50 text-cyan-400 font-bold text-lg rounded hover:bg-cyan-500/30 transition-all"
@@ -725,7 +725,7 @@ export default function Home() {
               🛍️ Browse Listings
             </a>
             <a 
-              href="https://www.silkroadx402.com/listings/new" 
+              href="https://solkroad.fun/listings/new" 
               target="_blank" 
               rel="noopener noreferrer"
               className="inline-block px-10 py-3 bg-purple-500/20 border border-purple-500/50 text-purple-400 font-bold text-lg rounded hover:bg-purple-500/30 transition-all"
@@ -733,7 +733,7 @@ export default function Home() {
               💰 Start Selling
             </a>
             <a 
-              href="https://www.silkroadx402.com/leaderboard" 
+              href="https://solkroad.fun/leaderboard" 
               target="_blank" 
               rel="noopener noreferrer"
               className="inline-block px-10 py-3 bg-yellow-500/20 border border-yellow-500/50 text-yellow-400 font-bold text-lg rounded hover:bg-yellow-500/30 transition-all"

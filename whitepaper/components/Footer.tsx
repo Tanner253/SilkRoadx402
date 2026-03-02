@@ -6,7 +6,7 @@ export function Footer() {
       <div className="mx-auto flex max-w-7xl items-center justify-center space-x-6 py-3 px-4">
         {/* Main App Link */}
         <a
-          href="https://silk-road-psi.vercel.app"
+          href="https://solkroad.fun"
           className="flex items-center space-x-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 transition-colors"
           title="Go to Main App"
         >
@@ -16,7 +16,7 @@ export function Footer() {
 
         {/* FAQ Button */}
         <a
-          href="https://silk-road-psi.vercel.app/faq"
+          href="https://solkroad.fun/faq"
           className="flex items-center space-x-2 rounded-lg px-4 py-2 text-sm font-medium text-zinc-700 hover:bg-zinc-100 dark:text-zinc-300 dark:hover:bg-zinc-800 transition-colors"
           title="Frequently Asked Questions"
         >
@@ -26,7 +26,7 @@ export function Footer() {
 
         {/* Updates Button */}
         <a
-          href="https://silk-road-psi.vercel.app/updates"
+          href="https://solkroad.fun/updates"
           className="flex items-center space-x-2 rounded-lg px-4 py-2 text-sm font-medium text-zinc-700 hover:bg-zinc-100 dark:text-zinc-300 dark:hover:bg-zinc-800 transition-colors"
           title="Platform Updates"
         >

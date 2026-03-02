@@ -43,7 +43,7 @@ export const CONFIG = {
   
   // General
   NODE_ENV: process.env.NODE_ENV || 'development',
-  NEXT_PUBLIC_APP_URL: process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000',
+  NEXT_PUBLIC_APP_URL: process.env.NEXT_PUBLIC_APP_URL || 'https://solkroad.fun',
   
   // Development Mock Mode (bypasses database for testing)
   // Only enable if explicitly set to 'true'

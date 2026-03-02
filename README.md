@@ -5,7 +5,7 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](https://opensource.org/licenses/MIT)
 [![Next.js](https://img.shields.io/badge/Next.js-15-black)](https://nextjs.org/)
 [![Solana](https://img.shields.io/badge/Solana-Blockchain-purple)](https://solana.com/)
-[![Status](https://img.shields.io/badge/Status-OPERATIONAL-success)](https://silkroadx402.com)
+[![Status](https://img.shields.io/badge/Status-OPERATIONAL-success)](https://solkroad.fun)
 
 **🚀 Platform Status:** ✅ **OPERATIONAL** - Core functionality complete. Sellers are receiving USDC payments from buyers today.
 
@@ -279,7 +279,7 @@ We operate as a **peer-to-peer marketplace** with no liability for user-generate
 - **X Community:** [Join here](https://x.com/i/communities/1982622474983637154)
 - **GitHub:** [@Tanner253](https://github.com/Tanner253)
 - **Token:** Trade $SRx402 on [DexScreener](https://dexscreener.com/solana/4dquGRPzcjskMsHtiFagPuguMfY37ywkNMNBg4F54fNW)
-- **Whitepaper:** [silkroadx402.com](https://silkroadx402.com)
+- **Whitepaper:** [solkroad.fun](https://solkroad.fun)
 
 ---
 
