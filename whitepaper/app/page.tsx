@@ -1,19 +1,8 @@
 'use client';
 
-import { useState } from 'react';
 import Image from 'next/image';
 
 export default function Home() {
-  const [copied, setCopied] = useState(false);
-  
-  const TOKEN_ADDRESS = 'coming soon';
-  
-  const copyToClipboard = () => {
-    navigator.clipboard.writeText(TOKEN_ADDRESS);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
-  };
-
   return (
     <div className="min-h-screen">
       {/* Header */}
@@ -484,29 +473,10 @@ export default function Home() {
             <span className="gradient-text">$SR</span> Token
           </h2>
           <p className="text-gray-400 text-center mb-12 max-w-2xl mx-auto">
-            Platform governance and access token. Hold 50,000+ tokens to access the marketplace.
+            Platform governance and access token. Hold 50,000+ tokens to access the marketplace. Launching soon.
           </p>
 
           <div className="max-w-2xl mx-auto flex flex-col gap-4">
-            {/* Token Info */}
-              <div className="bg-black/50 border border-gray-800 rounded-lg p-6">
-                <h3 className="text-lg font-bold mb-4 text-cyan-400">Contract Address</h3>
-                <div className="flex flex-col sm:flex-row gap-2">
-                  <input 
-                    type="text" 
-                    readOnly 
-                    value={TOKEN_ADDRESS}
-                    className="flex-1 bg-gray-900 border border-gray-700 rounded px-4 py-2 text-gray-300 text-sm font-mono"
-                  />
-                  <button 
-                    onClick={copyToClipboard}
-                    className="px-4 py-2 bg-purple-500/10 border border-purple-500/30 text-purple-400 rounded hover:bg-purple-500/20 transition-all whitespace-nowrap"
-                  >
-                    {copied ? '✓ Copied!' : 'Copy CA'}
-                  </button>
-                </div>
-              </div>
-
               <div className="bg-gradient-to-br from-purple-900/20 to-pink-900/20 border border-purple-500/30 rounded-lg p-6">
                 <h3 className="text-lg font-bold mb-2 text-purple-400">🔐 Access Token</h3>
                 <p className="text-sm text-gray-400">

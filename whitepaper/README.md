@@ -209,8 +209,7 @@ The 50k token requirement creates **constant buying pressure** for $SRx402 while
 ## 🎮 **GET STARTED IN 3 STEPS**
 
 ### 1️⃣ **Get $SRx402 Tokens**
-- Buy 50,000+ $SRx402 tokens on Raydium/Jupiter
-- Contract: `49AfJsWb9E7VjBDTdZ2DjnSLFgSEvCoP1wdXuhHbpump`
+- Token and contract launching soon.
 
 ### 2️⃣ **Connect Your Wallet**
 - Visit [solkroad.fun](https://solkroad.fun/)

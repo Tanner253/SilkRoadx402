@@ -1,21 +1,10 @@
 'use client';
 
-import { useState } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { WalletMultiButton } from '@solana/wallet-adapter-react-ui';
 import Link from 'next/link';
 
-const CONTRACT_ADDRESS = 'coming soon';
-
 export default function Home() {
-  const [copied, setCopied] = useState(false);
-
-  const copyCA = () => {
-    navigator.clipboard.writeText(CONTRACT_ADDRESS);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
-  };
-
   const {
     isConnected,
     hasAcceptedTOS,
@@ -55,26 +44,10 @@ export default function Home() {
           </p>
         </div>
 
-        {/* Contract Address */}
+        {/* Token – launching soon */}
         <div className="mb-6 rounded-xl border border-purple-900/50 bg-white/5 p-4 shadow-md backdrop-blur-sm">
-          <div className="flex flex-col items-center gap-3">
-            <p className="text-sm font-semibold text-[#9945FF]">
-              💎 $SR Token
-            </p>
-            <div className="flex flex-col sm:flex-row items-center gap-2 w-full">
-              <div className="flex-1 rounded-lg bg-black/40 p-3 border border-purple-900/40 overflow-hidden">
-                <p className="text-xs sm:text-sm text-white/40 text-center sm:text-left italic">
-                  {CONTRACT_ADDRESS}
-                </p>
-              </div>
-              <button
-                onClick={copyCA}
-                className="rounded-lg bg-gradient-to-r from-[#9945FF] to-[#14F195] px-4 py-2.5 text-sm font-semibold text-black hover:opacity-90 transition-opacity whitespace-nowrap"
-              >
-                {copied ? '✓ Copied!' : '📋 Copy CA'}
-              </button>
-            </div>
-          </div>
+          <p className="text-sm font-semibold text-[#9945FF]">💎 $SR Token</p>
+          <p className="text-sm text-white/60 mt-1">Launching soon.</p>
         </div>
 
         {/* 0% Fees Banner */}
