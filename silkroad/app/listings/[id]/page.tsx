@@ -22,6 +22,7 @@ import {
   createTransferInstruction,
   TOKEN_PROGRAM_ID,
 } from '@solana/spl-token';
+import { getFriendlyTransactionError } from '@/lib/solana/transactionErrors';
 
 interface Listing {
   _id: string;
@@ -316,6 +317,25 @@ function ListingDetail({ params }: { params: Promise<{ id: string }> }) {
         console.log(`📥 Buyer token account: ${buyerTokenAccount.toBase58()}`);
         console.log(`📤 Seller token account: ${sellerTokenAccount.toBase58()}`);
 
+        // Pre-check: ensure buyer has a USDC account and enough balance (friendly error before signing)
+        try {
+          const balance = await connection.getTokenAccountBalance(buyerTokenAccount);
+          const available = BigInt(balance.value.amount);
+          if (available < BigInt(amountLamports)) {
+            setError(
+              `Insufficient USDC. You need $${(amountLamports / 1_000_000).toFixed(2)} USDC but your balance is lower. Add USDC to your wallet and try again.`
+            );
+            toast.error('Insufficient USDC balance for this purchase.');
+            return;
+          }
+        } catch (balanceErr: unknown) {
+          // Token account may not exist if user has never received USDC
+          const friendly = getFriendlyTransactionError(balanceErr);
+          setError(friendly);
+          toast.error(friendly);
+          return;
+        }
+
         // Create transfer instruction
         const transferInstruction = createTransferInstruction(
           buyerTokenAccount,
@@ -440,7 +460,11 @@ function ListingDetail({ params }: { params: Promise<{ id: string }> }) {
           setError('Payment verification failed: ' + (err.response.data.error || 'Unknown error'));
           toast.error('Payment verification failed. Please try again.');
         } else {
-          const errorMsg = err.response?.data?.error || err.message || 'Purchase failed';
+          const errorMsg =
+            err.response?.data?.error ||
+            getFriendlyTransactionError(err) ||
+            (err as Error).message ||
+            'Purchase failed';
           setError(errorMsg);
           toast.error(errorMsg);
         }
