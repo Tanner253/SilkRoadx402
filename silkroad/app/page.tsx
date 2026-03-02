@@ -1,10 +1,22 @@
 'use client';
 
+import { useState } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { WalletMultiButton } from '@solana/wallet-adapter-react-ui';
 import Link from 'next/link';
 
+const CONTRACT_ADDRESS = '7agXvaLthTkLm1drPossJbtKS6jZsnJ6Ad3PQDampump';
+const DEXSCREENER_CHART_URL = 'https://dexscreener.com/solana/ewme4qclssr8v2tm3ozsdgm4f8p2p2qouzpcn22nr1zb';
+
 export default function Home() {
+  const [copied, setCopied] = useState(false);
+
+  const copyCA = () => {
+    navigator.clipboard.writeText(CONTRACT_ADDRESS);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
   const {
     isConnected,
     hasAcceptedTOS,
@@ -44,10 +56,32 @@ export default function Home() {
           </p>
         </div>
 
-        {/* Token – launching soon */}
+        {/* $SR Token – CA & Chart */}
         <div className="mb-6 rounded-xl border border-purple-900/50 bg-white/5 p-4 shadow-md backdrop-blur-sm">
-          <p className="text-sm font-semibold text-[#9945FF]">💎 $SR Token</p>
-          <p className="text-sm text-white/60 mt-1">Launching soon.</p>
+          <p className="text-sm font-semibold text-[#9945FF] mb-3">💎 $SR Token</p>
+          <div className="flex flex-col sm:flex-row items-center gap-2 w-full">
+            <div className="flex-1 w-full rounded-lg bg-black/40 p-3 border border-purple-900/40 overflow-hidden">
+              <p className="text-xs sm:text-sm text-white/80 text-center sm:text-left font-mono truncate">
+                {CONTRACT_ADDRESS}
+              </p>
+            </div>
+            <div className="flex flex-wrap items-center justify-center gap-2 w-full sm:w-auto">
+              <button
+                onClick={copyCA}
+                className="rounded-lg bg-gradient-to-r from-[#9945FF] to-[#14F195] px-4 py-2.5 text-sm font-semibold text-black hover:opacity-90 transition-opacity whitespace-nowrap"
+              >
+                {copied ? '✓ Copied!' : '📋 Copy CA'}
+              </button>
+              <a
+                href={DEXSCREENER_CHART_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="rounded-lg border border-purple-500/50 bg-purple-500/10 px-4 py-2.5 text-sm font-semibold text-purple-300 hover:bg-purple-500/20 transition-colors whitespace-nowrap"
+              >
+                📈 View chart
+              </a>
+            </div>
+          </div>
         </div>
 
         {/* 0% Fees Banner */}

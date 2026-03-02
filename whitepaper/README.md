@@ -9,7 +9,7 @@
 ## ⚡ **EXPERIENCE IT LIVE**
 
 🌐 **Official Site:** [https://solkroad.fun/](https://solkroad.fun/)  
-💎 **Token Required:** 50,000 $SRx402 (CA: coming soon)  
+💎 **Token Required:** 50,000 $SRx402 (CA: `7agXvaLthTkLm1drPossJbtKS6jZsnJ6Ad3PQDampump`)  
 ⚡ **Blockchain:** Solana Mainnet  
 💰 **Payment:** USDC via x402 Protocol  
 
@@ -209,7 +209,8 @@ The 50k token requirement creates **constant buying pressure** for $SRx402 while
 ## 🎮 **GET STARTED IN 3 STEPS**
 
 ### 1️⃣ **Get $SRx402 Tokens**
-- Token and contract launching soon.
+- Buy 50,000+ $SRx402 tokens. CA: `7agXvaLthTkLm1drPossJbtKS6jZsnJ6Ad3PQDampump`
+- [View chart (DexScreener)](https://dexscreener.com/solana/ewme4qclssr8v2tm3ozsdgm4f8p2p2qouzpcn22nr1zb)
 
 ### 2️⃣ **Connect Your Wallet**
 - Visit [solkroad.fun](https://solkroad.fun/)
@@ -327,7 +328,7 @@ This platform is in **BETA**. While transactions execute on Solana mainnet with 
 
 - **🌐 Website:** [solkroad.fun](https://solkroad.fun/)
 - **💬 Twitter:** [@SilkRoadx402](https://twitter.com/SilkRoadx402) *(if applicable)*
-- **📊 Chart:** coming soon
+- **📊 Chart:** [DexScreener](https://dexscreener.com/solana/ewme4qclssr8v2tm3ozsdgm4f8p2p2qouzpcn22nr1zb)
 - **🔗 GitHub:** [github.com/Tanner253/SilkRoadx402](https://github.com/Tanner253/SilkRoadx402)
 
 ---
