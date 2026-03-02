@@ -1,74 +1,17 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import Image from 'next/image';
-
-interface TokenData {
-  priceUsd: string;
-  marketCap: number;
-  volume24h: number;
-  priceChange24h: number;
-  liquidity?: number;
-}
 
 export default function Home() {
   const [copied, setCopied] = useState(false);
-  const [tokenData, setTokenData] = useState<TokenData | null>(null);
-  const [loading, setLoading] = useState(true);
   
-  const TOKEN_ADDRESS = '49AfJsWb9E7VjBDTdZ2DjnSLFgSEvCoP1wdXuhHbpump';
-  const PAIR_ADDRESS = '4dquGRPzcjskMsHtiFagPuguMfY37ywkNMNBg4F54fNW';
-  
-  useEffect(() => {
-    const fetchTokenData = async () => {
-      try {
-        // Fetch from DexScreener API with cache busting
-        const response = await fetch(
-          `https://api.dexscreener.com/latest/dex/pairs/solana/${PAIR_ADDRESS}?t=${Date.now()}`,
-          { cache: 'no-store' }
-        );
-        const data = await response.json();
-        
-        console.log('DexScreener data:', data);
-        
-        if (data.pair) {
-          setTokenData({
-            priceUsd: data.pair.priceUsd,
-            marketCap: data.pair.fdv ?? data.pair.marketCap ?? 0,
-            volume24h: data.pair.volume?.h24 ?? 0,
-            priceChange24h: data.pair.priceChange?.h24 ?? 0,
-            liquidity: data.pair.liquidity?.usd
-          });
-        }
-      } catch (error) {
-        console.error('Error fetching token data:', error);
-      }
-    };
-
-    // Initial fetch
-    fetchTokenData();
-    setLoading(false);
-
-    // Refresh every 2 seconds for faster updates
-    const interval = setInterval(() => {
-      fetchTokenData();
-    }, 2000);
-
-    return () => clearInterval(interval);
-  }, [TOKEN_ADDRESS, PAIR_ADDRESS]);
+  const TOKEN_ADDRESS = 'coming soon';
   
   const copyToClipboard = () => {
     navigator.clipboard.writeText(TOKEN_ADDRESS);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
-  };
-
-  const formatNumber = (num: number | undefined | null): string => {
-    if (num == null || isNaN(num)) return 'N/A';
-    if (num >= 1000000000) return `$${(num / 1000000000).toFixed(2)}B`;
-    if (num >= 1000000) return `$${(num / 1000000).toFixed(2)}M`;
-    if (num >= 1000) return `$${(num / 1000).toFixed(2)}K`;
-    return `$${num.toFixed(2)}`;
   };
 
   return (
@@ -517,14 +460,6 @@ export default function Home() {
 
             <div className="mt-8 text-center space-y-4">
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <a 
-                href="https://dexscreener.com/solana/4dqugrpzcjskmshtifagpugumfy37ywknmnbg4f54fnw" 
-                target="_blank" 
-                rel="noopener noreferrer"
-                  className="inline-block px-8 py-3 bg-gradient-to-r from-[#9945FF] to-[#14F195] text-black font-bold text-lg rounded hover:opacity-90 transition-all shadow-lg"
-              >
-                  💰 Buy $SR →
-                </a>
                 <a 
                   href="https://www.silkroadx402.com/" 
                   target="_blank" 
@@ -552,24 +487,15 @@ export default function Home() {
             Platform governance and access token. Hold 50,000+ tokens to access the marketplace.
           </p>
 
-          <div className="grid lg:grid-cols-2 gap-8">
-            {/* Chart */}
-            <div className="bg-black/50 border border-gray-800 rounded-lg p-6 flex flex-col">
-              <h3 className="text-xl font-bold mb-4 text-green-400">Live Chart</h3>
-              <div id="dexscreener-embed">
-                <iframe src="https://dexscreener.com/solana/4dquGRPzcjskMsHtiFagPuguMfY37ywkNMNBg4F54fNW?embed=1&loadChartSettings=0&trades=0&tabs=0&info=0&chartLeftToolbar=0&chartTheme=dark&theme=dark&chartStyle=1&chartType=marketCap&interval=1"></iframe>
-              </div>
-            </div>
-
+          <div className="max-w-2xl mx-auto flex flex-col gap-4">
             {/* Token Info */}
-            <div className="flex flex-col gap-4">
               <div className="bg-black/50 border border-gray-800 rounded-lg p-6">
                 <h3 className="text-lg font-bold mb-4 text-cyan-400">Contract Address</h3>
                 <div className="flex flex-col sm:flex-row gap-2">
                   <input 
                     type="text" 
                     readOnly 
-                    value="49AfJsWb9E7VjBDTdZ2DjnSLFgSEvCoP1wdXuhHbpump"
+                    value={TOKEN_ADDRESS}
                     className="flex-1 bg-gray-900 border border-gray-700 rounded px-4 py-2 text-gray-300 text-sm font-mono"
                   />
                   <button 
@@ -578,48 +504,6 @@ export default function Home() {
                   >
                     {copied ? '✓ Copied!' : 'Copy CA'}
                   </button>
-                </div>
-              </div>
-
-              <div className="bg-black/50 border border-gray-800 rounded-lg p-6">
-                <h3 className="text-lg font-bold mb-4 text-purple-400">Token Stats</h3>
-                <div className="space-y-3">
-                  <div className="flex justify-between items-center">
-                    <span className="text-gray-500">Symbol</span>
-                    <span className="text-gray-300 font-bold">$SR</span>
-                  </div>
-                  <div className="flex justify-between items-center">
-                    <span className="text-gray-500">Network</span>
-                    <span className="text-gray-300">Solana</span>
-                  </div>
-                  <div className="flex justify-between items-center">
-                    <span className="text-gray-500">Market Cap</span>
-                    <span className="text-gray-300">
-                      {loading ? (
-                        <span className="animate-pulse">Loading...</span>
-                      ) : tokenData?.marketCap ? (
-                        formatNumber(tokenData.marketCap)
-                      ) : (
-                        'N/A'
-                      )}
-                    </span>
-                  </div>
-                  {tokenData && (
-                    <>
-                      <div className="flex justify-between items-center">
-                        <span className="text-gray-500">24h Volume</span>
-                        <span className="text-gray-300">
-                          {formatNumber(tokenData.volume24h)}
-                        </span>
-                  </div>
-                  <div className="flex justify-between items-center">
-                        <span className="text-gray-500">24h Change</span>
-                        <span className={tokenData.priceChange24h >= 0 ? 'text-green-400' : 'text-red-400'}>
-                          {tokenData.priceChange24h >= 0 ? '+' : ''}{tokenData.priceChange24h.toFixed(2)}%
-                        </span>
-                  </div>
-                    </>
-                  )}
                 </div>
               </div>
 
@@ -632,15 +516,7 @@ export default function Home() {
                 </p>
               </div>
 
-              <a 
-                href="https://dexscreener.com/solana/4dqugrpzcjskmshtifagpugumfy37ywknmnbg4f54fnw" 
-                target="_blank" 
-                rel="noopener noreferrer"
-                className="w-full px-6 py-3 bg-gradient-to-r from-purple-500 to-pink-500 text-white font-bold rounded hover:from-purple-600 hover:to-pink-600 transition-all text-center"
-              >
-                Trade on DexScreener →
-              </a>
-            </div>
+              </div>
           </div>
         </div>
       </section>
@@ -867,16 +743,8 @@ export default function Home() {
             </a>
           </div>
 
-          {/* Token & Community CTAs */}
+          {/* Community CTA */}
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <a 
-              href="https://dexscreener.com/solana/4dqugrpzcjskmshtifagpugumfy37ywknmnbg4f54fnw" 
-              target="_blank" 
-              rel="noopener noreferrer"
-              className="inline-block px-10 py-3 bg-gradient-to-r from-purple-500 to-pink-500 text-white font-bold text-lg rounded hover:from-purple-600 hover:to-pink-600 transition-all"
-            >
-              💎 Buy $SR
-            </a>
           <a 
             href="https://x.com/i/communities/1982622474983637154" 
             target="_blank" 
@@ -934,6 +802,9 @@ export default function Home() {
           </div>
           
           <div className="border-t border-gray-900 pt-8">
+            <p className="text-xs text-gray-600 text-center mb-2">
+              Dex paid at bond
+            </p>
             <p className="text-xs text-gray-600 text-center">
               SOLk Road operates as a decentralized peer-to-peer marketplace. We do not host, verify, or guarantee any software listings. 
               Buyers and sellers interact directly via smart contracts. All transactions are final and non-refundable due to blockchain immutability.

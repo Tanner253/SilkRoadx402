@@ -6,15 +6,15 @@ import { Breadcrumbs } from '@/components/ui/Breadcrumbs';
 
 export default function FAQPage() {
   return (
-    <div className="min-h-screen bg-gradient-to-b from-zinc-50 to-zinc-100 dark:from-zinc-950 dark:to-black py-12 px-4">
+    <div className="min-h-screen bg-[#0f0f14] py-12 px-4">
       <div className="mx-auto max-w-4xl">
         {/* Breadcrumbs */}
         <Breadcrumbs />
-        
+
         {/* Back Button */}
         <Link
           href="/"
-          className="mb-6 inline-flex items-center text-sm text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-50"
+          className="mb-6 inline-flex items-center text-sm text-white/50 hover:text-white transition-colors"
         >
           ← Back to Home
         </Link>
@@ -24,4 +24,3 @@ export default function FAQPage() {
     </div>
   );
 }
-

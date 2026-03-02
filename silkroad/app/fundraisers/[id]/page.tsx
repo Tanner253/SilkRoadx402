@@ -11,7 +11,7 @@ import { useToast } from '@/components/ui/Toast';
 import { useConfirm } from '@/components/ui/ConfirmDialog';
 import { Breadcrumbs } from '@/components/ui/Breadcrumbs';
 import { CommentSkeleton } from '@/components/ui/LoadingSkeleton';
-import { 
+import {
   Connection,
   PublicKey,
   Transaction,
@@ -46,7 +46,7 @@ interface Fundraiser {
 function FundraiserDetail({ params }: { params: Promise<{ id: string }> }) {
   // Unwrap params Promise
   const { id } = use(params);
-  
+
   const { isConnected, hasAcceptedTOS, isTokenGated, mounted } = useAuth();
   const { publicKey, signTransaction } = useWallet();
   const router = useRouter();
@@ -72,12 +72,12 @@ function FundraiserDetail({ params }: { params: Promise<{ id: string }> }) {
 
   // Track navigation context from URL params
   const [backUrl, setBackUrl] = useState('/fundraisers');
-  
+
   useEffect(() => {
     // Check if we have a 'from' query parameter
     const urlParams = new URLSearchParams(window.location.search);
     const from = urlParams.get('from');
-    
+
     if (from === 'my-listings') {
       setBackUrl('/listings/my');
     } else {
@@ -150,7 +150,7 @@ function FundraiserDetail({ params }: { params: Promise<{ id: string }> }) {
 
   const checkDonationStatus = async () => {
     if (!publicKey) return;
-    
+
     try {
       const response = await axios.get('/api/transactions', {
         params: {
@@ -158,11 +158,11 @@ function FundraiserDetail({ params }: { params: Promise<{ id: string }> }) {
           type: 'purchases',
         },
       });
-      
+
       const purchases = response.data.transactions || [];
       const donated = purchases.some((tx: any) => tx.listingId === id && tx.status === 'success');
       setHasDonated(donated);
-      
+
       // Check if already commented
       const commented = comments.some((c: any) => c.buyerWallet === publicKey.toBase58());
       setHasCommented(commented);
@@ -216,7 +216,7 @@ function FundraiserDetail({ params }: { params: Promise<{ id: string }> }) {
         // ====================================
         console.log('📋 Step 1: Requesting payment requirements...');
         let paymentRequired;
-        
+
         try {
           await axios.post('/api/fundraise', {
             fundraiserId: fundraiser._id,
@@ -239,7 +239,7 @@ function FundraiserDetail({ params }: { params: Promise<{ id: string }> }) {
         const amountLamports = Math.floor(donationAmount * 1_000_000);
         const sellerWallet = new PublicKey(requirements.payTo);
         const usdcMint = new PublicKey(requirements.asset);
-        
+
         console.log(`💰 Amount: ${amountLamports / 1_000_000} USDC`);
         console.log(`👤 Fundraiser Creator: ${sellerWallet.toBase58()}`);
         console.log(`🪙 Mint: ${usdcMint.toBase58()}`);
@@ -248,12 +248,12 @@ function FundraiserDetail({ params }: { params: Promise<{ id: string }> }) {
         // STEP 2: Construct SPL Transfer
         // ====================================
         console.log('🔨 Step 2: Constructing USDC transfer transaction...');
-        
+
         // Get RPC connection (devnet or mainnet based on requirements)
-        const rpcUrl = requirements.network === 'solana-devnet' 
+        const rpcUrl = requirements.network === 'solana-devnet'
           ? process.env.NEXT_PUBLIC_SOLANA_DEVNET_RPC || 'https://api.devnet.solana.com'
           : process.env.NEXT_PUBLIC_SOLANA_MAINNET_RPC || 'https://api.mainnet-beta.solana.com';
-        
+
         const connection = new Connection(rpcUrl, 'confirmed');
 
         // Get associated token accounts
@@ -283,7 +283,7 @@ function FundraiserDetail({ params }: { params: Promise<{ id: string }> }) {
         // Create transaction
         const transaction = new Transaction().add(transferInstruction);
         transaction.feePayer = publicKey;
-        
+
         // Get recent blockhash
         const { blockhash, lastValidBlockHeight } = await connection.getLatestBlockhash();
         transaction.recentBlockhash = blockhash;
@@ -295,43 +295,43 @@ function FundraiserDetail({ params }: { params: Promise<{ id: string }> }) {
         // STEP 3: Sign & Broadcast
         // ====================================
         console.log('✍️  Step 3: Signing transaction with wallet...');
-        
+
         const signed = await signTransaction(transaction);
-        
+
         console.log('📡 Broadcasting transaction...');
         const signature = await connection.sendRawTransaction(signed.serialize());
-        
+
         console.log(`✅ Transaction sent! Signature: ${signature}`);
         console.log(`🔗 View: https://explorer.solana.com/tx/${signature}?cluster=${requirements.network === 'solana-devnet' ? 'devnet' : 'mainnet'}`);
 
         // Wait for confirmation using polling (avoid WebSocket issues)
         console.log('⏳ Waiting for confirmation...');
-        
+
         let confirmed = false;
         const maxAttempts = 30; // 30 attempts = ~30 seconds
-        
+
         for (let i = 0; i < maxAttempts; i++) {
           try {
             const status = await connection.getSignatureStatus(signature);
-            
-            if (status?.value?.confirmationStatus === 'confirmed' || 
+
+            if (status?.value?.confirmationStatus === 'confirmed' ||
                 status?.value?.confirmationStatus === 'finalized') {
               confirmed = true;
               console.log(`✅ Transaction confirmed! (${status.value.confirmationStatus})`);
               break;
             }
-            
+
             if (status?.value?.err) {
               throw new Error(`Transaction failed: ${JSON.stringify(status.value.err)}`);
             }
-            
+
             // Wait 1 second before next poll
             await new Promise(resolve => setTimeout(resolve, 1000));
           } catch (err) {
             console.warn(`Attempt ${i + 1}/${maxAttempts} - checking status...`);
           }
         }
-        
+
         if (!confirmed) {
           console.warn('⚠️ Could not confirm transaction in time, proceeding anyway...');
           console.warn('   Backend will verify on-chain');
@@ -341,7 +341,7 @@ function FundraiserDetail({ params }: { params: Promise<{ id: string }> }) {
         // STEP 4: Send Payment to Backend
         // ====================================
         console.log('📨 Step 4: Sending payment proof to backend...');
-        
+
         // Construct payment payload
         const paymentPayload = {
           x402Version: 1,
@@ -362,7 +362,7 @@ function FundraiserDetail({ params }: { params: Promise<{ id: string }> }) {
           // Send to backend with X-PAYMENT header
           const finalResponse = await axios.post(
             '/api/fundraise',
-            { 
+            {
               fundraiserId: fundraiser._id,
               customAmount: donationAmount, // Include custom amount
             },
@@ -377,11 +377,11 @@ function FundraiserDetail({ params }: { params: Promise<{ id: string }> }) {
 
           if (finalResponse.data.success && finalResponse.data.transactionId) {
             console.log('🎉 Donation successful! Transaction ID:', finalResponse.data.transactionId);
-            
+
             // Refresh transactions and fundraiser data before redirecting
             await fetchTransactions();
             await fetchFundraiser();
-            
+
             // Redirect to delivery page with transaction ID
             router.push(`/delivery/${finalResponse.data.transactionId}`);
           } else {
@@ -391,7 +391,7 @@ function FundraiserDetail({ params }: { params: Promise<{ id: string }> }) {
 
       } catch (err: any) {
         console.error('❌ Donation error:', err);
-        
+
         // Handle user rejection gracefully
         if (err.code === 4001 || err.name === 'WalletSignTransactionError' || err.message?.includes('rejected')) {
           console.log('ℹ️ User cancelled transaction');
@@ -492,10 +492,10 @@ function FundraiserDetail({ params }: { params: Promise<{ id: string }> }) {
 
   if (!mounted) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-gradient-to-b from-zinc-50 to-zinc-100 dark:from-zinc-950 dark:to-black">
+      <div className="flex min-h-screen items-center justify-center bg-[#0f0f14]">
         <div className="text-center">
-          <div className="h-8 w-8 animate-spin rounded-full border-4 border-green-600 border-t-transparent mx-auto mb-4"></div>
-          <p className="text-zinc-600 dark:text-zinc-400">Loading...</p>
+          <div className="h-8 w-8 animate-spin rounded-full border-4 border-[#9945FF] border-t-transparent mx-auto mb-4"></div>
+          <p className="text-white/50">Loading...</p>
         </div>
       </div>
     );
@@ -503,10 +503,10 @@ function FundraiserDetail({ params }: { params: Promise<{ id: string }> }) {
 
   if (loading) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-gradient-to-b from-zinc-50 to-zinc-100 dark:from-zinc-950 dark:to-black">
+      <div className="flex min-h-screen items-center justify-center bg-[#0f0f14]">
         <div className="text-center">
-          <div className="h-8 w-8 animate-spin rounded-full border-4 border-purple-600 border-t-transparent mx-auto mb-4"></div>
-          <p className="text-zinc-600 dark:text-zinc-400">Loading fundraiser...</p>
+          <div className="h-8 w-8 animate-spin rounded-full border-4 border-[#9945FF] border-t-transparent mx-auto mb-4"></div>
+          <p className="text-white/50">Loading fundraiser...</p>
         </div>
       </div>
     );
@@ -514,14 +514,14 @@ function FundraiserDetail({ params }: { params: Promise<{ id: string }> }) {
 
   if (error || !fundraiser) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-gradient-to-b from-zinc-50 to-zinc-100 dark:from-zinc-950 dark:to-black px-4">
+      <div className="flex min-h-screen items-center justify-center bg-[#0f0f14] px-4">
         <div className="text-center">
-          <h1 className="text-2xl font-bold text-zinc-900 dark:text-zinc-50 mb-4">
+          <h1 className="text-2xl font-bold text-white mb-4">
             {error || 'Fundraiser Not Found'}
           </h1>
           <Link
             href={backUrl}
-            className="inline-flex items-center justify-center rounded-lg bg-purple-600 px-6 py-3 text-sm font-medium text-white hover:bg-purple-700 transition-colors"
+            className="inline-flex items-center justify-center rounded-lg bg-gradient-to-r from-[#9945FF] to-[#14F195] px-6 py-3 text-sm font-medium text-black hover:opacity-90 transition-opacity"
           >
             {backUrl === '/listings/my' ? 'Back to My Listings' : 'Back to Fundraisers'}
           </Link>
@@ -531,31 +531,31 @@ function FundraiserDetail({ params }: { params: Promise<{ id: string }> }) {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-zinc-50 to-zinc-100 dark:from-zinc-950 dark:to-black py-12 px-4">
+    <div className="min-h-screen bg-[#0f0f14] py-12 px-4">
       <div className="mx-auto max-w-5xl">
         {/* Back Button */}
         <Link
           href={backUrl}
-          className="mb-6 inline-flex items-center text-sm text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-50"
+          className="mb-6 inline-flex items-center text-sm text-white/50 hover:text-white transition-colors"
         >
           {backUrl === '/listings/my' ? '← Back to My Listings' : '← Back to Fundraisers'}
         </Link>
 
         {/* Critical Warning Banner (Toggleable) */}
         {showWarning && (
-          <div className="mb-8 rounded-lg border-2 border-red-600 bg-red-50 p-6 dark:border-red-500 dark:bg-red-950">
+          <div className="mb-8 rounded-lg border-2 border-red-600 bg-red-950/20 p-6">
             <div className="flex items-start space-x-4">
               <div className="flex h-12 w-12 items-center justify-center rounded-full bg-red-600 text-white text-2xl font-bold flex-shrink-0">
                 ⚠️
               </div>
               <div>
-                <h2 className="text-lg font-bold text-red-900 dark:text-red-100 mb-2">
+                <h2 className="text-lg font-bold text-red-400 mb-2">
                   CRITICAL WARNING
                 </h2>
-                <p className="text-red-800 dark:text-red-200 mb-3">
+                <p className="text-red-400 mb-3">
                   This fundraiser has been flagged as <strong>HIGH RISK</strong>. Exercise extreme caution before donating.
                 </p>
-                <ul className="list-disc list-inside text-sm text-red-700 dark:text-red-300 space-y-1 mb-4">
+                <ul className="list-disc list-inside text-sm text-red-400/80 space-y-1 mb-4">
                   <li>Only donate what you can afford to lose</li>
                   <li>Be aware that this may be a scam or fraudulent fundraiser</li>
                   <li>There are NO refunds or chargebacks in crypto</li>
@@ -563,7 +563,7 @@ function FundraiserDetail({ params }: { params: Promise<{ id: string }> }) {
                 </ul>
                 <button
                   onClick={() => setShowWarning(false)}
-                  className="text-sm text-red-600 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 underline"
+                  className="text-sm text-red-400 hover:text-red-300 underline transition-colors"
                 >
                   I understand the risks, dismiss warning
                 </button>
@@ -574,7 +574,7 @@ function FundraiserDetail({ params }: { params: Promise<{ id: string }> }) {
 
         <div className="grid grid-cols-1 gap-8 lg:grid-cols-2">
           {/* Image */}
-          <div className="relative aspect-[4/3] w-full overflow-hidden rounded-lg border border-zinc-200 bg-zinc-100 dark:border-zinc-800 dark:bg-zinc-800">
+          <div className="relative aspect-[4/3] w-full overflow-hidden rounded-lg border border-purple-900/30 bg-white/5">
             <Image
               src={fundraiser.imageUrl}
               alt={fundraiser.title}
@@ -587,7 +587,7 @@ function FundraiserDetail({ params }: { params: Promise<{ id: string }> }) {
               </div>
             )}
             {/* Fundraiser Badge */}
-            <div className="absolute top-4 left-4 rounded-full bg-purple-600 px-4 py-2 text-sm font-medium text-white shadow-lg flex items-center gap-2">
+            <div className="absolute top-4 left-4 rounded-full bg-gradient-to-r from-[#9945FF] to-[#14F195] px-4 py-2 text-sm font-medium text-black shadow-lg flex items-center gap-2">
               💝 Fundraiser
             </div>
           </div>
@@ -595,17 +595,17 @@ function FundraiserDetail({ params }: { params: Promise<{ id: string }> }) {
           {/* Details */}
           <div>
             <div className="mb-6 relative">
-              <span className="inline-flex items-center rounded-full bg-purple-100 px-3 py-1 text-xs font-medium text-purple-800 dark:bg-purple-900 dark:text-purple-200 mb-3">
+              <span className="inline-flex items-center rounded-full bg-white/10 px-3 py-1 text-xs font-medium text-white/70 mb-3">
                 {fundraiser.category}
               </span>
-              
+
               {/* Icon Buttons - Top Right */}
               <div className="absolute top-0 right-0 flex items-center space-x-2">
                 {/* Warning Icon */}
                 {fundraiser.riskLevel === 'high-risk' && (
                   <button
                     onClick={() => setShowWarning(!showWarning)}
-                    className="rounded-full bg-red-100 p-2 text-red-600 hover:bg-red-200 transition-colors dark:bg-red-900 dark:text-red-300 dark:hover:bg-red-800"
+                    className="rounded-full bg-red-950/30 p-2 text-red-400 hover:bg-red-950/50 transition-colors"
                     title="Show risk warning"
                   >
                     <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 20 20">
@@ -617,7 +617,7 @@ function FundraiserDetail({ params }: { params: Promise<{ id: string }> }) {
                 {/* Report Button */}
                 <button
                   onClick={() => setShowReportForm(!showReportForm)}
-                  className="rounded-full bg-zinc-100 p-2 text-zinc-600 hover:bg-zinc-200 transition-colors dark:bg-zinc-800 dark:text-zinc-400 dark:hover:bg-zinc-700"
+                  className="rounded-full bg-white/5 p-2 text-white/40 hover:bg-white/10 transition-colors"
                   title="Report fundraiser"
                 >
                   <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -626,50 +626,50 @@ function FundraiserDetail({ params }: { params: Promise<{ id: string }> }) {
                 </button>
               </div>
 
-              <h1 className="text-3xl font-bold text-zinc-900 dark:text-zinc-50 mb-2">
+              <h1 className="text-3xl font-bold text-white mb-2">
                 {fundraiser.title}
               </h1>
-              
+
               {/* Donation Progress */}
-              <div className="mb-6 rounded-lg border border-purple-200 bg-purple-50 p-4 dark:border-purple-900 dark:bg-purple-950">
+              <div className="mb-6 rounded-lg border border-purple-900/30 bg-white/5 p-4">
                 <div className="flex justify-between text-sm mb-2">
-                  <span className="font-semibold text-purple-900 dark:text-purple-100">
+                  <span className="font-semibold text-[#14F195]">
                     ${totalRaised.toFixed(2)} raised
                   </span>
-                  <span className="text-purple-700 dark:text-purple-300">
+                  <span className="text-white/50">
                     of ${(fundraiser.goalAmount || fundraiser.price).toFixed(2)} goal
                   </span>
                 </div>
-                <div className="w-full bg-purple-200 rounded-full h-3 dark:bg-purple-900 overflow-hidden">
-                  <div 
-                    className="bg-gradient-to-r from-purple-600 to-pink-600 h-3 rounded-full transition-all duration-500"
+                <div className="w-full bg-white/10 rounded-full h-3 overflow-hidden">
+                  <div
+                    className="bg-gradient-to-r from-[#9945FF] to-[#14F195] h-3 rounded-full transition-all duration-500"
                     style={{ width: `${Math.min((totalRaised / (fundraiser.goalAmount || fundraiser.price)) * 100, 100)}%` }}
                   />
                 </div>
-                <div className="text-sm text-purple-700 dark:text-purple-300 mt-2 font-medium">
+                <div className="text-sm text-white/50 mt-2 font-medium">
                   {Math.round((totalRaised / (fundraiser.goalAmount || fundraiser.price)) * 100)}% funded
                 </div>
               </div>
             </div>
 
-            <p className="text-zinc-700 dark:text-zinc-300 mb-6 whitespace-pre-wrap">
+            <p className="text-white/70 mb-6 whitespace-pre-wrap">
               {fundraiser.description}
             </p>
 
             {/* CTA Button - Hide if viewing own fundraiser */}
             {publicKey && fundraiser.wallet === publicKey.toBase58() ? (
-              <div className="w-full rounded-lg bg-zinc-100 border border-zinc-300 px-6 py-3 text-sm font-medium text-zinc-600 text-center dark:bg-zinc-800 dark:border-zinc-700 dark:text-zinc-400 mb-3">
+              <div className="w-full rounded-lg border border-purple-900/30 bg-white/5 px-6 py-3 text-sm font-medium text-white/50 text-center mb-3">
                 👤 This is your fundraiser
               </div>
             ) : (
               <>
                 {/* Custom Donation Amount Input */}
                 <div className="mb-4">
-                  <label className="block text-sm font-medium text-zinc-900 dark:text-zinc-50 mb-2">
+                  <label className="block text-sm font-medium text-white/70 mb-2">
                     Donation Amount (USDC)
                   </label>
                   <div className="relative">
-                    <span className="absolute left-4 top-3 text-zinc-500 text-sm">$</span>
+                    <span className="absolute left-4 top-3 text-white/40 text-sm">$</span>
                     <input
                       type="number"
                       step="0.01"
@@ -677,10 +677,10 @@ function FundraiserDetail({ params }: { params: Promise<{ id: string }> }) {
                       value={customDonationAmount}
                       onChange={(e) => setCustomDonationAmount(e.target.value)}
                       placeholder="Enter amount (e.g. 10.00)"
-                      className="w-full rounded-lg border border-zinc-300 bg-white px-4 py-3 pl-8 text-sm text-zinc-900 placeholder-zinc-400 focus:border-purple-600 focus:outline-none focus:ring-2 focus:ring-purple-600 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-50 dark:placeholder-zinc-500"
+                      className="w-full rounded-lg border border-purple-900/40 bg-black/40 px-4 py-3 pl-8 text-sm text-white placeholder-white/30 focus:border-[#9945FF] focus:outline-none focus:ring-2 focus:ring-[#9945FF]/30"
                     />
                   </div>
-                  <p className="mt-1 text-xs text-zinc-500 dark:text-zinc-400">
+                  <p className="mt-1 text-xs text-white/40">
                     Choose your donation amount. Every contribution helps reach the ${fundraiser.goalAmount?.toFixed(2) || fundraiser.price.toFixed(2)} goal!
                   </p>
                 </div>
@@ -688,51 +688,58 @@ function FundraiserDetail({ params }: { params: Promise<{ id: string }> }) {
                 <button
                   onClick={handleDonate}
                   disabled={donating || !isConnected || !hasAcceptedTOS || !isTokenGated || !customDonationAmount}
-                  className="w-full rounded-lg bg-purple-600 px-6 py-3 text-sm font-medium text-white hover:bg-purple-700 disabled:cursor-not-allowed disabled:opacity-50 transition-colors mb-3"
+                  className="w-full rounded-lg bg-gradient-to-r from-[#9945FF] to-[#14F195] px-6 py-3 text-sm font-medium text-black hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50 transition-opacity mb-3"
                 >
                   {donating ? 'Processing...' : hasDonated ? '💝 Donate Again' : '💝 Support This Cause'}
                 </button>
 
                 {!isConnected && (
-                  <p className="text-xs text-center text-zinc-500 dark:text-zinc-400">
+                  <p className="text-xs text-center text-white/40">
                     Connect your wallet to donate
                   </p>
                 )}
                 {isConnected && !hasAcceptedTOS && (
-                  <p className="text-xs text-center text-red-500 dark:text-red-400">
+                  <p className="text-xs text-center text-red-400">
                     Accept Terms of Service in your profile to donate
                   </p>
                 )}
               </>
             )}
             {isConnected && hasAcceptedTOS && !isTokenGated && publicKey && fundraiser.wallet !== publicKey.toBase58() && (
-              <p className="text-xs text-center text-red-500 dark:text-red-400">
+              <p className="text-xs text-center text-red-400">
                 Hold 50,000+ $SR tokens to donate
               </p>
             )}
 
+            {/* Error */}
+            {error && (
+              <div className="mt-3 rounded-lg border border-red-900/50 bg-red-950/20 p-3">
+                <p className="text-sm text-red-400">⚠️ {error}</p>
+              </div>
+            )}
+
             {/* Stats */}
             <div className="mt-6 grid grid-cols-2 sm:grid-cols-3 gap-4">
-              <div className="rounded-lg border border-zinc-200 bg-white p-4 dark:border-zinc-800 dark:bg-zinc-900">
-                <div className="text-xs text-zinc-500 dark:text-zinc-400 mb-1">Views</div>
-                <span className="text-lg font-bold text-zinc-900 dark:text-zinc-50">
+              <div className="rounded-lg border border-purple-900/30 bg-white/5 p-4">
+                <div className="text-xs text-white/40 mb-1">Views</div>
+                <span className="text-lg font-bold text-white">
                   {fundraiser.views?.toLocaleString() || 0}
                 </span>
               </div>
 
-              <div className="rounded-lg border border-zinc-200 bg-white p-4 dark:border-zinc-800 dark:bg-zinc-900">
-                <div className="text-xs text-zinc-500 dark:text-zinc-400 mb-1">Donations</div>
-                <span className="text-lg font-bold text-purple-600 dark:text-purple-400">
+              <div className="rounded-lg border border-purple-900/30 bg-white/5 p-4">
+                <div className="text-xs text-white/40 mb-1">Donations</div>
+                <span className="text-lg font-bold text-[#14F195]">
                   {donationCount.toLocaleString()}
                 </span>
               </div>
 
               {/* Organizer Info */}
-              <div className="rounded-lg border border-zinc-200 bg-white p-4 dark:border-zinc-800 dark:bg-zinc-900 col-span-2 sm:col-span-1">
-                <div className="text-xs text-zinc-500 dark:text-zinc-400 mb-1">Organizer</div>
+              <div className="rounded-lg border border-purple-900/30 bg-white/5 p-4 col-span-2 sm:col-span-1">
+                <div className="text-xs text-white/40 mb-1">Organizer</div>
                 <Link
                   href={`/fundraisers?wallet=${fundraiser.wallet}`}
-                  className="text-xs font-mono text-purple-600 hover:text-purple-700 dark:text-purple-400 dark:hover:text-purple-300 transition-colors block truncate"
+                  className="text-xs font-mono text-[#9945FF] hover:text-[#9945FF]/80 transition-colors block truncate"
                   title={fundraiser.wallet}
                 >
                   {fundraiser.wallet.slice(0, 6)}...{fundraiser.wallet.slice(-4)}
@@ -745,10 +752,10 @@ function FundraiserDetail({ params }: { params: Promise<{ id: string }> }) {
         {/* Demo Video Section */}
         {fundraiser.demoVideoUrl && getYouTubeVideoId(fundraiser.demoVideoUrl) && (
           <div className="mt-8">
-            <h2 className="text-2xl font-bold text-zinc-900 dark:text-zinc-50 mb-4">
+            <h2 className="text-2xl font-bold text-white mb-4">
               🎥 Campaign Video
             </h2>
-            <div className="relative w-full overflow-hidden rounded-lg border border-zinc-200 bg-zinc-100 dark:border-zinc-800 dark:bg-zinc-800" style={{ paddingBottom: '56.25%' }}>
+            <div className="relative w-full overflow-hidden rounded-lg border border-purple-900/30 bg-white/5" style={{ paddingBottom: '56.25%' }}>
               <iframe
                 className="absolute top-0 left-0 h-full w-full"
                 src={`https://www.youtube.com/embed/${getYouTubeVideoId(fundraiser.demoVideoUrl)}?autoplay=1&mute=1&rel=0`}
@@ -763,7 +770,7 @@ function FundraiserDetail({ params }: { params: Promise<{ id: string }> }) {
         {/* Additional Resources Section */}
         {(fundraiser.whitepaperUrl || fundraiser.githubUrl) && (
           <div className="mt-8">
-            <h2 className="text-2xl font-bold text-zinc-900 dark:text-zinc-50 mb-4">
+            <h2 className="text-2xl font-bold text-white mb-4">
               📚 Additional Information
             </h2>
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -772,10 +779,10 @@ function FundraiserDetail({ params }: { params: Promise<{ id: string }> }) {
                   href={fundraiser.whitepaperUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex items-center justify-between rounded-lg border border-zinc-200 bg-white p-4 hover:border-purple-600 hover:bg-purple-50 transition-colors dark:border-zinc-800 dark:bg-zinc-900 dark:hover:border-purple-600 dark:hover:bg-purple-950"
+                  className="flex items-center justify-between rounded-lg border border-purple-900/30 bg-white/5 p-4 hover:border-[#9945FF] hover:bg-white/10 transition-colors"
                 >
-                  <span className="text-sm font-medium text-zinc-900 dark:text-zinc-50">📄 Documentation</span>
-                  <svg className="h-4 w-4 text-zinc-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <span className="text-sm font-medium text-white">📄 Documentation</span>
+                  <svg className="h-4 w-4 text-white/40" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
                   </svg>
                 </a>
@@ -786,10 +793,10 @@ function FundraiserDetail({ params }: { params: Promise<{ id: string }> }) {
                   href={fundraiser.githubUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex items-center justify-between rounded-lg border border-zinc-200 bg-white p-4 hover:border-purple-600 hover:bg-purple-50 transition-colors dark:border-zinc-800 dark:bg-zinc-900 dark:hover:border-purple-600 dark:hover:bg-purple-950"
+                  className="flex items-center justify-between rounded-lg border border-purple-900/30 bg-white/5 p-4 hover:border-[#9945FF] hover:bg-white/10 transition-colors"
                 >
-                  <span className="text-sm font-medium text-zinc-900 dark:text-zinc-50">💻 GitHub</span>
-                  <svg className="h-4 w-4 text-zinc-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <span className="text-sm font-medium text-white">💻 GitHub</span>
+                  <svg className="h-4 w-4 text-white/40" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
                   </svg>
                 </a>
@@ -800,11 +807,11 @@ function FundraiserDetail({ params }: { params: Promise<{ id: string }> }) {
 
         {/* Report Form */}
         {showReportForm && (
-          <div className="mt-8 rounded-lg border-2 border-red-300 bg-red-50 p-6 dark:border-red-700 dark:bg-red-950">
-            <h3 className="text-lg font-bold text-red-900 dark:text-red-100 mb-3">
+          <div className="mt-8 rounded-lg border-2 border-red-900/50 bg-red-950/20 p-6">
+            <h3 className="text-lg font-bold text-red-400 mb-3">
               🚨 Report This Fundraiser
             </h3>
-            <p className="text-sm text-red-700 dark:text-red-300 mb-4">
+            <p className="text-sm text-red-400/80 mb-4">
               Help us keep the community safe. If you believe this fundraiser violates our terms or is fraudulent, please report it.
             </p>
             <textarea
@@ -813,7 +820,7 @@ function FundraiserDetail({ params }: { params: Promise<{ id: string }> }) {
               placeholder="Optional: Describe the issue (max 100 characters)"
               maxLength={100}
               rows={2}
-              className="w-full rounded-lg border border-red-300 bg-white px-4 py-2 text-sm text-zinc-900 placeholder-zinc-400 focus:border-red-600 focus:outline-none focus:ring-2 focus:ring-red-600 dark:border-red-700 dark:bg-zinc-800 dark:text-zinc-50 dark:placeholder-zinc-500 mb-3"
+              className="w-full rounded-lg border border-red-900/50 bg-black/40 px-4 py-2 text-sm text-white placeholder-white/30 focus:border-red-600 focus:outline-none focus:ring-2 focus:ring-red-600/30 mb-3"
             />
             <div className="flex items-center space-x-3">
               <button
@@ -824,7 +831,7 @@ function FundraiserDetail({ params }: { params: Promise<{ id: string }> }) {
                 {reporting ? 'Submitting...' : '🚨 Submit Report'}
               </button>
               {!isConnected && (
-                <p className="text-xs text-red-700 dark:text-red-300">
+                <p className="text-xs text-red-400">
                   Connect your wallet to report
                 </p>
               )}
@@ -835,38 +842,38 @@ function FundraiserDetail({ params }: { params: Promise<{ id: string }> }) {
         {/* Recent Donations */}
         {transactions.length > 0 && (
           <div className="mt-8">
-            <h2 className="text-2xl font-bold text-zinc-900 dark:text-zinc-50 mb-4">
+            <h2 className="text-2xl font-bold text-white mb-4">
               💝 Recent Donations ({donationCount})
             </h2>
-            <div className="rounded-lg border border-zinc-200 bg-white shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
+            <div className="rounded-lg border border-purple-900/30 bg-white/5 backdrop-blur-sm">
               <div className="max-h-96 overflow-y-auto">
                 {transactions.map((txn, index) => (
                   <div
                     key={txn._id}
                     className={`flex items-center justify-between p-4 ${
-                      index !== transactions.length - 1 ? 'border-b border-zinc-200 dark:border-zinc-800' : ''
-                    } hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-colors`}
+                      index !== transactions.length - 1 ? 'border-b border-purple-900/30' : ''
+                    } hover:bg-white/5 transition-colors`}
                   >
                     <div className="flex items-center gap-3 flex-1 min-w-0">
-                      <div className="flex h-10 w-10 items-center justify-center rounded-full bg-purple-100 dark:bg-purple-900 flex-shrink-0">
+                      <div className="flex h-10 w-10 items-center justify-center rounded-full bg-purple-900/40 flex-shrink-0">
                         <span className="text-lg">💝</span>
                       </div>
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2 mb-1">
-                          <span className="text-sm font-mono text-zinc-900 dark:text-zinc-50 truncate">
+                          <span className="text-sm font-mono text-white truncate">
                             {txn.wallet.slice(0, 8)}...{txn.wallet.slice(-6)}
                           </span>
-                          <span className="text-xs text-zinc-500 dark:text-zinc-400">
+                          <span className="text-xs text-white/40">
                             {new Date(txn.createdAt).toLocaleDateString()}
                           </span>
                         </div>
-                        <div className="text-xs text-zinc-500 dark:text-zinc-400 flex items-center gap-1">
+                        <div className="text-xs text-white/40 flex items-center gap-1">
                           <span>Tx:</span>
                           <a
                             href={`https://solscan.io/tx/${txn.txnHash}?cluster=${process.env.NEXT_PUBLIC_SOLANA_NETWORK === 'devnet' ? 'devnet' : 'mainnet'}`}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="font-mono hover:text-purple-600 dark:hover:text-purple-400 truncate max-w-[150px]"
+                            className="font-mono hover:text-[#9945FF] transition-colors truncate max-w-[150px]"
                             title={txn.txnHash}
                           >
                             {txn.txnHash.slice(0, 8)}...
@@ -875,28 +882,28 @@ function FundraiserDetail({ params }: { params: Promise<{ id: string }> }) {
                       </div>
                     </div>
                     <div className="text-right flex-shrink-0 ml-4">
-                      <div className="text-lg font-bold text-purple-600 dark:text-purple-400">
+                      <div className="text-lg font-bold text-[#14F195]">
                         ${txn.amount.toFixed(2)}
                       </div>
-                      <div className="text-xs text-zinc-500 dark:text-zinc-400">
+                      <div className="text-xs text-white/40">
                         USDC
                       </div>
                     </div>
                   </div>
                 ))}
               </div>
-              
+
               {/* Summary Footer */}
-              <div className="border-t border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-800 p-4">
+              <div className="border-t border-purple-900/30 bg-white/5 p-4">
                 <div className="flex items-center justify-between">
-                  <span className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
+                  <span className="text-sm font-medium text-white/70">
                     Total Raised
                   </span>
                   <div className="text-right">
-                    <div className="text-2xl font-bold text-purple-600 dark:text-purple-400">
+                    <div className="text-2xl font-bold text-[#14F195]">
                       ${totalRaised.toFixed(2)}
                     </div>
-                    <div className="text-xs text-zinc-500 dark:text-zinc-400">
+                    <div className="text-xs text-white/40">
                       of ${fundraiser.goalAmount?.toFixed(2) || fundraiser.price.toFixed(2)} goal
                     </div>
                   </div>
@@ -908,14 +915,14 @@ function FundraiserDetail({ params }: { params: Promise<{ id: string }> }) {
 
         {/* Reviews/Comments Section */}
         <div className="mt-8">
-          <h2 className="text-2xl font-bold text-zinc-900 dark:text-zinc-50 mb-4">
+          <h2 className="text-2xl font-bold text-white mb-4">
             📝 Reviews ({comments.length})
           </h2>
 
           {/* Comments List */}
           {comments.length === 0 ? (
-            <div className="rounded-lg border border-zinc-200 bg-zinc-50 p-8 text-center dark:border-zinc-800 dark:bg-zinc-900">
-              <p className="text-zinc-600 dark:text-zinc-400">
+            <div className="rounded-lg border border-purple-900/30 bg-white/5 p-8 text-center">
+              <p className="text-white/50">
                 No reviews yet. Be the first to review after donating!
               </p>
             </div>
@@ -924,7 +931,7 @@ function FundraiserDetail({ params }: { params: Promise<{ id: string }> }) {
               {comments.map((comment: any) => {
                 const wallet = comment.buyerWallet;
                 const truncatedWallet = `${wallet.slice(0, 4)}...${wallet.slice(-4)}`;
-                
+
                 // Calculate time ago
                 const timeAgo = () => {
                   const now = new Date();
@@ -944,27 +951,27 @@ function FundraiserDetail({ params }: { params: Promise<{ id: string }> }) {
                 return (
                   <div
                     key={comment._id}
-                    className="rounded-lg border border-zinc-200 bg-white p-4 dark:border-zinc-800 dark:bg-zinc-900"
+                    className="rounded-lg border border-purple-900/30 bg-white/5 p-4"
                   >
                     <div className="flex items-center justify-between mb-2">
                       <div className="flex items-center gap-2">
-                        <div className="h-8 w-8 rounded-full bg-purple-600 flex items-center justify-center text-white text-xs font-bold">
+                        <div className="h-8 w-8 rounded-full bg-gradient-to-r from-[#9945FF] to-[#14F195] flex items-center justify-center text-black text-xs font-bold">
                           {wallet.slice(0, 2).toUpperCase()}
                         </div>
                         <div>
-                          <p className="text-sm font-medium text-zinc-900 dark:text-zinc-50">
+                          <p className="text-sm font-medium text-white">
                             {truncatedWallet}
                           </p>
-                          <p className="text-xs text-zinc-500 dark:text-zinc-400">
+                          <p className="text-xs text-white/40">
                             Verified Donor
                           </p>
                         </div>
                       </div>
-                      <span className="text-xs text-zinc-500 dark:text-zinc-400">
+                      <span className="text-xs text-white/40">
                         {timeAgo()}
                       </span>
                     </div>
-                    <p className="text-sm text-zinc-700 dark:text-zinc-300">
+                    <p className="text-sm text-white/70">
                       {comment.comment}
                     </p>
                   </div>
@@ -975,8 +982,8 @@ function FundraiserDetail({ params }: { params: Promise<{ id: string }> }) {
 
           {/* Comment Form */}
           {hasDonated && !hasCommented && (
-            <div className="mt-6 rounded-lg border-2 border-purple-200 bg-purple-50 p-6 dark:border-purple-900 dark:bg-purple-950">
-              <h3 className="text-lg font-bold text-purple-900 dark:text-purple-100 mb-3">
+            <div className="mt-6 rounded-lg border border-[#14F195]/20 bg-[#14F195]/5 p-6">
+              <h3 className="text-lg font-bold text-[#14F195] mb-3">
                 Leave a Review
               </h3>
               <form onSubmit={handleSubmitComment}>
@@ -986,12 +993,12 @@ function FundraiserDetail({ params }: { params: Promise<{ id: string }> }) {
                   placeholder="Share your thoughts about this fundraiser... (max 200 characters)"
                   maxLength={200}
                   rows={3}
-                  className="w-full rounded-lg border border-zinc-300 bg-white px-4 py-3 text-sm text-zinc-900 placeholder-zinc-400 focus:border-purple-600 focus:outline-none focus:ring-2 focus:ring-purple-600 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-50 dark:placeholder-zinc-500 mb-3"
+                  className="w-full rounded-lg border border-purple-900/40 bg-black/40 px-4 py-3 text-sm text-white placeholder-white/30 focus:border-[#9945FF] focus:outline-none focus:ring-2 focus:ring-[#9945FF]/30 mb-3"
                 />
                 <button
                   type="submit"
                   disabled={submittingComment || !newComment.trim()}
-                  className="rounded-lg bg-purple-600 px-6 py-2 text-sm font-medium text-white hover:bg-purple-700 disabled:cursor-not-allowed disabled:opacity-50 transition-colors"
+                  className="rounded-lg bg-gradient-to-r from-[#9945FF] to-[#14F195] px-6 py-2 text-sm font-medium text-black hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50 transition-opacity"
                 >
                   {submittingComment ? 'Submitting...' : 'Post Review'}
                 </button>
@@ -1000,8 +1007,8 @@ function FundraiserDetail({ params }: { params: Promise<{ id: string }> }) {
           )}
 
           {!hasDonated && isConnected && (
-            <div className="mt-6 rounded-lg border border-zinc-200 bg-zinc-50 p-4 text-center dark:border-zinc-800 dark:bg-zinc-900">
-              <p className="text-sm text-zinc-600 dark:text-zinc-400">
+            <div className="mt-6 rounded-lg border border-purple-900/30 bg-white/5 p-4 text-center">
+              <p className="text-sm text-white/50">
                 💝 Donate to this fundraiser to leave a review
               </p>
             </div>

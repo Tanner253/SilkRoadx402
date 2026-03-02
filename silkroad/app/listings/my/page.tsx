@@ -42,7 +42,7 @@ function MyListingsPageContent() {
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [updatingId, setUpdatingId] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<'market' | 'fundraisers'>('market');
-  
+
   // Edit modal state
   const [editingListing, setEditingListing] = useState<Listing | null>(null);
   const [editFormData, setEditFormData] = useState({
@@ -72,7 +72,7 @@ function MyListingsPageContent() {
 
     try {
       setLoading(true);
-      
+
       // Fetch both regular listings and fundraisers
       const [listingsResponse, fundraisersResponse] = await Promise.all([
         axios.get(`/api/listings?wallet=${publicKey.toBase58()}`).catch(() => ({ data: { listings: [] } })),
@@ -80,17 +80,17 @@ function MyListingsPageContent() {
       ]);
 
       // Combine and mark with type
-      const listings = (listingsResponse.data.listings || []).map((item: Listing) => ({ 
-        ...item, 
-        type: 'listing' as const 
+      const listings = (listingsResponse.data.listings || []).map((item: Listing) => ({
+        ...item,
+        type: 'listing' as const
       }));
-      const fundraisers = (fundraisersResponse.data.fundraisers || []).map((item: Listing) => ({ 
-        ...item, 
-        type: 'fundraiser' as const 
+      const fundraisers = (fundraisersResponse.data.fundraisers || []).map((item: Listing) => ({
+        ...item,
+        type: 'fundraiser' as const
       }));
 
       // Merge and sort by creation date (newest first)
-      const combined = [...listings, ...fundraisers].sort((a, b) => 
+      const combined = [...listings, ...fundraisers].sort((a, b) =>
         new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
       );
 
@@ -110,7 +110,7 @@ function MyListingsPageContent() {
       confirmLabel: 'Delete',
       variant: 'danger',
     });
-    
+
     if (!confirmed) return;
 
     try {
@@ -134,7 +134,7 @@ function MyListingsPageContent() {
       confirmLabel: 'Deactivate',
       variant: 'warning',
     });
-    
+
     if (!confirmed) return;
 
     try {
@@ -158,15 +158,15 @@ function MyListingsPageContent() {
       confirmLabel: 'Reactivate',
       variant: 'info',
     });
-    
+
     if (!confirmed) return;
 
     try {
       setUpdatingId(id);
       const endpoint = type === 'fundraiser' ? `/api/fundraisers/${id}` : `/api/listings/${id}`;
-      await axios.patch(endpoint, { 
+      await axios.patch(endpoint, {
         state: 'in_review',
-        approved: false 
+        approved: false
       });
       await fetchMyListings(); // Refresh list
       toast.success(`${itemType.charAt(0).toUpperCase() + itemType.slice(1)} reactivated successfully`);
@@ -286,12 +286,12 @@ function MyListingsPageContent() {
 
     try {
       setSubmittingEdit(true);
-      
+
       // Use correct endpoint based on item type
       const endpoint = editingListing.type === 'fundraiser'
         ? `/api/fundraisers/${editingListing._id}/edit`
         : `/api/listings/${editingListing._id}/edit`;
-      
+
       await axios.put(endpoint, {
         wallet: publicKey.toBase58(),
         title: editFormData.title,
@@ -322,17 +322,17 @@ function MyListingsPageContent() {
 
   if (!isConnected || !hasAcceptedTOS) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-gradient-to-b from-zinc-50 to-zinc-100 dark:from-zinc-950 dark:to-black">
+      <div className="flex min-h-screen items-center justify-center bg-[#0f0f14]">
         <div className="text-center">
-          <h1 className="text-2xl font-bold text-zinc-900 dark:text-zinc-50 mb-4">
+          <h1 className="text-2xl font-bold text-white mb-4">
             Connect Your Wallet
           </h1>
-          <p className="text-zinc-600 dark:text-zinc-400 mb-6">
+          <p className="text-white/50 mb-6">
             You need to connect your wallet and accept TOS to view your listings
           </p>
           <Link
             href="/"
-            className="inline-flex items-center justify-center rounded-lg bg-green-600 px-6 py-3 text-sm font-medium text-white hover:bg-green-700 transition-colors"
+            className="inline-flex items-center justify-center rounded-lg bg-gradient-to-r from-[#9945FF] to-[#14F195] px-6 py-3 text-sm font-medium text-black hover:opacity-90 transition-opacity"
           >
             Go to Homepage
           </Link>
@@ -342,10 +342,10 @@ function MyListingsPageContent() {
   }
 
   const getStateColor = (state: string, approved: boolean) => {
-    if (state === 'in_review' && !approved) return 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200';
-    if (state === 'on_market' && approved) return 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200';
-    if (state === 'pulled') return 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200';
-    return 'bg-zinc-100 text-zinc-800 dark:bg-zinc-800 dark:text-zinc-200';
+    if (state === 'in_review' && !approved) return 'bg-yellow-950/30 text-yellow-400';
+    if (state === 'on_market' && approved) return 'bg-[#14F195]/10 text-[#14F195]';
+    if (state === 'pulled') return 'bg-red-950/30 text-red-400';
+    return 'bg-white/10 text-white/70';
   };
 
   const getStateText = (state: string, approved: boolean) => {
@@ -356,21 +356,21 @@ function MyListingsPageContent() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-zinc-50 to-zinc-100 dark:from-zinc-950 dark:to-black py-12 px-4">
+    <div className="min-h-screen bg-[#0f0f14] py-12 px-4">
       <div className="mx-auto max-w-7xl">
         {/* Header */}
         <div className="mb-8 flex items-center justify-between">
           <div>
-            <h1 className="text-4xl font-bold text-zinc-900 dark:text-zinc-50 mb-2">
+            <h1 className="text-4xl font-bold text-white mb-2">
               My Listings
             </h1>
-            <p className="text-lg text-zinc-600 dark:text-zinc-400">
+            <p className="text-lg text-white/50">
               Manage your software listings
             </p>
           </div>
           <Link
             href="/listings/new"
-            className="rounded-lg bg-blue-600 px-6 py-3 text-sm font-medium text-white hover:bg-blue-700 transition-colors"
+            className="rounded-lg bg-gradient-to-r from-[#9945FF] to-[#14F195] px-6 py-3 text-sm font-medium text-black hover:opacity-90 transition-opacity"
           >
             + Create Listing
           </Link>
@@ -378,8 +378,8 @@ function MyListingsPageContent() {
 
         {/* Token Gating Warning */}
         {!isTokenGated && (
-          <div className="mb-6 rounded-lg border border-yellow-200 bg-yellow-50 p-4 dark:border-yellow-900 dark:bg-yellow-950">
-            <p className="text-sm text-yellow-800 dark:text-yellow-200">
+          <div className="mb-6 rounded-lg border border-yellow-800/40 bg-yellow-950/20 p-4">
+            <p className="text-sm text-yellow-400">
               ⚠️ You don't have enough $SR tokens. Some features may be restricted.
             </p>
           </div>
@@ -388,30 +388,30 @@ function MyListingsPageContent() {
         {/* Loading State */}
         {loading && (
           <div className="flex justify-center py-12">
-            <div className="h-8 w-8 animate-spin rounded-full border-4 border-green-600 border-t-transparent"></div>
+            <div className="h-8 w-8 animate-spin rounded-full border-4 border-[#9945FF] border-t-transparent"></div>
           </div>
         )}
 
         {/* Error State */}
         {error && (
-          <div className="rounded-lg border border-red-200 bg-red-50 p-6 dark:border-red-900 dark:bg-red-950">
-            <p className="text-sm text-red-600 dark:text-red-400">⚠️ {error}</p>
+          <div className="rounded-lg border border-red-900/50 bg-red-950/20 p-6">
+            <p className="text-sm text-red-400">⚠️ {error}</p>
           </div>
         )}
 
         {/* Empty State */}
         {!loading && !error && listings.length === 0 && (
-          <div className="rounded-lg border border-zinc-200 bg-white p-12 text-center dark:border-zinc-800 dark:bg-zinc-900">
+          <div className="rounded-lg border border-purple-900/30 bg-white/5 p-12 text-center">
             <div className="mb-4 text-5xl">📦</div>
-            <h2 className="text-xl font-semibold text-zinc-900 dark:text-zinc-50 mb-2">
+            <h2 className="text-xl font-semibold text-white mb-2">
               No listings yet
             </h2>
-            <p className="text-zinc-600 dark:text-zinc-400 mb-6">
+            <p className="text-white/50 mb-6">
               Create your first listing to start selling on SOLk Road
             </p>
             <Link
               href="/listings/new"
-              className="inline-flex items-center justify-center rounded-lg bg-green-600 px-6 py-3 text-sm font-medium text-white hover:bg-green-700 transition-colors"
+              className="inline-flex items-center justify-center rounded-lg bg-gradient-to-r from-[#9945FF] to-[#14F195] px-6 py-3 text-sm font-medium text-black hover:opacity-90 transition-opacity"
             >
               Create Listing
             </Link>
@@ -427,22 +427,22 @@ function MyListingsPageContent() {
           return (
             <>
               {/* Tabs */}
-              <div className="mb-6 border-b border-zinc-200 dark:border-zinc-800">
+              <div className="mb-6 border-b border-purple-900/30">
                 <nav className="flex gap-8" aria-label="Tabs">
                   <button
                     onClick={() => setActiveTab('market')}
                     className={`flex items-center gap-2 border-b-2 pb-4 px-1 text-sm font-medium transition-colors ${
                       activeTab === 'market'
-                        ? 'border-green-600 text-green-600 dark:text-green-400'
-                        : 'border-transparent text-zinc-500 hover:text-zinc-700 hover:border-zinc-300 dark:text-zinc-400 dark:hover:text-zinc-300'
+                        ? 'border-[#9945FF] text-[#9945FF]'
+                        : 'border-transparent text-white/40 hover:text-white/60'
                     }`}
                   >
                     <span className="text-xl">🏪</span>
                     <span>Market Items</span>
                     <span className={`rounded-full px-2.5 py-0.5 text-xs font-medium ${
                       activeTab === 'market'
-                        ? 'bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300'
-                        : 'bg-zinc-100 text-zinc-600 dark:bg-zinc-800 dark:text-zinc-400'
+                        ? 'bg-[#9945FF]/20 text-[#9945FF]'
+                        : 'bg-white/10 text-white/50'
                     }`}>
                       {marketListings.length}
                     </span>
@@ -451,16 +451,16 @@ function MyListingsPageContent() {
                     onClick={() => setActiveTab('fundraisers')}
                     className={`flex items-center gap-2 border-b-2 pb-4 px-1 text-sm font-medium transition-colors ${
                       activeTab === 'fundraisers'
-                        ? 'border-purple-600 text-purple-600 dark:text-purple-400'
-                        : 'border-transparent text-zinc-500 hover:text-zinc-700 hover:border-zinc-300 dark:text-zinc-400 dark:hover:text-zinc-300'
+                        ? 'border-[#9945FF] text-[#9945FF]'
+                        : 'border-transparent text-white/40 hover:text-white/60'
                     }`}
                   >
                     <span className="text-xl">💝</span>
                     <span>Fundraisers</span>
                     <span className={`rounded-full px-2.5 py-0.5 text-xs font-medium ${
                       activeTab === 'fundraisers'
-                        ? 'bg-purple-100 text-purple-700 dark:bg-purple-900 dark:text-purple-300'
-                        : 'bg-zinc-100 text-zinc-600 dark:bg-zinc-800 dark:text-zinc-400'
+                        ? 'bg-[#9945FF]/20 text-[#9945FF]'
+                        : 'bg-white/10 text-white/50'
                     }`}>
                       {fundraiserListings.length}
                     </span>
@@ -472,33 +472,33 @@ function MyListingsPageContent() {
               <div>
                 {/* Market Items Section */}
                 {activeTab === 'market' && marketListings.length > 0 && (
-          <div className="overflow-hidden rounded-lg border border-zinc-200 bg-white shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
+          <div className="overflow-hidden rounded-lg border border-purple-900/30 bg-white/5 backdrop-blur-sm">
             <table className="w-full">
-              <thead className="border-b border-zinc-200 bg-zinc-50 dark:border-zinc-800 dark:bg-zinc-800">
+              <thead className="border-b border-purple-900/30 bg-white/5">
                 <tr>
-                  <th className="px-6 py-4 text-left text-xs font-medium uppercase text-zinc-600 dark:text-zinc-400">
+                  <th className="px-6 py-4 text-left text-xs font-medium uppercase text-white/40">
                     Listing
                   </th>
-                  <th className="px-6 py-4 text-left text-xs font-medium uppercase text-zinc-600 dark:text-zinc-400">
+                  <th className="px-6 py-4 text-left text-xs font-medium uppercase text-white/40">
                     Price
                   </th>
-                  <th className="px-6 py-4 text-left text-xs font-medium uppercase text-zinc-600 dark:text-zinc-400">
+                  <th className="px-6 py-4 text-left text-xs font-medium uppercase text-white/40">
                     Revenue
                   </th>
-                  <th className="px-6 py-4 text-left text-xs font-medium uppercase text-zinc-600 dark:text-zinc-400">
+                  <th className="px-6 py-4 text-left text-xs font-medium uppercase text-white/40">
                     Status
                   </th>
-                  <th className="px-6 py-4 text-left text-xs font-medium uppercase text-zinc-600 dark:text-zinc-400">
+                  <th className="px-6 py-4 text-left text-xs font-medium uppercase text-white/40">
                     Created
                   </th>
-                  <th className="px-6 py-4 text-right text-xs font-medium uppercase text-zinc-600 dark:text-zinc-400">
+                  <th className="px-6 py-4 text-right text-xs font-medium uppercase text-white/40">
                     Actions
                   </th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-zinc-200 dark:divide-zinc-800">
+              <tbody className="divide-y divide-purple-900/30">
                         {marketListings.map((listing) => (
-                  <tr key={listing._id} className="hover:bg-zinc-50 dark:hover:bg-zinc-800">
+                  <tr key={listing._id} className="hover:bg-white/5">
                     <td className="px-6 py-4">
                       <div className="flex items-center space-x-3">
                         <div className="relative h-12 w-12 flex-shrink-0 overflow-hidden rounded-lg">
@@ -511,31 +511,31 @@ function MyListingsPageContent() {
                         </div>
                         <div>
                           <div className="flex items-center gap-2">
-                          <div className="font-medium text-zinc-900 dark:text-zinc-50">
+                          <div className="font-medium text-white">
                             {listing.title}
                             </div>
                             {listing.type === 'fundraiser' && (
-                              <span className="inline-flex items-center gap-1 rounded-full bg-purple-100 px-2 py-0.5 text-xs font-medium text-purple-700 dark:bg-purple-900 dark:text-purple-300">
+                              <span className="inline-flex items-center gap-1 rounded-full bg-purple-900/40 px-2 py-0.5 text-xs font-medium text-purple-300">
                                 💝
                               </span>
                             )}
                           </div>
-                          <div className="text-sm text-zinc-500 dark:text-zinc-400">
+                          <div className="text-sm text-white/40">
                             {listing.category}
                           </div>
                         </div>
                       </div>
                     </td>
                     <td className="px-6 py-4">
-                      <div className="text-sm font-medium text-zinc-900 dark:text-zinc-50">
+                      <div className="text-sm font-medium text-white">
                         ${listing.price.toFixed(2)} USDC
                       </div>
                     </td>
                     <td className="px-6 py-4">
-                      <div className="text-sm font-medium text-green-600 dark:text-green-400">
+                      <div className="text-sm font-medium text-[#14F195]">
                         ${(listing.revenue || 0).toFixed(2)} USDC
                       </div>
-                      <div className="text-xs text-zinc-500 dark:text-zinc-400">
+                      <div className="text-xs text-white/40">
                         {listing.salesCount || 0} {listing.salesCount === 1 ? 'sale' : 'sales'}
                       </div>
                     </td>
@@ -545,7 +545,7 @@ function MyListingsPageContent() {
                       </span>
                     </td>
                     <td className="px-6 py-4">
-                      <div className="text-sm text-zinc-600 dark:text-zinc-400">
+                      <div className="text-sm text-white/50">
                         {new Date(listing.createdAt).toLocaleDateString()}
                       </div>
                     </td>
@@ -553,13 +553,13 @@ function MyListingsPageContent() {
                       <div className="flex items-center justify-end space-x-2">
                         <Link
                           href={listing.type === 'fundraiser' ? `/fundraisers/${listing._id}?from=my-listings` : `/listings/${listing._id}?from=my-listings`}
-                          className="text-sm text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300"
+                          className="text-sm text-[#9945FF] hover:text-[#9945FF]/80 transition-colors"
                         >
                           View
                         </Link>
                         <button
                           onClick={() => openEditModal(listing)}
-                          className="text-sm text-green-600 hover:text-green-700 dark:text-green-400 dark:hover:text-green-300"
+                          className="text-sm text-[#14F195] hover:text-[#14F195]/80 transition-colors"
                         >
                           Edit
                         </button>
@@ -567,7 +567,7 @@ function MyListingsPageContent() {
                           <button
                             onClick={() => handleDeactivate(listing._id, listing.type)}
                             disabled={updatingId === listing._id}
-                            className="text-sm text-orange-600 hover:text-orange-700 disabled:opacity-50 dark:text-orange-400 dark:hover:text-orange-300"
+                            className="text-sm text-orange-400 hover:text-orange-300 disabled:opacity-50 transition-colors"
                           >
                             {updatingId === listing._id ? 'Updating...' : 'Deactivate'}
                           </button>
@@ -576,7 +576,7 @@ function MyListingsPageContent() {
                           <button
                             onClick={() => handleReactivate(listing._id, listing.type)}
                             disabled={updatingId === listing._id}
-                            className="text-sm text-green-600 hover:text-green-700 disabled:opacity-50 dark:text-green-400 dark:hover:text-green-300"
+                            className="text-sm text-[#14F195] hover:text-[#14F195]/80 disabled:opacity-50 transition-colors"
                           >
                             {updatingId === listing._id ? 'Updating...' : 'Reactivate'}
                           </button>
@@ -584,7 +584,7 @@ function MyListingsPageContent() {
                         <button
                         onClick={() => handleDelete(listing._id, listing.type)}
                           disabled={deletingId === listing._id}
-                          className="text-sm text-red-600 hover:text-red-700 disabled:opacity-50 dark:text-red-400 dark:hover:text-red-300"
+                          className="text-sm text-red-400 hover:text-red-300 disabled:opacity-50 transition-colors"
                         >
                           {deletingId === listing._id ? 'Deleting...' : 'Delete'}
                         </button>
@@ -598,17 +598,17 @@ function MyListingsPageContent() {
         )}
 
                 {activeTab === 'market' && marketListings.length === 0 && (
-                  <div className="rounded-lg border border-zinc-200 bg-white p-12 text-center dark:border-zinc-800 dark:bg-zinc-900">
+                  <div className="rounded-lg border border-purple-900/30 bg-white/5 p-12 text-center">
                     <div className="mb-4 text-5xl">🏪</div>
-                    <h2 className="text-xl font-semibold text-zinc-900 dark:text-zinc-50 mb-2">
+                    <h2 className="text-xl font-semibold text-white mb-2">
                       No market items yet
                     </h2>
-                    <p className="text-zinc-600 dark:text-zinc-400 mb-6">
+                    <p className="text-white/50 mb-6">
                       Create your first market listing
                     </p>
                     <Link
                       href="/listings/new"
-                      className="inline-flex items-center justify-center rounded-lg bg-green-600 px-6 py-3 text-sm font-medium text-white hover:bg-green-700 transition-colors"
+                      className="inline-flex items-center justify-center rounded-lg bg-gradient-to-r from-[#9945FF] to-[#14F195] px-6 py-3 text-sm font-medium text-black hover:opacity-90 transition-opacity"
                     >
                       Create Market Listing
                     </Link>
@@ -619,40 +619,40 @@ function MyListingsPageContent() {
                 {activeTab === 'fundraisers' && fundraiserListings.length > 0 && (
                   <div>
                     <div className="mb-4 flex items-center gap-3">
-                      <h2 className="text-2xl font-bold text-zinc-900 dark:text-zinc-50">
+                      <h2 className="text-2xl font-bold text-white">
                         💝 Fundraisers
                       </h2>
-                      <span className="rounded-full bg-purple-100 px-3 py-1 text-sm font-medium text-purple-700 dark:bg-purple-900 dark:text-purple-300">
+                      <span className="rounded-full bg-purple-900/40 px-3 py-1 text-sm font-medium text-purple-300">
                         {fundraiserListings.length}
                       </span>
                     </div>
-                    <div className="overflow-hidden rounded-lg border border-zinc-200 bg-white shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
+                    <div className="overflow-hidden rounded-lg border border-purple-900/30 bg-white/5 backdrop-blur-sm">
                     <table className="w-full">
-                      <thead className="border-b border-zinc-200 bg-zinc-50 dark:border-zinc-800 dark:bg-zinc-800">
+                      <thead className="border-b border-purple-900/30 bg-white/5">
                         <tr>
-                          <th className="px-6 py-4 text-left text-xs font-medium uppercase text-zinc-600 dark:text-zinc-400">
+                          <th className="px-6 py-4 text-left text-xs font-medium uppercase text-white/40">
                             Fundraiser
                           </th>
-                          <th className="px-6 py-4 text-left text-xs font-medium uppercase text-zinc-600 dark:text-zinc-400">
+                          <th className="px-6 py-4 text-left text-xs font-medium uppercase text-white/40">
                             Donation Amount
                           </th>
-                          <th className="px-6 py-4 text-left text-xs font-medium uppercase text-zinc-600 dark:text-zinc-400">
+                          <th className="px-6 py-4 text-left text-xs font-medium uppercase text-white/40">
                             Revenue
                           </th>
-                          <th className="px-6 py-4 text-left text-xs font-medium uppercase text-zinc-600 dark:text-zinc-400">
+                          <th className="px-6 py-4 text-left text-xs font-medium uppercase text-white/40">
                             Status
                           </th>
-                          <th className="px-6 py-4 text-left text-xs font-medium uppercase text-zinc-600 dark:text-zinc-400">
+                          <th className="px-6 py-4 text-left text-xs font-medium uppercase text-white/40">
                             Created
                           </th>
-                          <th className="px-6 py-4 text-right text-xs font-medium uppercase text-zinc-600 dark:text-zinc-400">
+                          <th className="px-6 py-4 text-right text-xs font-medium uppercase text-white/40">
                             Actions
                           </th>
                         </tr>
                       </thead>
-                      <tbody className="divide-y divide-zinc-200 dark:divide-zinc-800">
+                      <tbody className="divide-y divide-purple-900/30">
                         {fundraiserListings.map((listing) => (
-                          <tr key={listing._id} className="hover:bg-zinc-50 dark:hover:bg-zinc-800">
+                          <tr key={listing._id} className="hover:bg-white/5">
                             <td className="px-6 py-4">
                               <div className="flex items-center space-x-3">
                                 <div className="relative h-12 w-12 flex-shrink-0 overflow-hidden rounded-lg">
@@ -664,25 +664,25 @@ function MyListingsPageContent() {
                                   />
                                 </div>
                                 <div>
-                                  <div className="font-medium text-zinc-900 dark:text-zinc-50">
+                                  <div className="font-medium text-white">
                                     {listing.title}
                                   </div>
-                                  <div className="text-sm text-zinc-500 dark:text-zinc-400">
+                                  <div className="text-sm text-white/40">
                                     {listing.category}
                                   </div>
                                 </div>
                               </div>
                             </td>
                             <td className="px-6 py-4">
-                              <div className="text-sm font-medium text-zinc-900 dark:text-zinc-50">
+                              <div className="text-sm font-medium text-white">
                                 ${listing.price.toFixed(2)} USDC
                               </div>
                             </td>
                             <td className="px-6 py-4">
-                              <div className="text-sm font-medium text-green-600 dark:text-green-400">
+                              <div className="text-sm font-medium text-[#14F195]">
                                 ${(listing.revenue || 0).toFixed(2)} USDC
                               </div>
-                              <div className="text-xs text-zinc-500 dark:text-zinc-400">
+                              <div className="text-xs text-white/40">
                                 {listing.salesCount || 0} {listing.salesCount === 1 ? 'donation' : 'donations'}
                               </div>
                             </td>
@@ -692,7 +692,7 @@ function MyListingsPageContent() {
                               </span>
                             </td>
                             <td className="px-6 py-4">
-                              <div className="text-sm text-zinc-600 dark:text-zinc-400">
+                              <div className="text-sm text-white/50">
                                 {new Date(listing.createdAt).toLocaleDateString()}
                               </div>
                             </td>
@@ -700,13 +700,13 @@ function MyListingsPageContent() {
                               <div className="flex items-center justify-end space-x-2">
                                 <Link
                                   href={`/fundraisers/${listing._id}?from=my-listings`}
-                                  className="text-sm text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300"
+                                  className="text-sm text-[#9945FF] hover:text-[#9945FF]/80 transition-colors"
                                 >
                                   View
                                 </Link>
                                 <button
                                   onClick={() => openEditModal(listing)}
-                                  className="text-sm text-green-600 hover:text-green-700 dark:text-green-400 dark:hover:text-green-300"
+                                  className="text-sm text-[#14F195] hover:text-[#14F195]/80 transition-colors"
                                 >
                                   Edit
                                 </button>
@@ -714,7 +714,7 @@ function MyListingsPageContent() {
                                   <button
                                     onClick={() => handleDeactivate(listing._id, listing.type)}
                                     disabled={updatingId === listing._id}
-                                    className="text-sm text-orange-600 hover:text-orange-700 disabled:opacity-50 dark:text-orange-400 dark:hover:text-orange-300"
+                                    className="text-sm text-orange-400 hover:text-orange-300 disabled:opacity-50 transition-colors"
                                   >
                                     {updatingId === listing._id ? 'Updating...' : 'Deactivate'}
                                   </button>
@@ -723,7 +723,7 @@ function MyListingsPageContent() {
                                   <button
                                     onClick={() => handleReactivate(listing._id, listing.type)}
                                     disabled={updatingId === listing._id}
-                                    className="text-sm text-green-600 hover:text-green-700 disabled:opacity-50 dark:text-green-400 dark:hover:text-green-300"
+                                    className="text-sm text-[#14F195] hover:text-[#14F195]/80 disabled:opacity-50 transition-colors"
                                   >
                                     {updatingId === listing._id ? 'Updating...' : 'Reactivate'}
                                   </button>
@@ -731,7 +731,7 @@ function MyListingsPageContent() {
                                 <button
                                   onClick={() => handleDelete(listing._id, listing.type)}
                                   disabled={deletingId === listing._id}
-                                  className="text-sm text-red-600 hover:text-red-700 disabled:opacity-50 dark:text-red-400 dark:hover:text-red-300"
+                                  className="text-sm text-red-400 hover:text-red-300 disabled:opacity-50 transition-colors"
                                 >
                                   {deletingId === listing._id ? 'Deleting...' : 'Delete'}
                                 </button>
@@ -746,17 +746,17 @@ function MyListingsPageContent() {
                 )}
 
                 {activeTab === 'fundraisers' && fundraiserListings.length === 0 && (
-                  <div className="rounded-lg border border-zinc-200 bg-white p-12 text-center dark:border-zinc-800 dark:bg-zinc-900">
+                  <div className="rounded-lg border border-purple-900/30 bg-white/5 p-12 text-center">
                     <div className="mb-4 text-5xl">💝</div>
-                    <h2 className="text-xl font-semibold text-zinc-900 dark:text-zinc-50 mb-2">
+                    <h2 className="text-xl font-semibold text-white mb-2">
                       No fundraisers yet
                     </h2>
-                    <p className="text-zinc-600 dark:text-zinc-400 mb-6">
+                    <p className="text-white/50 mb-6">
                       Create your first fundraiser campaign
                     </p>
                     <Link
                       href="/listings/new"
-                      className="inline-flex items-center justify-center rounded-lg bg-purple-600 px-6 py-3 text-sm font-medium text-white hover:bg-purple-700 transition-colors"
+                      className="inline-flex items-center justify-center rounded-lg bg-gradient-to-r from-[#9945FF] to-[#14F195] px-6 py-3 text-sm font-medium text-black hover:opacity-90 transition-opacity"
                     >
                       Create Fundraiser
                     </Link>
@@ -770,29 +770,29 @@ function MyListingsPageContent() {
         {/* Edit Modal */}
         {editingListing && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4" onClick={closeEditModal}>
-            <div 
-              className="max-h-[90vh] w-full max-w-3xl overflow-y-auto rounded-lg border border-zinc-200 bg-white shadow-xl dark:border-zinc-800 dark:bg-zinc-900"
+            <div
+              className="max-h-[90vh] w-full max-w-3xl overflow-y-auto rounded-lg border border-purple-900/30 bg-[#0f0f14] shadow-xl"
               onClick={(e) => e.stopPropagation()}
             >
-              <div className="border-b border-zinc-200 p-6 dark:border-zinc-800">
+              <div className="border-b border-purple-900/30 p-6">
                 <div className="flex items-center justify-between">
-                  <h2 className="text-2xl font-bold text-zinc-900 dark:text-zinc-50">
+                  <h2 className="text-2xl font-bold text-white">
                     Edit Listing
                   </h2>
                   <button
                     onClick={closeEditModal}
-                    className="rounded-lg p-2 hover:bg-zinc-100 dark:hover:bg-zinc-800"
+                    className="rounded-lg p-2 hover:bg-white/5 transition-colors"
                   >
-                    <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <svg className="h-6 w-6 text-white/40" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                     </svg>
                   </button>
                 </div>
-                <p className="mt-2 text-sm text-zinc-600 dark:text-zinc-400">
+                <p className="mt-2 text-sm text-white/50">
                   Update your listing information. Changes will require admin approval if currently live.
                 </p>
-                <div className="mt-3 rounded-lg border border-blue-200 bg-blue-50 p-3 dark:border-blue-900 dark:bg-blue-950">
-                  <p className="text-xs text-blue-800 dark:text-blue-200">
+                <div className="mt-3 rounded-lg border border-purple-900/40 bg-purple-950/20 p-3">
+                  <p className="text-xs text-purple-300">
                     <strong>Note:</strong> The delivery URL cannot be changed. Only title, description, price, category, image, and public URLs can be edited.
                   </p>
                 </div>
@@ -801,69 +801,69 @@ function MyListingsPageContent() {
               <form onSubmit={handleSubmitEdit} className="p-6 space-y-6">
                 {/* Error Message */}
                 {editError && (
-                  <div className="rounded-lg border border-red-200 bg-red-50 p-4 dark:border-red-900 dark:bg-red-950">
-                    <p className="text-sm text-red-600 dark:text-red-400">⚠️ {editError}</p>
+                  <div className="rounded-lg border border-red-900/50 bg-red-950/20 p-4">
+                    <p className="text-sm text-red-400">⚠️ {editError}</p>
                   </div>
                 )}
 
                 {/* Title */}
                 <div>
-                  <label className="mb-2 block text-sm font-medium text-zinc-900 dark:text-zinc-50">
-                    Title <span className="text-red-600">*</span>
+                  <label className="mb-2 block text-sm font-medium text-white/70">
+                    Title <span className="text-red-400">*</span>
                   </label>
                   <input
                     type="text"
                     value={editFormData.title}
                     onChange={(e) => setEditFormData({ ...editFormData, title: e.target.value })}
-                    className="w-full rounded-lg border border-zinc-300 bg-white px-4 py-2 text-zinc-900 focus:border-green-600 focus:ring-2 focus:ring-green-600 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-50"
+                    className="w-full rounded-lg border border-purple-900/40 bg-black/40 px-4 py-2 text-white placeholder-white/30 focus:border-[#9945FF] focus:outline-none focus:ring-2 focus:ring-[#9945FF]/30"
                     maxLength={100}
                     required
                   />
-                  <p className="mt-1 text-xs text-zinc-500">{editFormData.title.length}/100 characters</p>
+                  <p className="mt-1 text-xs text-white/40">{editFormData.title.length}/100 characters</p>
                 </div>
 
                 {/* Description */}
                 <div>
-                  <label className="mb-2 block text-sm font-medium text-zinc-900 dark:text-zinc-50">
-                    Description <span className="text-red-600">*</span>
+                  <label className="mb-2 block text-sm font-medium text-white/70">
+                    Description <span className="text-red-400">*</span>
                   </label>
                   <textarea
                     value={editFormData.description}
                     onChange={(e) => setEditFormData({ ...editFormData, description: e.target.value })}
                     rows={6}
-                    className="w-full rounded-lg border border-zinc-300 bg-white px-4 py-2 text-zinc-900 focus:border-green-600 focus:ring-2 focus:ring-green-600 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-50"
+                    className="w-full rounded-lg border border-purple-900/40 bg-black/40 px-4 py-2 text-white placeholder-white/30 focus:border-[#9945FF] focus:outline-none focus:ring-2 focus:ring-[#9945FF]/30"
                     maxLength={2000}
                     required
                   />
-                  <p className="mt-1 text-xs text-zinc-500">{editFormData.description.length}/2000 characters</p>
+                  <p className="mt-1 text-xs text-white/40">{editFormData.description.length}/2000 characters</p>
                 </div>
 
                 {/* Price & Category Row */}
                 <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
                   {/* Price */}
                   <div>
-                    <label className="mb-2 block text-sm font-medium text-zinc-900 dark:text-zinc-50">
-                      Price (USDC) <span className="text-red-600">*</span>
+                    <label className="mb-2 block text-sm font-medium text-white/70">
+                      Price (USDC) <span className="text-red-400">*</span>
                     </label>
                     <input
                       type="number"
                       step="0.01"
                       value={editFormData.price}
                       onChange={(e) => setEditFormData({ ...editFormData, price: e.target.value })}
-                      className="w-full rounded-lg border border-zinc-300 bg-white px-4 py-2 text-zinc-900 focus:border-green-600 focus:ring-2 focus:ring-green-600 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-50"
+                      className="w-full rounded-lg border border-purple-900/40 bg-black/40 px-4 py-2 text-white placeholder-white/30 focus:border-[#9945FF] focus:outline-none focus:ring-2 focus:ring-[#9945FF]/30"
                       required
                     />
                   </div>
 
                   {/* Category */}
                   <div>
-                    <label className="mb-2 block text-sm font-medium text-zinc-900 dark:text-zinc-50">
-                      Category <span className="text-red-600">*</span>
+                    <label className="mb-2 block text-sm font-medium text-white/70">
+                      Category <span className="text-red-400">*</span>
                     </label>
                     <select
                       value={editFormData.category}
                       onChange={(e) => setEditFormData({ ...editFormData, category: e.target.value })}
-                      className="w-full rounded-lg border border-zinc-300 bg-white px-4 py-2 text-zinc-900 focus:border-green-600 focus:ring-2 focus:ring-green-600 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-50"
+                      className="w-full rounded-lg border border-purple-900/40 bg-black/40 px-4 py-2 text-white focus:border-[#9945FF] focus:outline-none focus:ring-2 focus:ring-[#9945FF]/30"
                       required
                     >
                       {editingListing?.type === 'fundraiser' ? (
@@ -925,12 +925,12 @@ function MyListingsPageContent() {
 
                 {/* Image Upload */}
                 <div>
-                  <label className="mb-2 block text-sm font-medium text-zinc-900 dark:text-zinc-50">
-                    Product Image <span className="text-red-600">*</span>
+                  <label className="mb-2 block text-sm font-medium text-white/70">
+                    Product Image <span className="text-red-400">*</span>
                   </label>
                   <div className="flex items-start space-x-4">
                     {imagePreview && (
-                      <div className="relative h-32 w-32 overflow-hidden rounded-lg border border-zinc-300 dark:border-zinc-700">
+                      <div className="relative h-32 w-32 overflow-hidden rounded-lg border border-purple-900/40">
                         <img src={imagePreview} alt="Preview" className="h-full w-full object-cover" />
                       </div>
                     )}
@@ -939,13 +939,13 @@ function MyListingsPageContent() {
                         type="file"
                         accept="image/jpeg,image/png,image/webp"
                         onChange={handleImageChange}
-                        className="block w-full text-sm text-zinc-500 file:mr-4 file:rounded-lg file:border-0 file:bg-green-600 file:px-4 file:py-2 file:text-sm file:font-medium file:text-white hover:file:bg-green-700 dark:text-zinc-400"
+                        className="block w-full text-sm text-white/50 file:mr-4 file:rounded-lg file:border-0 file:bg-gradient-to-r file:from-[#9945FF] file:to-[#14F195] file:px-4 file:py-2 file:text-sm file:font-medium file:text-black hover:file:opacity-90"
                       />
-                      <p className="mt-2 text-xs text-zinc-500">
+                      <p className="mt-2 text-xs text-white/40">
                         JPEG, PNG, or WebP. Max 5MB.
                       </p>
                       {uploadingImage && (
-                        <p className="mt-2 text-sm text-green-600">Uploading...</p>
+                        <p className="mt-2 text-sm text-[#14F195]">Uploading...</p>
                       )}
                     </div>
                   </div>
@@ -953,12 +953,12 @@ function MyListingsPageContent() {
 
                 {/* Optional URLs */}
                 <div className="space-y-4">
-                  <h3 className="text-sm font-medium text-zinc-900 dark:text-zinc-50">
+                  <h3 className="text-sm font-medium text-white/70">
                     Optional Resources
                   </h3>
-                  
+
                   <div>
-                    <label className="mb-1 block text-sm text-zinc-700 dark:text-zinc-300">
+                    <label className="mb-1 block text-sm text-white/50">
                       Demo Video URL
                     </label>
                     <input
@@ -966,12 +966,12 @@ function MyListingsPageContent() {
                       value={editFormData.demoVideoUrl}
                       onChange={(e) => setEditFormData({ ...editFormData, demoVideoUrl: e.target.value })}
                       placeholder="https://youtube.com/..."
-                      className="w-full rounded-lg border border-zinc-300 bg-white px-4 py-2 text-sm text-zinc-900 focus:border-green-600 focus:ring-2 focus:ring-green-600 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-50"
+                      className="w-full rounded-lg border border-purple-900/40 bg-black/40 px-4 py-2 text-sm text-white placeholder-white/30 focus:border-[#9945FF] focus:outline-none focus:ring-2 focus:ring-[#9945FF]/30"
                     />
                   </div>
 
                   <div>
-                    <label className="mb-1 block text-sm text-zinc-700 dark:text-zinc-300">
+                    <label className="mb-1 block text-sm text-white/50">
                       Whitepaper URL
                     </label>
                     <input
@@ -979,12 +979,12 @@ function MyListingsPageContent() {
                       value={editFormData.whitepaperUrl}
                       onChange={(e) => setEditFormData({ ...editFormData, whitepaperUrl: e.target.value })}
                       placeholder="https://..."
-                      className="w-full rounded-lg border border-zinc-300 bg-white px-4 py-2 text-sm text-zinc-900 focus:border-green-600 focus:ring-2 focus:ring-green-600 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-50"
+                      className="w-full rounded-lg border border-purple-900/40 bg-black/40 px-4 py-2 text-sm text-white placeholder-white/30 focus:border-[#9945FF] focus:outline-none focus:ring-2 focus:ring-[#9945FF]/30"
                     />
                   </div>
 
                   <div>
-                    <label className="mb-1 block text-sm text-zinc-700 dark:text-zinc-300">
+                    <label className="mb-1 block text-sm text-white/50">
                       GitHub URL
                     </label>
                     <input
@@ -992,24 +992,24 @@ function MyListingsPageContent() {
                       value={editFormData.githubUrl}
                       onChange={(e) => setEditFormData({ ...editFormData, githubUrl: e.target.value })}
                       placeholder="https://github.com/..."
-                      className="w-full rounded-lg border border-zinc-300 bg-white px-4 py-2 text-sm text-zinc-900 focus:border-green-600 focus:ring-2 focus:ring-green-600 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-50"
+                      className="w-full rounded-lg border border-purple-900/40 bg-black/40 px-4 py-2 text-sm text-white placeholder-white/30 focus:border-[#9945FF] focus:outline-none focus:ring-2 focus:ring-[#9945FF]/30"
                     />
                   </div>
                 </div>
 
                 {/* Submit Buttons */}
-                <div className="flex items-center justify-end space-x-4 border-t border-zinc-200 pt-6 dark:border-zinc-800">
+                <div className="flex items-center justify-end space-x-4 border-t border-purple-900/30 pt-6">
                   <button
                     type="button"
                     onClick={closeEditModal}
-                    className="rounded-lg border border-zinc-300 px-6 py-2 text-sm font-medium text-zinc-700 hover:bg-zinc-50 dark:border-zinc-700 dark:text-zinc-300 dark:hover:bg-zinc-800"
+                    className="rounded-lg border border-purple-900/40 bg-white/5 px-6 py-2 text-sm font-medium text-white/70 hover:bg-white/10 transition-colors"
                   >
                     Cancel
                   </button>
                   <button
                     type="submit"
                     disabled={submittingEdit || uploadingImage}
-                    className="rounded-lg bg-green-600 px-6 py-2 text-sm font-medium text-white hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="rounded-lg bg-gradient-to-r from-[#9945FF] to-[#14F195] px-6 py-2 text-sm font-medium text-black hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed transition-opacity"
                   >
                     {submittingEdit ? 'Updating...' : 'Update Listing'}
                   </button>
@@ -1030,4 +1030,3 @@ export default function MyListingsPage() {
     </ProtectedContent>
   );
 }
-

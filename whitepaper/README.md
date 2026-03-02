@@ -9,7 +9,7 @@
 ## ⚡ **EXPERIENCE IT LIVE**
 
 🌐 **Official Site:** [https://www.silkroadx402.com/](https://www.silkroadx402.com/)  
-💎 **Token Required:** 50,000 $SRx402 ([CA: `49AfJsWb9E7VjBDTdZ2DjnSLFgSEvCoP1wdXuhHbpump`](https://solscan.io/token/49AfJsWb9E7VjBDTdZ2DjnSLFgSEvCoP1wdXuhHbpump))  
+💎 **Token Required:** 50,000 $SRx402 (CA: coming soon)  
 ⚡ **Blockchain:** Solana Mainnet  
 💰 **Payment:** USDC via x402 Protocol  
 
@@ -328,7 +328,7 @@ This platform is in **BETA**. While transactions execute on Solana mainnet with 
 
 - **🌐 Website:** [silkroadx402.com](https://www.silkroadx402.com/)
 - **💬 Twitter:** [@SilkRoadx402](https://twitter.com/SilkRoadx402) *(if applicable)*
-- **📊 Chart:** [DexScreener](https://dexscreener.com/solana/49AfJsWb9E7VjBDTdZ2DjnSLFgSEvCoP1wdXuhHbpump)
+- **📊 Chart:** coming soon
 - **🔗 GitHub:** [github.com/Tanner253/SilkRoadx402](https://github.com/Tanner253/SilkRoadx402)
 
 ---

@@ -5,7 +5,7 @@ import { ReactNode } from 'react';
 
 /**
  * ProtectedContent Component
- * 
+ *
  * Wraps content that requires token gating + TOS acceptance.
  * Blocks rendering until both requirements are met.
  */
@@ -20,10 +20,10 @@ export function ProtectedContent({ children }: { children: ReactNode }) {
   // Show loading state
   if (isLoading) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-gradient-to-b from-zinc-50 to-zinc-100 dark:from-zinc-950 dark:to-black">
+      <div className="flex min-h-screen items-center justify-center bg-[#0f0f14]">
         <div className="text-center">
-          <div className="h-12 w-12 animate-spin rounded-full border-4 border-green-600 border-t-transparent mx-auto mb-4"></div>
-          <p className="text-zinc-600 dark:text-zinc-400">Checking access...</p>
+          <div className="h-12 w-12 animate-spin rounded-full border-4 border-[#9945FF] border-t-transparent mx-auto mb-4"></div>
+          <p className="text-white/50">Checking access...</p>
         </div>
       </div>
     );
@@ -32,13 +32,13 @@ export function ProtectedContent({ children }: { children: ReactNode }) {
   // Block content if not connected
   if (!isConnected) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-gradient-to-b from-zinc-50 to-zinc-100 dark:from-zinc-950 dark:to-black px-4">
+      <div className="flex min-h-screen items-center justify-center bg-[#0f0f14] px-4">
         <div className="text-center max-w-md">
           <div className="text-6xl mb-4">🔒</div>
-          <h2 className="text-2xl font-bold text-zinc-900 dark:text-zinc-50 mb-2">
+          <h2 className="text-2xl font-bold text-white mb-2">
             Wallet Not Connected
           </h2>
-          <p className="text-zinc-600 dark:text-zinc-400">
+          <p className="text-white/50">
             Please connect your wallet to access this page.
           </p>
         </div>
@@ -49,16 +49,16 @@ export function ProtectedContent({ children }: { children: ReactNode }) {
   // Block content if token gating failed (insufficient $SR)
   if (!isTokenGated) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-gradient-to-b from-zinc-50 to-zinc-100 dark:from-zinc-950 dark:to-black px-4">
+      <div className="flex min-h-screen items-center justify-center bg-[#0f0f14] px-4">
         <div className="text-center max-w-md">
           <div className="text-6xl mb-4">⛔</div>
-          <h2 className="text-2xl font-bold text-zinc-900 dark:text-zinc-50 mb-2">
+          <h2 className="text-2xl font-bold text-white mb-2">
             Access Restricted
           </h2>
-          <p className="text-zinc-600 dark:text-zinc-400 mb-6">
-            You need to hold at least <span className="font-bold text-green-600">50,000 $SR</span> tokens to access this platform.
+          <p className="text-white/50 mb-6">
+            You need to hold at least <span className="font-bold text-[#14F195]">50,000 $SR</span> tokens to access this platform.
           </p>
-          <p className="text-sm text-zinc-500 dark:text-zinc-600">
+          <p className="text-sm text-white/40">
             The Token Gate Modal will guide you to purchase tokens.
           </p>
         </div>
@@ -69,13 +69,13 @@ export function ProtectedContent({ children }: { children: ReactNode }) {
   // Block content if TOS not accepted
   if (!hasAcceptedTOS) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-gradient-to-b from-zinc-50 to-zinc-100 dark:from-zinc-950 dark:to-black px-4">
+      <div className="flex min-h-screen items-center justify-center bg-[#0f0f14] px-4">
         <div className="text-center max-w-md">
           <div className="text-6xl mb-4">📜</div>
-          <h2 className="text-2xl font-bold text-zinc-900 dark:text-zinc-50 mb-2">
+          <h2 className="text-2xl font-bold text-white mb-2">
             Terms of Service Required
           </h2>
-          <p className="text-zinc-600 dark:text-zinc-400">
+          <p className="text-white/50">
             Please review and accept the Terms of Service to continue.
           </p>
         </div>
@@ -86,4 +86,3 @@ export function ProtectedContent({ children }: { children: ReactNode }) {
   // All checks passed - render protected content
   return <>{children}</>;
 }
-

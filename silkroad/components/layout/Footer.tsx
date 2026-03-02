@@ -28,7 +28,7 @@ export function Footer() {
 
         {/* Whitepaper Link */}
         <a
-          href="https://silk-roadx402.vercel.app"
+          href="https://solkroadwp.vercel.app"
           target="_blank"
           rel="noopener noreferrer"
           className="flex items-center space-x-1 sm:space-x-2 rounded-lg px-2 sm:px-4 py-2 text-sm font-medium text-white/60 hover:bg-white/5 hover:text-white/90 transition-colors"
@@ -37,6 +37,11 @@ export function Footer() {
           <span className="text-lg sm:text-xl">📄</span>
           <span className="hidden sm:inline">Whitepaper</span>
         </a>
+
+        {/* Dex paid at bond */}
+        <span className="flex items-center space-x-1 sm:space-x-2 rounded-lg px-2 sm:px-4 py-2 text-sm font-medium text-white/50">
+          <span>Dex paid at bond</span>
+        </span>
 
         {/* GitHub Link */}
         <a

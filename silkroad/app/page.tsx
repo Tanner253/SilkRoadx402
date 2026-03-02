@@ -5,7 +5,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { WalletMultiButton } from '@solana/wallet-adapter-react-ui';
 import Link from 'next/link';
 
-const CONTRACT_ADDRESS = '49AfJsWb9E7VjBDTdZ2DjnSLFgSEvCoP1wdXuhHbpump';
+const CONTRACT_ADDRESS = 'coming soon';
 
 export default function Home() {
   const [copied, setCopied] = useState(false);
@@ -64,7 +64,7 @@ export default function Home() {
             <div className="flex flex-col sm:flex-row items-center gap-2 w-full">
               <div className="flex-1 rounded-lg bg-black/40 p-3 border border-purple-900/40 overflow-hidden">
                 <p className="text-xs sm:text-sm text-white/40 text-center sm:text-left italic">
-                  Coming Soon
+                  {CONTRACT_ADDRESS}
                 </p>
               </div>
               <button

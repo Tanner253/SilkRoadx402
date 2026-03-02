@@ -354,7 +354,7 @@ export function Navbar() {
                   </Link>
 
                   <a
-                    href="https://silk-roadx402.vercel.app"
+                    href="https://solkroadwp.vercel.app"
                     target="_blank"
                     rel="noopener noreferrer"
                     className="flex items-center gap-3 rounded-lg px-4 py-3 text-sm font-medium text-white/60 hover:bg-white/5 transition-colors"
@@ -363,6 +363,9 @@ export function Navbar() {
                     Whitepaper
                   </a>
 
+                  <span className="flex items-center gap-3 rounded-lg px-4 py-3 text-sm font-medium text-white/50">
+                    Dex paid at bond
+                  </span>
                   <a
                     href="https://github.com/Tanner253?tab=repositories"
                     target="_blank"

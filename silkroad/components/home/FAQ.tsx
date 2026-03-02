@@ -1,6 +1,6 @@
 /**
  * FAQ Component
- * 
+ *
  * Frequently asked questions to help new users
  */
 
@@ -30,11 +30,11 @@ export function FAQ() {
             <li>Use Phantom Wallet (USDC accounts created automatically)</li>
             <li>Or send yourself a tiny amount of USDC from an exchange (initializes account)</li>
             <li>Or use{' '}
-              <a 
-                href="https://www.sollet.io/" 
-                target="_blank" 
+              <a
+                href="https://www.sollet.io/"
+                target="_blank"
                 rel="noopener noreferrer"
-                className="text-blue-600 hover:underline"
+                className="text-[#9945FF] hover:text-[#9945FF]/80 transition-colors"
               >
                 Sollet.io
               </a>
@@ -59,7 +59,7 @@ export function FAQ() {
             <li>Creates a trusted community of stakeholders</li>
             <li>Holders have "skin in the game"</li>
           </ul>
-          <p className="text-sm text-zinc-600 dark:text-zinc-400 mt-3">
+          <p className="text-sm text-white/50 mt-3">
             Note: Transactions are paid in USDC, not $SR. The token is only for access.
           </p>
         </>
@@ -78,7 +78,7 @@ export function FAQ() {
             <li>All transactions are in USDC on Solana</li>
             <li>Transaction fees are ~$0.00025 per tx</li>
           </ul>
-          <p className="mt-3 text-sm text-yellow-800 dark:text-yellow-200 bg-yellow-50 dark:bg-yellow-950 p-3 rounded">
+          <p className="mt-3 text-sm text-yellow-400 bg-yellow-950/20 border border-yellow-800/40 p-3 rounded">
             ⚠️ <strong>Important:</strong> No refunds or chargebacks. Do your research before purchasing!
           </p>
         </>
@@ -98,7 +98,7 @@ export function FAQ() {
             <li><strong>✓ Report suspicious listings:</strong> Use the flag 🚩 button</li>
             <li><strong>✗ Never share wallet keys</strong></li>
           </ul>
-          <p className="text-sm text-red-800 dark:text-red-200 bg-red-50 dark:bg-red-950 p-3 rounded">
+          <p className="text-sm text-red-400 bg-red-950/20 border border-red-900/50 p-3 rounded">
             ⚠️ This is an <strong>anonymous marketplace</strong>. Exercise extreme caution and only transact with trusted vendors.
           </p>
         </>
@@ -117,7 +117,7 @@ export function FAQ() {
             <li>Optionally add demo video, whitepaper, GitHub (public)</li>
             <li>Submit for admin review (approval required)</li>
           </ol>
-          <p className="mt-3 text-sm text-zinc-600 dark:text-zinc-400">
+          <p className="mt-3 text-sm text-white/50">
             <strong>Limits:</strong> Max 3 active listings per wallet. Listings auto-pulled after 3 failed purchases.
           </p>
         </>
@@ -135,7 +135,7 @@ export function FAQ() {
             <li>Transaction is recorded on your profile</li>
             <li>You can leave a review after purchase</li>
           </ol>
-          <p className="mt-3 text-sm text-yellow-800 dark:text-yellow-200 bg-yellow-50 dark:bg-yellow-950 p-3 rounded">
+          <p className="mt-3 text-sm text-yellow-400 bg-yellow-950/20 border border-yellow-800/40 p-3 rounded">
             ⚠️ <strong>Save the delivery URL immediately!</strong> We don't store unencrypted URLs for your privacy.
           </p>
         </>
@@ -150,7 +150,7 @@ export function FAQ() {
             <li><strong>Phantom</strong> - Recommended (USDC auto-setup)</li>
             <li><strong>Solflare</strong> - Full USDC support</li>
           </ul>
-          <p className="mt-3 text-sm text-zinc-600 dark:text-zinc-400">
+          <p className="mt-3 text-sm text-white/50">
             More wallets coming soon! Make sure your wallet supports Solana SPL tokens.
           </p>
         </>
@@ -166,7 +166,7 @@ export function FAQ() {
             <li>Optionally add a reason (max 100 characters)</li>
             <li>Submit the report</li>
           </ol>
-          <p className="text-sm text-zinc-600 dark:text-zinc-400">
+          <p className="text-sm text-white/50">
             Reports are reviewed by admins. Listings with multiple reports may be automatically pulled.
           </p>
         </>
@@ -175,29 +175,29 @@ export function FAQ() {
   ];
 
   return (
-    <div className="rounded-lg border border-zinc-200 bg-white p-8 shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
-      <h2 className="mb-6 text-3xl font-bold text-zinc-900 dark:text-zinc-50">
+    <div className="rounded-lg border border-purple-900/30 bg-white/5 backdrop-blur-sm p-8">
+      <h2 className="mb-6 text-3xl font-bold text-white">
         ❓ Frequently Asked Questions
       </h2>
       <div className="space-y-3">
         {faqs.map((faq, index) => (
           <div
             key={index}
-            className="rounded-lg border border-zinc-200 dark:border-zinc-800 overflow-hidden"
+            className="rounded-lg border border-purple-900/30 overflow-hidden"
           >
             <button
               onClick={() => setOpenIndex(openIndex === index ? null : index)}
-              className="w-full flex items-center justify-between p-4 text-left hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-colors"
+              className="w-full flex items-center justify-between p-4 text-left hover:bg-white/5 transition-colors"
             >
-              <span className="font-semibold text-zinc-900 dark:text-zinc-50">
+              <span className="font-semibold text-white">
                 {faq.question}
               </span>
-              <span className="text-2xl text-zinc-500 dark:text-zinc-400">
+              <span className="text-2xl text-white/40">
                 {openIndex === index ? '−' : '+'}
               </span>
             </button>
             {openIndex === index && (
-              <div className="p-4 pt-0 text-sm text-zinc-700 dark:text-zinc-300">
+              <div className="p-4 pt-0 text-sm text-white/70">
                 {faq.answer}
               </div>
             )}
@@ -207,4 +207,3 @@ export function FAQ() {
     </div>
   );
 }
-

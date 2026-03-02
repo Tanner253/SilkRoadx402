@@ -1,6 +1,6 @@
 /**
  * Platform Updates/Changelog Component
- * 
+ *
  * Manually maintained list of platform updates
  */
 
@@ -190,34 +190,34 @@ export function Updates() {
   ];
 
   return (
-    <div className="rounded-lg border border-zinc-200 bg-white p-8 shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
-      <h2 className="mb-6 text-3xl font-bold text-zinc-900 dark:text-zinc-50">
+    <div className="rounded-lg border border-purple-900/30 bg-white/5 backdrop-blur-sm p-8">
+      <h2 className="mb-6 text-3xl font-bold text-white">
         📋 Platform Updates
       </h2>
       <div className="space-y-6">
         {updates.map((update, index) => (
           <div
             key={index}
-            className="border-l-4 border-green-600 pl-6 pb-6 last:pb-0"
+            className="border-l-4 border-[#9945FF] pl-6 pb-6 last:pb-0"
           >
             <div className="mb-2 flex items-center space-x-3">
-              <span className="rounded-full bg-green-600 px-3 py-1 text-xs font-bold text-white">
+              <span className="rounded-full bg-gradient-to-r from-[#9945FF] to-[#14F195] px-3 py-1 text-xs font-bold text-black">
                 {update.version}
               </span>
-              <span className="text-sm text-zinc-500 dark:text-zinc-400">
+              <span className="text-sm text-white/40">
                 {update.date}
               </span>
             </div>
-            <h3 className="mb-3 text-xl font-bold text-zinc-900 dark:text-zinc-50">
+            <h3 className="mb-3 text-xl font-bold text-white">
               {update.title}
             </h3>
             <ul className="space-y-2">
               {update.items.map((item, itemIndex) => (
                 <li
                   key={itemIndex}
-                  className="flex items-start space-x-2 text-sm text-zinc-700 dark:text-zinc-300"
+                  className="flex items-start space-x-2 text-sm text-white/70"
                 >
-                  <span className="mt-1 text-green-600">✓</span>
+                  <span className="mt-1 text-[#14F195]">✓</span>
                   <span>{item}</span>
                 </li>
               ))}
@@ -228,4 +228,3 @@ export function Updates() {
     </div>
   );
 }
-
