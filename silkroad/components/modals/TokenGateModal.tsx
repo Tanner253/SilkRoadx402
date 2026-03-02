@@ -1,6 +1,7 @@
 'use client';
 
 import { useWallet } from '@solana/wallet-adapter-react';
+import { CONFIG } from '@/config/constants';
 
 interface TokenGateModalProps {
   isOpen: boolean;
@@ -8,13 +9,12 @@ interface TokenGateModalProps {
   requiredBalance: number;
 }
 
-const PUMP_FUN_URL = 'https://pump.fun/coin/49AfJsWb9E7VjBDTdZ2DjnSLFgSEvCoP1wdXuhHbpump';
-
 export function TokenGateModal({ isOpen, currentBalance = 0, requiredBalance }: TokenGateModalProps) {
   const { disconnect } = useWallet();
+  const buyChartUrl = CONFIG.SRX402_DEXSCREENER_URL;
 
   const handleBuyTokens = () => {
-    window.open(PUMP_FUN_URL, '_blank');
+    window.open(buyChartUrl, '_blank');
   };
 
   const handleDisconnect = () => {
@@ -92,7 +92,7 @@ export function TokenGateModal({ isOpen, currentBalance = 0, requiredBalance }: 
             <strong>ℹ️ How to get access:</strong>
           </p>
           <ol className="mt-2 ml-4 space-y-1 text-sm text-white/70 list-decimal">
-            <li>Buy $SR tokens on pump.fun</li>
+            <li>Buy $SR tokens (see chart link below)</li>
             <li>Send tokens to your connected wallet</li>
             <li>Reconnect your wallet to refresh balance</li>
             <li>Accept TOS and start using the platform!</li>
@@ -105,7 +105,7 @@ export function TokenGateModal({ isOpen, currentBalance = 0, requiredBalance }: 
             onClick={handleBuyTokens}
             className="w-full rounded-lg bg-gradient-to-r from-[#9945FF] to-[#14F195] px-4 py-3 text-sm font-semibold text-white hover:opacity-90 transition-opacity shadow-lg"
           >
-            🚀 Buy $SR on pump.fun
+            📈 View chart / Buy $SR
           </button>
           <button
             onClick={handleDisconnect}
@@ -121,7 +121,7 @@ export function TokenGateModal({ isOpen, currentBalance = 0, requiredBalance }: 
             <strong>Token Contract:</strong>
           </p>
           <p className="text-xs font-mono text-white/60 break-all">
-            49AfJsWb9E7VjBDTdZ2DjnSLFgSEvCoP1wdXuhHbpump
+            {CONFIG.SRX402_MINT}
           </p>
         </div>
       </div>
