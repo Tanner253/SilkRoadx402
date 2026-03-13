@@ -98,6 +98,13 @@ export default function Home() {
               </h1>
             </div>
 
+            <h4
+              className="fade-up font-black tracking-[0.2em] text-white/90 uppercase mt-3"
+              style={{ animationDelay: '0.22s', fontSize: 'clamp(1.2rem, 4vw, 2.2rem)' }}
+            >
+              NO KYC FUNDRAISING
+            </h4>
+
             {/* P2P tagline */}
             <div className="fade-up mt-4 flex flex-wrap gap-2" style={{ animationDelay: '0.28s' }}>
               {['⚡ Instant Payment', 'P2P Direct', '∞ No Withdrawal Limits'].map((t) => (
