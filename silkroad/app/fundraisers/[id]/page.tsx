@@ -2,7 +2,7 @@
 
 import { use, useState, useEffect } from 'react';
 import { useAuth } from '@/hooks/useAuth';
-import { useWallet } from '@solana/wallet-adapter-react';
+import { useWallet, useConnection } from '@solana/wallet-adapter-react';
 import { useRouter } from 'next/navigation';
 import axios from 'axios';
 import Link from 'next/link';
@@ -49,12 +49,14 @@ function FundraiserDetail({ params }: { params: Promise<{ id: string }> }) {
 
   const { isConnected, hasAcceptedTOS, mounted } = useAuth();
   const { publicKey, signTransaction } = useWallet();
+  const { connection } = useConnection();
   const router = useRouter();
   const toast = useToast();
   const { confirm } = useConfirm();
   const [fundraiser, setFundraiser] = useState<Fundraiser | null>(null);
   const [loading, setLoading] = useState(true);
   const [donating, setDonating] = useState(false);
+  const [agentDonating, setAgentDonating] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [showWarning, setShowWarning] = useState(false);
   const [reporting, setReporting] = useState(false);
@@ -406,6 +408,86 @@ function FundraiserDetail({ params }: { params: Promise<{ id: string }> }) {
     }
   };
 
+  const handleAgentDonate = async () => {
+    if (!publicKey || !fundraiser || !signTransaction) return;
+
+    if (!isConnected || !hasAcceptedTOS) {
+      toast.warning('Please connect your wallet and accept TOS first');
+      return;
+    }
+
+    const donationAmount = parseFloat(customDonationAmount);
+    if (isNaN(donationAmount) || donationAmount < 0.10) {
+      setError('Please enter a valid donation amount (minimum $0.10 USDC)');
+      return;
+    }
+
+    const confirmed = await confirm({
+      title: 'Donate via Agent Token',
+      message: `Support "${fundraiser.title}" with $${donationAmount.toFixed(2)} USDC via the OpenFund agent token? A portion of this payment supports automatic token buybacks.`,
+      confirmLabel: 'Donate with Agent',
+      variant: 'info',
+    });
+
+    if (!confirmed) return;
+
+    try {
+      setAgentDonating(true);
+      setError(null);
+
+      // Step 1: Build the transaction on the server
+      const buildRes = await axios.post('/api/agent-payment?action=build', {
+        fundraiserId: fundraiser._id,
+        userWallet: publicKey.toBase58(),
+        donationAmount,
+      });
+
+      const { transaction: txBase64, invoiceParams } = buildRes.data;
+
+      // Step 2: Deserialize, sign, and send
+      const tx = Transaction.from(Buffer.from(txBase64, 'base64'));
+      const signedTx = await signTransaction(tx);
+
+      const signature = await connection.sendRawTransaction(signedTx.serialize(), {
+        skipPreflight: false,
+        preflightCommitment: 'confirmed',
+      });
+
+      const latestBlockhash = await connection.getLatestBlockhash('confirmed');
+      await connection.confirmTransaction(
+        { signature, ...latestBlockhash },
+        'confirmed',
+      );
+
+      // Step 3: Verify on the server
+      const verifyRes = await axios.post('/api/agent-payment?action=verify', {
+        fundraiserId: fundraiser._id,
+        userWallet: publicKey.toBase58(),
+        donationAmount,
+        invoiceParams,
+        txSignature: signature,
+      });
+
+      if (verifyRes.data.success && verifyRes.data.transactionId) {
+        await fetchTransactions();
+        await fetchFundraiser();
+        router.push(`/delivery/${verifyRes.data.transactionId}`);
+      } else {
+        throw new Error('Donation succeeded but no transaction record received');
+      }
+    } catch (err: any) {
+      if (err.code === 4001 || err.name === 'WalletSignTransactionError' || err.message?.includes('rejected')) {
+        setError('Transaction cancelled');
+        return;
+      }
+      const errorMsg = err.response?.data?.error || err.message || 'Agent donation failed';
+      setError(errorMsg);
+      toast.error(errorMsg);
+    } finally {
+      setAgentDonating(false);
+    }
+  };
+
   const handleReport = async () => {
     if (!isConnected || !publicKey || !fundraiser) {
       toast.warning('Please connect your wallet to report');
@@ -687,6 +769,16 @@ function FundraiserDetail({ params }: { params: Promise<{ id: string }> }) {
                 >
                   {donating ? 'Processing...' : hasDonated ? '💝 Donate Again' : '💝 Support This Cause'}
                 </button>
+
+                {process.env.NEXT_PUBLIC_AGENT_TOKEN_MINT && (
+                  <button
+                    onClick={handleAgentDonate}
+                    disabled={agentDonating || donating || !isConnected || !hasAcceptedTOS || !customDonationAmount}
+                    className="w-full rounded-lg border border-[#FBBF24]/40 bg-[#FBBF24]/10 px-6 py-3 text-sm font-medium text-[#FBBF24] hover:bg-[#FBBF24]/20 disabled:cursor-not-allowed disabled:opacity-50 transition-colors mb-3"
+                  >
+                    {agentDonating ? 'Processing...' : 'Donate via Agent Token'}
+                  </button>
+                )}
 
                 {!isConnected && (
                   <p className="text-xs text-center text-white/40">

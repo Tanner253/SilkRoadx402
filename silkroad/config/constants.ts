@@ -43,6 +43,11 @@ export const CONFIG = {
   X402_FACILITATOR_URL_DEVNET: process.env.X402_FACILITATOR_URL_DEVNET || '',
   X402_FACILITATOR_URL_MAINNET: process.env.X402_FACILITATOR_URL_MAINNET || '',
   
+  // Pump.fun Tokenized Agent
+  AGENT_TOKEN_MINT: process.env.NEXT_PUBLIC_AGENT_TOKEN_MINT || '',
+  AGENT_CURRENCY_MINT: process.env.NEXT_PUBLIC_AGENT_CURRENCY_MINT || 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v',
+  SOLANA_RPC_URL: process.env.SOLANA_RPC_URL || process.env.NEXT_PUBLIC_SOLANA_MAINNET_RPC || 'https://rpc.solanatracker.io/public',
+  
   // General
   NODE_ENV: process.env.NODE_ENV || 'development',
   NEXT_PUBLIC_APP_URL: process.env.NEXT_PUBLIC_APP_URL || 'https://solkroad.fun',
