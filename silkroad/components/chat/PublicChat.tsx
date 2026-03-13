@@ -241,7 +241,7 @@ export function PublicChat() {
   return (
     <div className="fixed bottom-16 sm:bottom-20 right-3 sm:right-6 left-3 sm:left-auto z-50 sm:w-96 rounded-lg border-4 border-green-900 bg-zinc-900 shadow-2xl" style={{ fontFamily: 'monospace' }}>
       {/* Header */}
-      <div className="flex items-center justify-between bg-gradient-to-r from-green-700 to-emerald-800 px-4 py-2 border-b-2 border-green-950">
+      <div className="flex items-center justify-between bg-green-800 px-4 py-2 border-b-2 border-green-950">
         <div className="flex items-center space-x-2">
           <span className="text-lg">🏪</span>
           <span className="font-bold text-green-100 text-sm">Runescape Market</span>

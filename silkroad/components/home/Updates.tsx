@@ -201,7 +201,7 @@ export function Updates() {
             className="border-l-4 border-[#9945FF] pl-6 pb-6 last:pb-0"
           >
             <div className="mb-2 flex items-center space-x-3">
-              <span className="rounded-full bg-gradient-to-r from-[#9945FF] to-[#14F195] px-3 py-1 text-xs font-bold text-black">
+              <span className="rounded-full bg-[#F97316] px-3 py-1 text-xs font-bold text-black">
                 {update.version}
               </span>
               <span className="text-sm text-white/40">

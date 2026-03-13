@@ -1,9 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { CONFIG } from '@/config/constants';
-import { mockStore } from '@/lib/mockStore';
 import { connectDB } from '@/lib/db';
 import { Transaction } from '@/models/Transaction';
-import { Listing } from '@/models/Listing';
+import { Fundraiser } from '@/models/Fundraiser';
 
 export async function GET(req: NextRequest) {
   try {
@@ -14,53 +13,8 @@ export async function GET(req: NextRequest) {
     // MOCK MODE
     // ============================================
     if (CONFIG.MOCK_MODE) {
-      const transactions = mockStore.getAllTransactions();
-      const listings = mockStore.getAllListings();
-
-      // Group transactions by seller
-      const sellerStats = new Map<string, {
-        wallet: string;
-        totalRevenue: number;
-        salesCount: number;
-        activeListings: number;
-      }>();
-
-      // Calculate revenue per seller
-      transactions
-        .filter(t => t.status === 'success')
-        .forEach(txn => {
-          const stats = sellerStats.get(txn.sellerWallet) || {
-            wallet: txn.sellerWallet,
-            totalRevenue: 0,
-            salesCount: 0,
-            activeListings: 0,
-          };
-
-          stats.totalRevenue += txn.amount;
-          stats.salesCount += 1;
-          sellerStats.set(txn.sellerWallet, stats);
-        });
-
-      // Count active listings per seller
-      listings
-        .filter(l => l.state === 'on_market' && l.approved)
-        .forEach(listing => {
-          const stats = sellerStats.get(listing.wallet);
-          if (stats) {
-            stats.activeListings += 1;
-          }
-        });
-
-      // Convert to array and sort by revenue
-      const leaderboard = Array.from(sellerStats.values())
-        .sort((a, b) => b.totalRevenue - a.totalRevenue)
-        .slice(0, limit);
-
-      return NextResponse.json({
-        success: true,
-        leaderboard,
-        _mock: true,
-      });
+      // Mock data only contains old marketplace transactions — return empty leaderboard
+      return NextResponse.json({ success: true, leaderboard: [], _mock: true });
     }
 
     // ============================================
@@ -68,54 +22,45 @@ export async function GET(req: NextRequest) {
     // ============================================
     await connectDB();
 
-    // Aggregate transactions by seller wallet
-    const sellerRevenue = await Transaction.aggregate([
-      {
-        $match: { status: 'success' }
-      },
+    // Get all fundraiser IDs so we can filter to donations only (not old marketplace purchases)
+    // Transaction.listingId is stored as a plain string, Fundraiser._id is ObjectId — convert
+    const fundraiserDocs = await Fundraiser.find({}, { _id: 1 }).lean();
+    const fundraiserIds = fundraiserDocs.map((f: any) => f._id.toString());
+
+    // Aggregate only transactions whose listingId belongs to a fundraiser
+    const creatorRevenue = await Transaction.aggregate([
+      { $match: { status: 'success', listingId: { $in: fundraiserIds } } },
       {
         $group: {
           _id: '$sellerWallet',
-          totalRevenue: { $sum: '$amount' },
-          salesCount: { $sum: 1 }
-        }
+          totalRaised: { $sum: '$amount' },
+          donationCount: { $sum: 1 },
+        },
       },
-      {
-        $sort: { totalRevenue: -1 }
-      },
-      {
-        $limit: limit
-      }
+      { $sort: { totalRaised: -1 } },
+      { $limit: limit },
     ]);
 
-    // Enrich with active listings count
+    // Enrich with active campaign count from Fundraiser model
     const leaderboard = await Promise.all(
-      sellerRevenue.map(async (seller) => {
-        const activeListings = await Listing.countDocuments({
-          wallet: seller._id,
+      creatorRevenue.map(async (creator) => {
+        const activeCampaigns = await Fundraiser.countDocuments({
+          wallet: creator._id,
           state: 'on_market',
-          approved: true
+          approved: true,
         });
-
         return {
-          wallet: seller._id,
-          totalRevenue: seller.totalRevenue,
-          salesCount: seller.salesCount,
-          activeListings,
+          wallet: creator._id,
+          totalRaised: creator.totalRaised,
+          donationCount: creator.donationCount,
+          activeCampaigns,
         };
       })
     );
 
-    return NextResponse.json({
-      success: true,
-      leaderboard,
-    });
+    return NextResponse.json({ success: true, leaderboard });
   } catch (error: any) {
     console.error('Leaderboard error:', error);
-    return NextResponse.json(
-      { error: 'Failed to fetch leaderboard' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to fetch leaderboard' }, { status: 500 });
   }
 }
-

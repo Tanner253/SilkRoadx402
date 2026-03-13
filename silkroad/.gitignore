@@ -42,3 +42,5 @@ next-env.d.ts
 
 # mock data persistence (for testing)
 .mock-data/
+
+.vercel

@@ -16,6 +16,10 @@ const config: Config = {
   				purple: '#9945FF',
   				green: '#14F195',
   			},
+  			fund: {
+  				orange: '#F97316',
+  				amber: '#FBBF24',
+  			},
   			card: {
   				DEFAULT: 'hsl(var(--card))',
   				foreground: 'hsl(var(--card-foreground))'

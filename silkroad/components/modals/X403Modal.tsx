@@ -25,7 +25,7 @@ export function X403Modal({ isOpen, onSign, onCancel, isLoading, error, challeng
         {/* Header */}
         <div className="border-b border-purple-900/30 bg-purple-950/20 p-4 md:p-6 shrink-0">
           <div className="flex items-center gap-3 mb-2">
-            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-[#9945FF] to-[#14F195]">
+            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[#F97316]">
               <svg className="h-5 w-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
               </svg>
@@ -134,7 +134,7 @@ export function X403Modal({ isOpen, onSign, onCancel, isLoading, error, challeng
           <button
             onClick={onSign}
             disabled={isLoading}
-            className="flex-1 px-6 py-3 bg-gradient-to-r from-[#9945FF] to-[#14F195] hover:opacity-90 text-white rounded-xl font-bold transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-lg shadow-purple-900/30"
+            className="flex-1 px-6 py-3 bg-[#F97316] hover:bg-[#ea6c0e] text-black rounded-xl font-bold transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-lg shadow-orange-900/30"
           >
             {isLoading ? (
               <>

@@ -75,6 +75,25 @@ export async function GET(
   }
 }
 
+// PATCH - Only allows deactivate (state: pulled) or reactivate (state: in_review, approved: false).
+// Cannot set approved: true or state: on_market; admin approval is required for that.
+const PATCH_ALLOWED: Record<string, (v: unknown) => boolean> = {
+  state: (v) => v === 'pulled' || v === 'in_review',
+  approved: (v) => v === false,
+};
+
+function buildSafeListingUpdates(body: Record<string, unknown>): Record<string, unknown> | null {
+  const updates: Record<string, unknown> = {};
+  for (const [key, validator] of Object.entries(PATCH_ALLOWED)) {
+    if (!(key in body)) continue;
+    const value = body[key];
+    if (!validator(value)) return null;
+    updates[key] = value;
+  }
+  if (Object.keys(updates).length === 0) return null;
+  return updates;
+}
+
 // PATCH - Update listing
 export async function PATCH(
   req: NextRequest,
@@ -82,22 +101,26 @@ export async function PATCH(
 ) {
   try {
     const { id } = await params;
-    const updates = await req.json();
+    const body = (await req.json()) as Record<string, unknown>;
 
     // ============================================
     // MOCK MODE
     // ============================================
     if (CONFIG.MOCK_MODE) {
-      console.log(`🧪 MOCK: Updating listing ${id}`);
-      
-      const listing = mockStore.updateListing(id, updates);
+      const allowed = buildSafeListingUpdates(body);
+      if (!allowed) {
+        return NextResponse.json(
+          { error: 'PATCH only allows deactivate (state: "pulled") or reactivate (state: "in_review", approved: false)' },
+          { status: 400 }
+        );
+      }
+      const listing = mockStore.updateListing(id, allowed);
       if (!listing) {
         return NextResponse.json(
           { error: 'Listing not found' },
           { status: 404 }
         );
       }
-
       return NextResponse.json({
         success: true,
         listing,
@@ -108,22 +131,42 @@ export async function PATCH(
     // ============================================
     // REAL MODE
     // ============================================
+    const updates = buildSafeListingUpdates(body);
+    if (!updates) {
+      return NextResponse.json(
+        { error: 'PATCH only allows deactivate (state: "pulled") or reactivate (state: "in_review", approved: false). Cannot set listing live.' },
+        { status: 400 }
+      );
+    }
+
     await connectDB();
 
-    // Try to update in Listing collection first
-    let listing = await Listing.findByIdAndUpdate(
-      id,
-      { ...updates, updatedAt: new Date() },
-      { new: true }
-    );
-
-    // If not found, try Fundraiser collection
+    let listing = await Listing.findById(id);
+    let isFundraiser = false;
     if (!listing) {
-      listing = await Fundraiser.findByIdAndUpdate(
-        id,
-        { ...updates, updatedAt: new Date() },
-        { new: true }
+      listing = await Fundraiser.findById(id);
+      isFundraiser = true;
+    }
+    if (!listing) {
+      return NextResponse.json(
+        { error: 'Listing not found' },
+        { status: 404 }
       );
+    }
+
+    const wallet = body.wallet as string | undefined;
+    if (wallet && listing.wallet !== wallet) {
+      return NextResponse.json(
+        { error: 'You are not authorized to update this listing' },
+        { status: 403 }
+      );
+    }
+
+    const updatePayload = { ...updates, updatedAt: new Date() };
+    if (isFundraiser) {
+      listing = await Fundraiser.findByIdAndUpdate(id, updatePayload, { new: true });
+    } else {
+      listing = await Listing.findByIdAndUpdate(id, updatePayload, { new: true });
     }
 
     if (!listing) {

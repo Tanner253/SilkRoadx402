@@ -344,7 +344,7 @@ function FundraisersPageContent() {
                 {isTokenGated && (
                   <Link
                     href="/fundraisers/new"
-                    className="inline-flex items-center gap-2 rounded-lg bg-gradient-to-r from-[#9945FF] to-[#14F195] px-6 py-3 text-sm font-medium text-black hover:opacity-90 transition-opacity"
+                    className="inline-flex items-center gap-2 rounded-lg bg-[#F97316] px-6 py-3 text-sm font-medium text-black hover:bg-[#ea6c0e] transition-colors"
                   >
                     <span>💝</span>
                     Be the first to create a fundraiser here!
@@ -399,7 +399,7 @@ function FundraisersPageContent() {
                         </div>
                         <div className="h-2 w-full rounded-full bg-white/10 overflow-hidden">
                           <div
-                            className="h-full bg-gradient-to-r from-[#9945FF] to-[#14F195] transition-all duration-500"
+                            className="h-full bg-[#F97316] transition-all duration-500"
                             style={{ width: `${getFundedPct(fundraiser)}%` }}
                           />
                         </div>
@@ -411,7 +411,7 @@ function FundraisersPageContent() {
                       <div className="flex items-center justify-end">
                         <Link
                           href={`/fundraisers/${fundraiser._id}`}
-                          className="rounded-lg bg-gradient-to-r from-[#9945FF] to-[#14F195] px-6 py-2 text-sm font-medium text-black hover:opacity-90 transition-opacity"
+                          className="rounded-lg bg-[#F97316] px-6 py-2 text-sm font-medium text-black hover:bg-[#ea6c0e] transition-colors"
                         >
                           💝 Donate Now
                         </Link>
@@ -445,7 +445,7 @@ function FundraisersPageContent() {
                   >
                     <div className="relative flex items-center gap-3 rounded-lg border border-purple-900/30 bg-white/5 px-4 py-2 transition-all hover:border-[#9945FF]/60 hover:bg-purple-950/20 overflow-hidden">
                       {/* Bottom progress bar indicator */}
-                      <div className="absolute bottom-0 left-0 h-0.5 bg-gradient-to-r from-[#9945FF] to-[#14F195] transition-all duration-500"
+                      <div className="absolute bottom-0 left-0 h-0.5 bg-[#F97316] transition-all duration-500"
                         style={{ width: `${getFundedPct(fundraiser)}%` }}
                       />
 

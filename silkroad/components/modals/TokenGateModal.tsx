@@ -103,7 +103,7 @@ export function TokenGateModal({ isOpen, currentBalance = 0, requiredBalance }: 
         <div className="space-y-3">
           <button
             onClick={handleBuyTokens}
-            className="w-full rounded-lg bg-gradient-to-r from-[#9945FF] to-[#14F195] px-4 py-3 text-sm font-semibold text-white hover:opacity-90 transition-opacity shadow-lg"
+            className="w-full rounded-lg bg-[#F97316] px-4 py-3 text-sm font-semibold text-black hover:bg-[#ea6c0e] transition-colors shadow-lg"
           >
             📈 View chart / Buy $SR
           </button>

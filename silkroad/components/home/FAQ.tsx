@@ -1,9 +1,3 @@
-/**
- * FAQ Component
- *
- * Frequently asked questions to help new users
- */
-
 'use client';
 
 import { useState } from 'react';
@@ -13,54 +7,42 @@ export function FAQ() {
 
   const faqs = [
     {
-      question: 'Do I need a USDC account to use SOLk Road?',
+      question: 'What is OpenFund?',
+      answer: (
+        <p>
+          OpenFund is a pseudonymous, no-KYC crowdfunding platform built on Solana. Anyone with a
+          Solana wallet can create a fundraiser or donate to a campaign — no identity verification,
+          no bank accounts, no gatekeepers. Payments are made directly in USDC on-chain.
+        </p>
+      ),
+    },
+    {
+      question: 'Do I need to sign up or verify my identity?',
       answer: (
         <>
           <p className="mb-3">
-            <strong>Yes</strong> - You need a Solana wallet with a USDC token account to:
+            <strong>No</strong> — there is zero sign-up. Your Solana wallet is your account.
           </p>
-          <ul className="list-disc list-inside space-y-2 mb-3">
-            <li><strong>Buyers:</strong> Already set up automatically when you receive USDC</li>
-            <li><strong>Sellers:</strong> Must have an initialized USDC account before creating listings</li>
+          <ul className="list-disc list-inside space-y-1">
+            <li>No email required</li>
+            <li>No ID or KYC verification</li>
+            <li>No personal information stored</li>
+            <li>Connect your wallet → accept Terms → you&apos;re in</li>
           </ul>
-          <p className="mb-3">
-            <strong>How to get a USDC account:</strong>
-          </p>
-          <ol className="list-decimal list-inside space-y-2">
-            <li>Use Phantom Wallet (USDC accounts created automatically)</li>
-            <li>Or send yourself a tiny amount of USDC from an exchange (initializes account)</li>
-            <li>Or use{' '}
-              <a
-                href="https://www.sollet.io/"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-[#9945FF] hover:text-[#9945FF]/80 transition-colors"
-              >
-                Sollet.io
-              </a>
-              {' '}to manually create token accounts
-            </li>
-          </ol>
         </>
       ),
     },
     {
-      question: 'What is the $SR token and why is it required?',
+      question: 'What wallet do I need?',
       answer: (
         <>
-          <p className="mb-3">
-            $SR is our platform token used for <strong>token gating</strong>. You need to hold <strong>50,000+ $SR</strong> in your wallet to access the marketplace.
-          </p>
-          <p className="mb-3">
-            <strong>Why token gating?</strong>
-          </p>
+          <p className="mb-3">Any Solana-compatible wallet works. We recommend:</p>
           <ul className="list-disc list-inside space-y-2">
-            <li>Reduces spam and malicious activity</li>
-            <li>Creates a trusted community of stakeholders</li>
-            <li>Holders have "skin in the game"</li>
+            <li><strong>Phantom</strong> — most popular, sets up USDC automatically</li>
+            <li><strong>Solflare</strong> — full SPL token support</li>
           </ul>
-          <p className="text-sm text-white/50 mt-3">
-            Note: Transactions are paid in USDC, not $SR. The token is only for access.
+          <p className="mt-3 text-sm text-white/50">
+            You&apos;ll also need a small amount of SOL for transaction fees (~$0.00025 per tx).
           </p>
         </>
       ),
@@ -70,17 +52,46 @@ export function FAQ() {
       answer: (
         <>
           <p className="mb-3">
-            We use the <strong>x402 micropayment protocol</strong> for peer-to-peer payments:
+            All donations are made in <strong>USDC on Solana</strong> and go <strong>directly</strong> to
+            the fundraiser creator&apos;s wallet — no escrow, no platform intermediary.
           </p>
           <ul className="list-disc list-inside space-y-2">
-            <li>Payments go <strong>directly</strong> from buyer to seller (no escrow)</li>
-            <li>Instant delivery after payment confirmation</li>
-            <li>All transactions are in USDC on Solana</li>
-            <li>Transaction fees are ~$0.00025 per tx</li>
+            <li>Instant settlement (~400ms on Solana)</li>
+            <li>Network fees are less than $0.001</li>
+            <li>OpenFund takes <strong>0% of every donation</strong></li>
           </ul>
           <p className="mt-3 text-sm text-yellow-400 bg-yellow-950/20 border border-yellow-800/40 p-3 rounded">
-            ⚠️ <strong>Important:</strong> No refunds or chargebacks. Do your research before purchasing!
+            ⚠️ <strong>Donations are non-refundable.</strong> Do your research before donating to any campaign.
           </p>
+        </>
+      ),
+    },
+    {
+      question: 'How do I start a fundraiser?',
+      answer: (
+        <ol className="list-decimal list-inside space-y-2">
+          <li>Connect your Solana wallet and accept the Terms of Service</li>
+          <li>Click <strong>&quot;Start a Fund&quot;</strong> in the navigation</li>
+          <li>Fill in your campaign title, description, goal amount, and category</li>
+          <li>Upload a campaign image</li>
+          <li>Submit for admin review — approved campaigns go live on the platform</li>
+        </ol>
+      ),
+    },
+    {
+      question: 'Who can see my fundraiser?',
+      answer: (
+        <>
+          <p className="mb-3">
+            All approved fundraisers are publicly visible on the <strong>Campaigns</strong> page.
+            Your campaign will show:
+          </p>
+          <ul className="list-disc list-inside space-y-1">
+            <li>Campaign title, description, and image</li>
+            <li>Progress toward your goal</li>
+            <li>Anonymized donor list (truncated wallet addresses)</li>
+            <li>Your wallet address as the creator</li>
+          </ul>
         </>
       ),
     },
@@ -88,116 +99,66 @@ export function FAQ() {
       question: 'Is this safe? How do I protect myself?',
       answer: (
         <>
-          <p className="mb-3">
-            <strong>Security Tips:</strong>
-          </p>
+          <p className="mb-3"><strong>Tips for donors:</strong></p>
           <ul className="list-disc list-inside space-y-2 mb-3">
-            <li><strong>✓ Check vendor wallets:</strong> Search for vendors by their wallet address</li>
-            <li><strong>✓ Read reviews:</strong> Only verified buyers can leave reviews</li>
-            <li><strong>✓ Start small:</strong> Test with low-cost items first</li>
-            <li><strong>✓ Report suspicious listings:</strong> Use the flag 🚩 button</li>
-            <li><strong>✗ Never share wallet keys</strong></li>
+            <li>Research the campaign creator&apos;s wallet history on Solscan</li>
+            <li>Start with a small donation to test</li>
+            <li>Use the 🚩 report button for suspicious campaigns</li>
+            <li>Never share your wallet seed phrase with anyone</li>
           </ul>
-          <p className="text-sm text-red-400 bg-red-950/20 border border-red-900/50 p-3 rounded">
-            ⚠️ This is an <strong>anonymous marketplace</strong>. Exercise extreme caution and only transact with trusted vendors.
+          <p className="text-sm text-orange-400 bg-orange-950/20 border border-orange-900/50 p-3 rounded">
+            ⚠️ OpenFund is a permissionless platform. We review campaigns but cannot guarantee outcomes.
+            Only donate what you can afford to lose.
           </p>
         </>
       ),
     },
     {
-      question: 'How do I create a listing?',
+      question: 'How do I report a suspicious campaign?',
       answer: (
-        <>
-          <ol className="list-decimal list-inside space-y-2">
-            <li><strong>Connect your wallet</strong> and hold 50k+ $SR</li>
-            <li><strong>Ensure you have a USDC account</strong> to receive payments</li>
-            <li>Go to "New Listing" and fill out the form</li>
-            <li>Upload product image (max 5MB)</li>
-            <li>Set price in USDC and add delivery URL (private)</li>
-            <li>Optionally add demo video, whitepaper, GitHub (public)</li>
-            <li>Submit for admin review (approval required)</li>
-          </ol>
-          <p className="mt-3 text-sm text-white/50">
-            <strong>Limits:</strong> Max 3 active listings per wallet. Listings auto-pulled after 3 failed purchases.
-          </p>
-        </>
+        <ol className="list-decimal list-inside space-y-2">
+          <li>Open the campaign detail page</li>
+          <li>Click the flag icon 🚩 in the top-right corner</li>
+          <li>Optionally add a reason</li>
+          <li>Submit — our admins will review it</li>
+        </ol>
       ),
     },
     {
-      question: 'What happens after I purchase?',
+      question: 'What happens if a campaign doesn\'t reach its goal?',
       answer: (
-        <>
-          <ol className="list-decimal list-inside space-y-2">
-            <li>Your wallet is charged in USDC</li>
-            <li>Payment goes directly to the seller</li>
-            <li><strong>Delivery URL is shown immediately</strong> (save it!)</li>
-            <li>URL is also emailed to you (if email provided)</li>
-            <li>Transaction is recorded on your profile</li>
-            <li>You can leave a review after purchase</li>
-          </ol>
-          <p className="mt-3 text-sm text-yellow-400 bg-yellow-950/20 border border-yellow-800/40 p-3 rounded">
-            ⚠️ <strong>Save the delivery URL immediately!</strong> We don't store unencrypted URLs for your privacy.
-          </p>
-        </>
-      ),
-    },
-    {
-      question: 'What wallets are supported?',
-      answer: (
-        <>
-          <p className="mb-3">Currently supported Solana wallets:</p>
-          <ul className="list-disc list-inside space-y-2">
-            <li><strong>Phantom</strong> - Recommended (USDC auto-setup)</li>
-            <li><strong>Solflare</strong> - Full USDC support</li>
-          </ul>
-          <p className="mt-3 text-sm text-white/50">
-            More wallets coming soon! Make sure your wallet supports Solana SPL tokens.
-          </p>
-        </>
-      ),
-    },
-    {
-      question: 'How do I report a bad listing?',
-      answer: (
-        <>
-          <ol className="list-decimal list-inside space-y-2 mb-3">
-            <li>Go to the listing detail page</li>
-            <li>Click the grey flag icon 🚩 in the top-right</li>
-            <li>Optionally add a reason (max 100 characters)</li>
-            <li>Submit the report</li>
-          </ol>
-          <p className="text-sm text-white/50">
-            Reports are reviewed by admins. Listings with multiple reports may be automatically pulled.
-          </p>
-        </>
+        <p>
+          OpenFund uses a <strong>keep-what-you-raise</strong> model. All donations go directly to
+          the creator&apos;s wallet instantly — there is no holding period or goal-based release.
+          If a campaign doesn&apos;t reach its goal, the creator still keeps everything donated so far.
+          This is by design: it means donors&apos; funds are never locked.
+        </p>
       ),
     },
   ];
 
   return (
-    <div className="rounded-lg border border-purple-900/30 bg-white/5 backdrop-blur-sm p-8">
-      <h2 className="mb-6 text-3xl font-bold text-white">
+    <div className="rounded-xl border border-orange-900/30 bg-white/3 backdrop-blur-sm p-8">
+      <h2 className="mb-8 text-3xl font-bold text-white">
         ❓ Frequently Asked Questions
       </h2>
       <div className="space-y-3">
         {faqs.map((faq, index) => (
           <div
             key={index}
-            className="rounded-lg border border-purple-900/30 overflow-hidden"
+            className="rounded-lg border border-orange-900/30 overflow-hidden"
           >
             <button
               onClick={() => setOpenIndex(openIndex === index ? null : index)}
               className="w-full flex items-center justify-between p-4 text-left hover:bg-white/5 transition-colors"
             >
-              <span className="font-semibold text-white">
-                {faq.question}
-              </span>
-              <span className="text-2xl text-white/40">
+              <span className="font-semibold text-white pr-4">{faq.question}</span>
+              <span className="text-2xl text-white/40 flex-shrink-0">
                 {openIndex === index ? '−' : '+'}
               </span>
             </button>
             {openIndex === index && (
-              <div className="p-4 pt-0 text-sm text-white/70">
+              <div className="px-4 pb-4 text-sm text-white/70 leading-relaxed">
                 {faq.answer}
               </div>
             )}

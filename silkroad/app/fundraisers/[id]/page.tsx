@@ -47,7 +47,7 @@ function FundraiserDetail({ params }: { params: Promise<{ id: string }> }) {
   // Unwrap params Promise
   const { id } = use(params);
 
-  const { isConnected, hasAcceptedTOS, isTokenGated, mounted } = useAuth();
+  const { isConnected, hasAcceptedTOS, mounted } = useAuth();
   const { publicKey, signTransaction } = useWallet();
   const router = useRouter();
   const toast = useToast();
@@ -177,11 +177,6 @@ function FundraiserDetail({ params }: { params: Promise<{ id: string }> }) {
     if (!isConnected || !hasAcceptedTOS) {
       toast.warning('Please connect your wallet and accept TOS first');
       router.push('/');
-      return;
-    }
-
-    if (!isTokenGated) {
-      toast.warning('You need ≥50k $SR tokens to make donations');
       return;
     }
 
@@ -521,7 +516,7 @@ function FundraiserDetail({ params }: { params: Promise<{ id: string }> }) {
           </h1>
           <Link
             href={backUrl}
-            className="inline-flex items-center justify-center rounded-lg bg-gradient-to-r from-[#9945FF] to-[#14F195] px-6 py-3 text-sm font-medium text-black hover:opacity-90 transition-opacity"
+            className="inline-flex items-center justify-center rounded-lg bg-[#F97316] px-6 py-3 text-sm font-medium text-black hover:bg-[#ea6c0e] transition-colors"
           >
             {backUrl === '/listings/my' ? 'Back to My Listings' : 'Back to Fundraisers'}
           </Link>
@@ -587,7 +582,7 @@ function FundraiserDetail({ params }: { params: Promise<{ id: string }> }) {
               </div>
             )}
             {/* Fundraiser Badge */}
-            <div className="absolute top-4 left-4 rounded-full bg-gradient-to-r from-[#9945FF] to-[#14F195] px-4 py-2 text-sm font-medium text-black shadow-lg flex items-center gap-2">
+            <div className="absolute top-4 left-4 rounded-full bg-[#F97316] px-4 py-2 text-sm font-medium text-black shadow-lg flex items-center gap-2">
               💝 Fundraiser
             </div>
           </div>
@@ -642,7 +637,7 @@ function FundraiserDetail({ params }: { params: Promise<{ id: string }> }) {
                 </div>
                 <div className="w-full bg-white/10 rounded-full h-3 overflow-hidden">
                   <div
-                    className="bg-gradient-to-r from-[#9945FF] to-[#14F195] h-3 rounded-full transition-all duration-500"
+                    className="bg-[#F97316] h-3 rounded-full transition-all duration-500"
                     style={{ width: `${Math.min((totalRaised / (fundraiser.goalAmount || fundraiser.price)) * 100, 100)}%` }}
                   />
                 </div>
@@ -687,8 +682,8 @@ function FundraiserDetail({ params }: { params: Promise<{ id: string }> }) {
 
                 <button
                   onClick={handleDonate}
-                  disabled={donating || !isConnected || !hasAcceptedTOS || !isTokenGated || !customDonationAmount}
-                  className="w-full rounded-lg bg-gradient-to-r from-[#9945FF] to-[#14F195] px-6 py-3 text-sm font-medium text-black hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50 transition-opacity mb-3"
+                  disabled={donating || !isConnected || !hasAcceptedTOS || !customDonationAmount}
+                  className="w-full rounded-lg bg-[#F97316] px-6 py-3 text-sm font-medium text-black hover:bg-[#ea6c0e] disabled:cursor-not-allowed disabled:opacity-50 transition-colors mb-3"
                 >
                   {donating ? 'Processing...' : hasDonated ? '💝 Donate Again' : '💝 Support This Cause'}
                 </button>
@@ -705,12 +700,6 @@ function FundraiserDetail({ params }: { params: Promise<{ id: string }> }) {
                 )}
               </>
             )}
-            {isConnected && hasAcceptedTOS && !isTokenGated && publicKey && fundraiser.wallet !== publicKey.toBase58() && (
-              <p className="text-xs text-center text-red-400">
-                Hold 50,000+ $SR tokens to donate
-              </p>
-            )}
-
             {/* Error */}
             {error && (
               <div className="mt-3 rounded-lg border border-red-900/50 bg-red-950/20 p-3">
@@ -955,7 +944,7 @@ function FundraiserDetail({ params }: { params: Promise<{ id: string }> }) {
                   >
                     <div className="flex items-center justify-between mb-2">
                       <div className="flex items-center gap-2">
-                        <div className="h-8 w-8 rounded-full bg-gradient-to-r from-[#9945FF] to-[#14F195] flex items-center justify-center text-black text-xs font-bold">
+                        <div className="h-8 w-8 rounded-full bg-[#F97316] flex items-center justify-center text-black text-xs font-bold">
                           {wallet.slice(0, 2).toUpperCase()}
                         </div>
                         <div>
@@ -998,7 +987,7 @@ function FundraiserDetail({ params }: { params: Promise<{ id: string }> }) {
                 <button
                   type="submit"
                   disabled={submittingComment || !newComment.trim()}
-                  className="rounded-lg bg-gradient-to-r from-[#9945FF] to-[#14F195] px-6 py-2 text-sm font-medium text-black hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50 transition-opacity"
+                  className="rounded-lg bg-[#F97316] px-6 py-2 text-sm font-medium text-black hover:bg-[#ea6c0e] disabled:cursor-not-allowed disabled:opacity-50 transition-colors"
                 >
                   {submittingComment ? 'Submitting...' : 'Post Review'}
                 </button>

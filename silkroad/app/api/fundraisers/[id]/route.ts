@@ -63,6 +63,18 @@ export async function GET(
   }
 }
 
+// PATCH - Only allows deactivate (state: pulled) or reactivate (state: in_review, approved: false).
+// Cannot set approved: true or state: on_market; admin approval is required.
+function buildSafeFundraiserUpdates(body: Record<string, unknown>): Record<string, unknown> | null {
+  const state = body.state;
+  const approved = body.approved;
+  if (state !== 'pulled' && state !== 'in_review') return null;
+  if (state === 'in_review' && approved !== false) return null;
+  const updates: Record<string, unknown> = { state };
+  if (state === 'in_review') updates.approved = false;
+  return updates;
+}
+
 // PATCH - Update fundraiser
 export async function PATCH(
   req: NextRequest,
@@ -70,14 +82,13 @@ export async function PATCH(
 ) {
   try {
     const { id } = await params;
-    const updates = await req.json();
+    const body = (await req.json()) as Record<string, unknown>;
 
     // ============================================
     // MOCK MODE
     // ============================================
     if (CONFIG.MOCK_MODE) {
       console.log(`🧪 MOCK: Updating fundraiser ${id}`);
-      
       return NextResponse.json(
         { error: 'Fundraiser not found' },
         { status: 404 }
@@ -87,6 +98,14 @@ export async function PATCH(
     // ============================================
     // REAL MODE
     // ============================================
+    const updates = buildSafeFundraiserUpdates(body);
+    if (!updates) {
+      return NextResponse.json(
+        { error: 'PATCH only allows deactivate (state: "pulled") or reactivate (state: "in_review", approved: false). Cannot set fundraiser live.' },
+        { status: 400 }
+      );
+    }
+
     await connectDB();
 
     const fundraiser = await Fundraiser.findByIdAndUpdate(

@@ -8,6 +8,8 @@ import { useUSDCBalance } from '@/hooks/useUSDCBalance';
 import { useActiveUsers } from '@/hooks/useActiveUsers';
 import { usePathname } from 'next/navigation';
 
+const X_COMMUNITY_URL = process.env.NEXT_PUBLIC_X_COMMUNITY_URL || null;
+
 export function Navbar() {
   const { publicKey } = useWallet();
   const { balance, loading } = useUSDCBalance();
@@ -16,51 +18,37 @@ export function Navbar() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const pathname = usePathname();
 
-  // Prevent hydration mismatch
+  useEffect(() => { setMounted(true); }, []);
+  useEffect(() => { setMobileMenuOpen(false); }, [pathname]);
   useEffect(() => {
-    setMounted(true);
-  }, []);
-
-  // Close mobile menu on route change
-  useEffect(() => {
-    setMobileMenuOpen(false);
-  }, [pathname]);
-
-  // Prevent body scroll when mobile menu is open
-  useEffect(() => {
-    if (mobileMenuOpen) {
-      document.body.style.overflow = 'hidden';
-    } else {
-      document.body.style.overflow = 'unset';
-    }
-    return () => {
-      document.body.style.overflow = 'unset';
-    };
+    document.body.style.overflow = mobileMenuOpen ? 'hidden' : 'unset';
+    return () => { document.body.style.overflow = 'unset'; };
   }, [mobileMenuOpen]);
-
-  const X_COMMUNITY_URL = 'https://x.com/i/communities/1982622474983637154';
 
   return (
     <>
-      {/* Top banner: X community link */}
-      <a
-        href={X_COMMUNITY_URL}
-        target="_blank"
-        rel="noopener noreferrer"
-        className="fixed top-0 left-0 right-0 z-[60] flex items-center justify-center gap-2 bg-[#0f0f14] border-b border-purple-900/20 py-1.5 text-xs font-medium text-white/70 hover:text-white hover:bg-purple-950/30 transition-colors"
-      >
-        <span>💬</span>
-        <span>Join the community on X</span>
-        <span className="text-white/50">→</span>
-      </a>
+      {/* Top banner — only renders if X community URL is configured */}
+      {X_COMMUNITY_URL && (
+        <a
+          href={X_COMMUNITY_URL}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="fixed top-0 left-0 right-0 z-[60] flex items-center justify-center gap-2 bg-[#0f0d0a] border-b border-orange-900/20 py-1.5 text-xs font-medium text-white/70 hover:text-white hover:bg-orange-950/30 transition-colors"
+        >
+          <span>💬</span>
+          <span>Join the community on X</span>
+          <span className="text-white/50">→</span>
+        </a>
+      )}
 
-      <nav className="fixed top-8 z-50 w-full border-b border-purple-900/30 bg-[#0f0f14]/95 backdrop-blur-md shadow-lg shadow-purple-900/10">
+      <nav className={`fixed ${X_COMMUNITY_URL ? 'top-8' : 'top-0'} z-50 w-full border-b border-orange-900/30 bg-[#0f0d0a]/95 backdrop-blur-md shadow-lg shadow-orange-900/10`}>
         <div className="mx-auto flex h-14 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
-          {/* Mobile Menu Button - Always show */}
+
+          {/* Mobile menu button */}
           {mounted && (
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="md:hidden rounded-lg p-2 text-white hover:bg-purple-900/30 transition-colors"
+              className="md:hidden rounded-lg p-2 text-white hover:bg-orange-900/30 transition-colors"
               aria-label="Toggle menu"
             >
               {mobileMenuOpen ? (
@@ -76,330 +64,144 @@ export function Navbar() {
           )}
 
           {/* Logo */}
-          <Link href="/" className="flex items-center space-x-2 sm:space-x-3">
-            <div className="text-lg sm:text-xl font-bold tracking-tight text-white">
-              <span className="gradient-text">SOL</span><span>k Road</span>
-            </div>
+          <Link href="/" className="flex items-center">
+            <span className="text-lg sm:text-xl font-bold tracking-tight">
+              <span className="gradient-text">Open</span><span className="text-white">Funx402</span>
+            </span>
           </Link>
 
-        {/* Navigation Links */}
-        <div className="hidden md:flex items-center space-x-6">
-          {/* Market, Fundraisers & Leaderboard - Always visible */}
-          <Link
-            href="/browse"
-            className={`text-sm font-medium transition-colors ${
-              pathname === '/browse' ? 'text-[#9945FF]' : 'text-white/80 hover:text-white'
-            }`}
-          >
-            Market
-          </Link>
-          <Link
-            href="/fundraisers"
-            className={`text-sm font-medium transition-colors ${
-              pathname === '/fundraisers' || pathname?.startsWith('/fundraisers/')
-                ? 'text-[#9945FF]'
-                : 'text-white/80 hover:text-white'
-            }`}
-          >
-            Fundraisers
-          </Link>
-          <Link
-            href="/leaderboard"
-            className={`text-sm font-medium transition-colors flex items-center gap-1 ${
-              pathname === '/leaderboard' ? 'text-[#9945FF]' : 'text-white/80 hover:text-white'
-            }`}
-          >
-            <span>🏆</span>
-            Leaderboard
-          </Link>
+          {/* Desktop nav */}
+          <div className="hidden md:flex items-center space-x-6">
+            <Link href="/fundraisers" className={`text-sm font-medium transition-colors ${pathname === '/fundraisers' || pathname?.startsWith('/fundraisers/') ? 'text-[#F97316]' : 'text-white/80 hover:text-white'}`}>
+              Campaigns
+            </Link>
+            <Link href="/leaderboard" className={`text-sm font-medium transition-colors flex items-center gap-1 ${pathname === '/leaderboard' ? 'text-[#F97316]' : 'text-white/80 hover:text-white'}`}>
+              <span>🏆</span> Top Fundraisers
+            </Link>
+            {publicKey && (
+              <>
+                <Link href="/fundraisers/new" className={`text-sm font-medium transition-colors ${pathname === '/fundraisers/new' ? 'text-[#F97316]' : 'text-white/80 hover:text-white'}`}>
+                  Start a Fund
+                </Link>
+                <Link href="/fundraisers/my" className={`text-sm font-medium transition-colors ${pathname === '/fundraisers/my' ? 'text-[#F97316]' : 'text-white/80 hover:text-white'}`}>
+                  My Funds
+                </Link>
+              </>
+            )}
+          </div>
 
-          {/* Sell & My Listings - Only when wallet connected */}
-          {publicKey && (
-            <>
-              <Link
-                href="/sell"
-                className={`text-sm font-medium transition-colors ${
-                  pathname === '/sell' ? 'text-[#9945FF]' : 'text-white/80 hover:text-white'
-                }`}
-              >
-                Sell
-              </Link>
-              <Link
-                href="/my-listings"
-                className={`text-sm font-medium transition-colors ${
-                  pathname === '/my-listings' ? 'text-[#9945FF]' : 'text-white/80 hover:text-white'
-                }`}
-              >
-                My Listings
-              </Link>
-            </>
-          )}
-        </div>
-
-          {/* Right Side: Active Users + USDC Balance + Profile + Wallet Button */}
+          {/* Right side */}
           <div className="flex items-center gap-2 sm:gap-3">
-            {/* Active Users Counter - Hidden on mobile (shown in hamburger menu) */}
+            {/* Active users — pulsing dot style */}
             {mounted && (
-              <div className="hidden md:flex items-center gap-1.5 rounded-lg border border-purple-900/50 bg-purple-950/30 px-2 sm:px-3 py-2">
-                <span className="text-red-400 text-xs sm:text-sm">🔴</span>
-                <span className="text-xs sm:text-sm font-semibold text-white">
-                  {activeUsers}
+              <div className="hidden md:flex items-center gap-1.5 text-sm text-white/60">
+                <span className="relative flex h-2 w-2">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
                 </span>
-                <span className="hidden sm:inline text-xs text-white/70">
-                  online
-                </span>
+                <span className="font-medium text-white/80">{activeUsers}</span>
+                <span className="text-xs">online</span>
               </div>
             )}
 
-            {/* USDC Balance - Hidden on mobile when connected */}
+            {/* USDC balance */}
             {mounted && publicKey && (
-              <div className="hidden sm:flex items-center gap-2 rounded-lg border border-purple-900/50 bg-purple-950/30 px-3 py-2">
-                <svg
-                  className="h-5 w-5 text-blue-400"
-                  viewBox="0 0 40 40"
-                  fill="none"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <circle cx="20" cy="20" r="20" fill="#2775CA"/>
-                  <path d="M24.5 17.5C24.5 15.567 22.933 14 21 14H16V21H21C22.933 21 24.5 19.433 24.5 17.5Z" fill="white"/>
-                  <path d="M21 23H16V26H21C22.933 26 24.5 24.433 24.5 22.5C24.5 21.567 22.933 23 21 23Z" fill="white"/>
-                </svg>
-                <div className="flex flex-col">
-                  <span className="text-xs text-white/70">USDC</span>
-                  {loading ? (
-                    <span className="text-sm font-semibold text-white">
-                      Loading...
-                    </span>
-                  ) : balance !== null ? (
-                    <span className="text-sm font-semibold text-white">
-                      ${balance.toFixed(2)}
-                    </span>
-                  ) : (
-                    <span className="text-sm font-semibold text-white/50">
-                      --
-                    </span>
-                  )}
-                </div>
+              <div className="hidden sm:flex items-center gap-1.5 text-sm">
+                <span className="text-white/50 text-xs">USDC</span>
+                {loading ? (
+                  <span className="text-white/60 text-sm">...</span>
+                ) : balance !== null ? (
+                  <span className="font-semibold text-white">${balance.toFixed(2)}</span>
+                ) : (
+                  <span className="text-white/40">--</span>
+                )}
               </div>
             )}
 
-            {/* Profile Button - Icon only on mobile */}
+            {/* Profile */}
             {mounted && publicKey && (
               <Link
                 href="/profile"
-                className="flex items-center gap-2 rounded-lg border border-purple-900/50 bg-purple-950/30 px-2 sm:px-3 py-2 hover:bg-purple-900/40 transition-colors"
-                title="View Profile & Analytics"
+                className="flex items-center gap-2 rounded-lg border border-orange-900/50 bg-orange-950/30 px-2 sm:px-3 py-2 hover:bg-orange-900/40 transition-colors"
+                title="Profile"
               >
-                <svg className="h-5 w-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <svg className="h-4 w-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                 </svg>
               </Link>
             )}
 
-            {/* Wallet Button - Compact on mobile */}
+            {/* Wallet */}
             {mounted && (
-              <WalletMultiButton className="!bg-gradient-to-r !from-[#9945FF] !to-[#14F195] hover:!opacity-90 !rounded-lg !h-10 !px-3 sm:!px-4 !text-xs sm:!text-sm !font-medium transition-opacity" />
+              <WalletMultiButton className="!bg-[#F97316] hover:!bg-[#ea6c0e] !rounded-lg !h-9 !px-3 sm:!px-4 !text-xs sm:!text-sm !font-semibold !transition-colors !text-black" />
             )}
           </div>
         </div>
       </nav>
 
-      {/* Mobile Menu Overlay */}
+      {/* Mobile overlay */}
       {mounted && mobileMenuOpen && (
         <>
-          {/* Backdrop */}
-          <div
-            className="fixed inset-0 z-40 bg-black/60 backdrop-blur-sm md:hidden"
-            onClick={() => setMobileMenuOpen(false)}
-          />
-
-          {/* Menu Panel */}
-          <div className="fixed top-[5.5rem] left-0 right-0 bottom-0 z-40 bg-[#0f0f14] md:hidden overflow-y-auto">
+          <div className="fixed inset-0 z-40 bg-black/60 backdrop-blur-sm md:hidden" onClick={() => setMobileMenuOpen(false)} />
+          <div className={`fixed ${X_COMMUNITY_URL ? 'top-[5.5rem]' : 'top-[3.5rem]'} left-0 right-0 bottom-0 z-40 bg-[#0f0d0a] md:hidden overflow-y-auto`}>
             <div className="flex flex-col p-6 space-y-6">
-              {/* Active Users on Mobile - Always visible */}
-              <div className="flex items-center gap-3 rounded-lg border border-purple-900/50 bg-purple-950/20 p-4">
-                <span className="text-2xl">🟢</span>
-                <div className="flex flex-col">
-                  <span className="text-sm text-white/60">Active Users</span>
-                  <span className="text-lg font-semibold text-white">
-                    {activeUsers} online
+
+              {/* Active users + balance */}
+              <div className="flex items-center justify-between rounded-lg border border-orange-900/30 bg-orange-950/10 px-4 py-3">
+                <div className="flex items-center gap-2">
+                  <span className="relative flex h-2 w-2">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+                    <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
                   </span>
+                  <span className="text-sm text-white/70">{activeUsers} online</span>
                 </div>
-              </div>
-
-              {/* USDC Balance on Mobile - Only show when wallet connected */}
-              {publicKey && (
-                <div className="flex items-center gap-3 rounded-lg border border-purple-900/50 bg-purple-950/20 p-4">
-                <svg
-                  className="h-6 w-6 text-blue-400"
-                  viewBox="0 0 40 40"
-                  fill="none"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <circle cx="20" cy="20" r="20" fill="#2775CA"/>
-                  <path d="M24.5 17.5C24.5 15.567 22.933 14 21 14H16V21H21C22.933 21 24.5 19.433 24.5 17.5Z" fill="white"/>
-                  <path d="M21 23H16V26H21C22.933 26 24.5 24.433 24.5 22.5C24.5 21.567 22.933 23 21 23Z" fill="white"/>
-                </svg>
-                <div className="flex flex-col">
-                  <span className="text-sm text-white/60">USDC Balance</span>
-                  {loading ? (
-                    <span className="text-lg font-semibold text-white">
-                      Loading...
-                    </span>
-                  ) : balance !== null ? (
-                    <span className="text-lg font-semibold text-white">
-                      ${balance.toFixed(2)}
-                    </span>
-                  ) : (
-                    <span className="text-lg font-semibold text-white/50">
-                      --
-                    </span>
-                  )}
-                </div>
-              </div>
-              )}
-
-              {/* Navigation Links */}
-              <nav className="flex flex-col space-y-2">
-                {/* Market, Fundraisers & Leaderboard - Always visible */}
-                <Link
-                  href="/browse"
-                  className={`flex items-center gap-3 rounded-lg px-4 py-3 text-base font-medium transition-colors ${
-                    pathname === '/browse'
-                      ? 'bg-purple-900/30 text-[#9945FF]'
-                      : 'text-white/80 hover:bg-white/5'
-                  }`}
-                >
-                  <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                  </svg>
-                  Market
-                </Link>
-
-                <Link
-                  href="/fundraisers"
-                  className={`flex items-center gap-3 rounded-lg px-4 py-3 text-base font-medium transition-colors ${
-                    pathname === '/fundraisers' || pathname?.startsWith('/fundraisers/')
-                      ? 'bg-purple-900/30 text-[#9945FF]'
-                      : 'text-white/80 hover:bg-white/5'
-                  }`}
-                >
-                  <span className="text-xl">💝</span>
-                  Fundraisers
-                </Link>
-
-                <Link
-                  href="/leaderboard"
-                  className={`flex items-center gap-3 rounded-lg px-4 py-3 text-base font-medium transition-colors ${
-                    pathname === '/leaderboard'
-                      ? 'bg-purple-900/30 text-[#9945FF]'
-                      : 'text-white/80 hover:bg-white/5'
-                  }`}
-                >
-                  <span className="text-xl">🏆</span>
-                  Leaderboard
-                </Link>
-
-                {/* Sell, My Listings, Profile - Only when wallet connected */}
-                {publicKey && (
-                  <>
-                    <Link
-                      href="/sell"
-                      className={`flex items-center gap-3 rounded-lg px-4 py-3 text-base font-medium transition-colors ${
-                        pathname === '/sell'
-                          ? 'bg-purple-900/30 text-[#9945FF]'
-                          : 'text-white/80 hover:bg-white/5'
-                      }`}
-                    >
-                      <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-                      </svg>
-                      List Product
-                    </Link>
-
-                    <Link
-                      href="/my-listings"
-                      className={`flex items-center gap-3 rounded-lg px-4 py-3 text-base font-medium transition-colors ${
-                        pathname === '/my-listings'
-                          ? 'bg-purple-900/30 text-[#9945FF]'
-                          : 'text-white/80 hover:bg-white/5'
-                      }`}
-                    >
-                      <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-                      </svg>
-                      My Listings
-                    </Link>
-
-                    <Link
-                      href="/profile"
-                      className={`flex items-center gap-3 rounded-lg px-4 py-3 text-base font-medium transition-colors ${
-                        pathname === '/profile'
-                          ? 'bg-purple-900/30 text-[#9945FF]'
-                          : 'text-white/80 hover:bg-white/5'
-                      }`}
-                    >
-                      <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                      </svg>
-                      Profile & Analytics
-                    </Link>
-                  </>
+                {publicKey && balance !== null && (
+                  <span className="text-sm font-semibold text-white">${balance.toFixed(2)} USDC</span>
                 )}
+              </div>
+
+              {/* Nav links */}
+              <nav className="flex flex-col space-y-1">
+                {[
+                  { href: '/fundraisers', label: 'Campaigns', icon: '💝' },
+                  { href: '/leaderboard', label: 'Top Fundraisers', icon: '🏆' },
+                  ...(publicKey ? [
+                    { href: '/fundraisers/new', label: 'Start a Fund', icon: '🚀' },
+                    { href: '/fundraisers/my', label: 'My Funds', icon: '📊' },
+                    { href: '/profile', label: 'Profile', icon: '👤' },
+                  ] : []),
+                ].map(({ href, label, icon }) => (
+                  <Link
+                    key={href}
+                    href={href}
+                    className={`flex items-center gap-3 rounded-lg px-4 py-3 text-base font-medium transition-colors ${
+                      pathname === href || (href !== '/' && pathname?.startsWith(href))
+                        ? 'bg-orange-900/30 text-[#F97316]'
+                        : 'text-white/80 hover:bg-white/5'
+                    }`}
+                  >
+                    <span>{icon}</span>{label}
+                  </Link>
+                ))}
               </nav>
 
-              {/* Footer Links in Mobile Menu */}
-              <div className="pt-6 border-t border-purple-900/30">
-                <div className="flex flex-col space-y-2">
-                  <Link
-                    href="/faq"
-                    className="flex items-center gap-3 rounded-lg px-4 py-3 text-sm font-medium text-white/60 hover:bg-white/5 transition-colors"
-                  >
-                    <span className="text-base">❓</span>
-                    FAQ
-                  </Link>
-
-                  <Link
-                    href="/updates"
-                    className="flex items-center gap-3 rounded-lg px-4 py-3 text-sm font-medium text-white/60 hover:bg-white/5 transition-colors"
-                  >
-                    <span className="text-base">📋</span>
-                    Updates
-                  </Link>
-
-                  <a
-                    href={X_COMMUNITY_URL}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex items-center gap-3 rounded-lg px-4 py-3 text-sm font-medium text-white/60 hover:bg-white/5 transition-colors"
-                  >
-                    <span className="text-base">💬</span>
-                    Community (X)
-                  </a>
-
-                  <a
-                    href="https://solkroadwp.vercel.app"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex items-center gap-3 rounded-lg px-4 py-3 text-sm font-medium text-white/60 hover:bg-white/5 transition-colors"
-                  >
-                    <span className="text-base">📄</span>
-                    Whitepaper
-                  </a>
-
-                  <span className="flex items-center gap-3 rounded-lg px-4 py-3 text-sm font-medium text-white/50">
-                    Dex paid at bond
-                  </span>
-                  <a
-                    href="https://github.com/Tanner253?tab=repositories"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex items-center gap-3 rounded-lg px-4 py-3 text-sm font-medium text-white/60 hover:bg-white/5 transition-colors"
-                  >
-                    <span className="text-base">💻</span>
-                    GitHub
-                  </a>
-                </div>
+              {/* Footer links */}
+              <div className="pt-4 border-t border-orange-900/30 flex flex-col space-y-1">
+                {[
+                  { href: '/faq', label: 'FAQ', icon: '❓', external: false },
+                  { href: '/updates', label: 'Updates', icon: '📋', external: false },
+                  ...(X_COMMUNITY_URL ? [{ href: X_COMMUNITY_URL, label: 'Community (X)', icon: '💬', external: true }] : []),
+                ].map(({ href, label, icon, external }) => (
+                  external ? (
+                    <a key={href} href={href} target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 rounded-lg px-4 py-3 text-sm font-medium text-white/60 hover:bg-white/5 transition-colors">
+                      <span>{icon}</span>{label}
+                    </a>
+                  ) : (
+                    <Link key={href} href={href} className="flex items-center gap-3 rounded-lg px-4 py-3 text-sm font-medium text-white/60 hover:bg-white/5 transition-colors">
+                      <span>{icon}</span>{label}
+                    </Link>
+                  )
+                ))}
               </div>
             </div>
           </div>

@@ -65,7 +65,7 @@ export function ConfirmDialogProvider({ children }: { children: ReactNode }) {
       default:
         return {
           icon: 'ℹ️',
-          confirmBtn: 'bg-gradient-to-r from-[#9945FF] to-[#14F195] text-black hover:opacity-90',
+          confirmBtn: 'bg-[#F97316] text-black hover:bg-[#ea6c0e]',
           iconBg: 'bg-purple-950/30',
         };
     }

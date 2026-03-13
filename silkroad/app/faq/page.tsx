@@ -6,7 +6,7 @@ import { Breadcrumbs } from '@/components/ui/Breadcrumbs';
 
 export default function FAQPage() {
   return (
-    <div className="min-h-screen bg-[#0f0f14] py-12 px-4">
+    <div className="min-h-screen bg-[#0f0d0a] py-12 px-4">
       <div className="mx-auto max-w-4xl">
         {/* Breadcrumbs */}
         <Breadcrumbs />

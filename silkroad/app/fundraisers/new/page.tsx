@@ -220,7 +220,7 @@ function NewFundraiserPageContent() {
           </p>
           <Link
             href="/"
-            className="inline-flex items-center justify-center rounded-lg bg-gradient-to-r from-[#9945FF] to-[#14F195] px-6 py-3 text-sm font-medium text-black hover:opacity-90 transition-opacity"
+            className="inline-flex items-center justify-center rounded-lg bg-[#F97316] px-6 py-3 text-sm font-medium text-black hover:bg-[#ea6c0e] transition-colors"
           >
             Go to Homepage
           </Link>
@@ -405,7 +405,7 @@ function NewFundraiserPageContent() {
                   type="file"
                   accept="image/jpeg,image/png,image/webp"
                   onChange={handleImageChange}
-                  className="block w-full text-sm text-white/50 file:mr-4 file:rounded-lg file:border-0 file:bg-gradient-to-r file:from-[#9945FF] file:to-[#14F195] file:px-4 file:py-2 file:text-sm file:font-medium file:text-black hover:file:opacity-90"
+                  className="block w-full text-sm text-white/50 file:mr-4 file:rounded-lg file:border-0 file:bg-[#F97316] file:px-4 file:py-2 file:text-sm file:font-medium file:text-black hover:file:bg-[#ea6c0e]"
                 />
                 <p className="mt-2 text-xs text-white/40">
                   JPEG, PNG, or WebP. Max 5MB. Recommended 800x600px
@@ -525,7 +525,7 @@ function NewFundraiserPageContent() {
             <button
               type="submit"
               disabled={loading || uploadingImage}
-              className="rounded-lg bg-gradient-to-r from-[#9945FF] to-[#14F195] px-6 py-2 text-sm font-medium text-black hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50 transition-opacity"
+              className="rounded-lg bg-[#F97316] px-6 py-2 text-sm font-medium text-black hover:bg-[#ea6c0e] disabled:cursor-not-allowed disabled:opacity-50 transition-colors"
             >
               {loading ? 'Creating...' : 'Create Fundraiser'}
             </button>

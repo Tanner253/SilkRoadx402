@@ -35,11 +35,8 @@ export function useActiveUsers() {
         }, {
           timeout: 5000, // 5 second timeout
         });
-      } catch (error: any) {
-        // Silently ignore abort errors
-        if (error.code !== 'ECONNRESET' && error.code !== 'ECONNABORTED') {
-          console.error('Failed to update activity:', error);
-        }
+      } catch {
+        // Silently ignore — API unavailable (e.g. no DB locally)
       }
     };
 
@@ -70,11 +67,8 @@ export function useActiveUsers() {
         if (isMounted && response.data.success) {
           setActiveUsers(response.data.activeUsers || 0);
         }
-      } catch (error: any) {
-        // Silently ignore timeout/abort errors
-        if (!error.code || (error.code !== 'ECONNRESET' && error.code !== 'ECONNABORTED')) {
-          console.error('Failed to fetch active users:', error);
-        }
+      } catch {
+        // Silently ignore — API unavailable (e.g. no DB locally)
       }
     };
 

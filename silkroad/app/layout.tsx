@@ -5,7 +5,6 @@ import { SolanaWalletProvider } from "@/components/providers/WalletProvider";
 import { AuthProvider } from "@/components/providers/AuthProvider";
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
-import { PublicChat } from "@/components/chat/PublicChat";
 import { AppInitializer } from "@/components/providers/AppInitializer";
 import { UIProviders } from "@/components/providers/UIProviders";
 
@@ -20,8 +19,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "SOLk Road - Anonymous Digital Marketplace",
-  description: "Peer-to-peer anonymous marketplace using x402 micropayments on Solana",
+  title: "OpenFund - No KYC Crowdfunding on Solana",
+  description: "Raise funds for anything, anywhere, anonymously. No banks, no bureaucracy. Powered by Solana.",
 };
 
 export default function RootLayout({
@@ -45,7 +44,6 @@ export default function RootLayout({
                   {children}
                 </main>
                 <Footer />
-                <PublicChat />
               </div>
             </UIProviders>
           </AuthProvider>

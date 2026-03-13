@@ -1,236 +1,217 @@
 'use client';
 
-import { useState } from 'react';
+import dynamic from 'next/dynamic';
 import { useAuth } from '@/hooks/useAuth';
-import { WalletMultiButton } from '@solana/wallet-adapter-react-ui';
+import { useWalletModal } from '@solana/wallet-adapter-react-ui';
 import Link from 'next/link';
 
-const CONTRACT_ADDRESS = '7agXvaLthTkLm1drPossJbtKS6jZsnJ6Ad3PQDampump';
-const DEXSCREENER_CHART_URL = 'https://dexscreener.com/solana/ewme4qclssr8v2tm3ozsdgm4f8p2p2qouzpcn22nr1zb';
+const PiggyScene = dynamic(
+  () => import('@/components/home/PiggyScene').then((m) => m.PiggyScene),
+  { ssr: false, loading: () => null }
+);
+
+const CONTRACT_ADDRESS = process.env.NEXT_PUBLIC_CONTRACT_ADDRESS || null;
 
 export default function Home() {
-  const [copied, setCopied] = useState(false);
+  const { isConnected, hasAcceptedTOS, mounted } = useAuth();
+  const { setVisible: openWallet } = useWalletModal();
 
-  const copyCA = () => {
-    navigator.clipboard.writeText(CONTRACT_ADDRESS);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
-  };
-
-  const {
-    isConnected,
-    hasAcceptedTOS,
-    isTokenGated,
-    isLoading,
-    error,
-    mounted,
-  } = useAuth();
-
-  // Prevent hydration mismatch
-  if (!mounted) {
-    return null;
-  }
+  // Don't show wallet-state-dependent nav until hydrated — avoids flicker
+  const ready = mounted;
 
   return (
-    <div className="flex min-h-[calc(100vh-8rem)] flex-col items-center justify-center bg-[#0f0f14] px-4 py-12 relative z-10"
-      style={{
-        backgroundImage: 'radial-gradient(circle at 20% 50%, rgba(153, 69, 255, 0.08) 0%, transparent 50%), radial-gradient(circle at 80% 80%, rgba(20, 241, 149, 0.05) 0%, transparent 50%)'
-      }}
-    >
-      <div className="w-full max-w-4xl text-center">
-        {/* Hero Section */}
-        <div className="mb-8">
-          <div className="mb-4 flex items-center justify-center gap-3">
-            <h1 className="text-5xl font-bold tracking-tight sm:text-6xl text-white">
-              <span className="gradient-text">SOL</span>k Road
-            </h1>
-          </div>
-          <h2 className="mb-4 text-2xl font-semibold tracking-tight text-white/80">
-            Anonymous Digital Marketplace on Solana
-          </h2>
-          <p className="mx-auto max-w-2xl text-lg text-white/60">
-            Peer-to-peer marketplace using{' '}
-            <span className="font-semibold text-[#9945FF]">x402 micropayments</span> on Solana.
-            <br />
-            <span className="text-base">No KYC. No middlemen. Just freedom.</span>
-          </p>
-        </div>
+    <>
+      <style>{`
+        @keyframes menu-glow {
+          0%,100%{ text-shadow: 0 0 12px rgba(251,191,36,0.5), 0 0 24px rgba(249,115,22,0.3); }
+          50%    { text-shadow: 0 0 22px rgba(251,191,36,1),   0 0 45px rgba(249,115,22,0.55), 0 0 70px rgba(249,115,22,0.2); }
+        }
+        @keyframes fade-in-up  { from{ opacity:0; transform:translateY(28px); } to{ opacity:1; transform:translateY(0); } }
+        @keyframes slide-right { from{ opacity:0; transform:translateX(-24px); } to{ opacity:1; transform:translateX(0); } }
 
-        {/* $SR Token – CA & Chart */}
-        <div className="mb-6 rounded-xl border border-purple-900/50 bg-white/5 p-4 shadow-md backdrop-blur-sm">
-          <p className="text-sm font-semibold text-[#9945FF] mb-3">💎 $SR Token</p>
-          <div className="flex flex-col sm:flex-row items-center gap-2 w-full">
-            <div className="flex-1 w-full rounded-lg bg-black/40 p-3 border border-purple-900/40 overflow-hidden">
-              <p className="text-xs sm:text-sm text-white/80 text-center sm:text-left font-mono truncate">
-                {CONTRACT_ADDRESS}
+        .menu-glow  { animation: menu-glow 2.2s ease-in-out infinite; }
+        .fade-up    { animation: fade-in-up  0.75s ease-out both; }
+        .slide-right{ animation: slide-right 0.65s ease-out both; }
+      `}</style>
+
+      {/* Full-viewport, non-scrollable */}
+      <div
+        className="relative overflow-hidden"
+        style={{ height: 'calc(100vh - 4rem)', background: '#020308' }}
+      >
+        {/* Space gradient */}
+        <div
+          className="absolute inset-0"
+          style={{
+            background: 'radial-gradient(ellipse at 68% 48%, #0d0420 0%, #040210 40%, #020308 100%)',
+          }}
+        />
+
+        {/* Subtle tech grid */}
+        <div
+          className="absolute inset-0 pointer-events-none"
+          style={{
+            backgroundImage: `
+              linear-gradient(rgba(249,115,22,0.016) 1px, transparent 1px),
+              linear-gradient(90deg, rgba(249,115,22,0.016) 1px, transparent 1px)
+            `,
+            backgroundSize: '80px 80px',
+          }}
+        />
+
+        {/* Piggy bank scene */}
+        <PiggyScene />
+
+        {/* ─── UI OVERLAY ─── */}
+        <div className="absolute inset-0 z-20 flex flex-col justify-between p-5 sm:p-12 lg:p-16 pointer-events-none">
+
+          {/* TOP — branding */}
+          <div>
+            <p className="slide-right text-[9px] tracking-[0.55em] text-orange-500/40 font-mono uppercase mb-3" style={{ animationDelay: '0.05s' }}>
+              ◈ Mission Control — System Online
+            </p>
+
+            <div className="fade-up" style={{ animationDelay: '0.15s' }}>
+              <h1 className="font-black leading-[0.88] tracking-tight">
+                <span
+                  className="block"
+                  style={{
+                    fontSize: 'clamp(3rem, 10vw, 7.5rem)',
+                    background: 'linear-gradient(135deg, #fde68a 0%, #FBBF24 30%, #F97316 70%, #dc2626 100%)',
+                    WebkitBackgroundClip: 'text',
+                    WebkitTextFillColor: 'transparent',
+                    backgroundClip: 'text',
+                    filter: 'drop-shadow(0 0 28px rgba(249,115,22,0.55))',
+                  }}
+                >
+                  OPEN
+                </span>
+                <span
+                  className="block text-white"
+                  style={{
+                    fontSize: 'clamp(3rem, 10vw, 7.5rem)',
+                    filter: 'drop-shadow(0 0 18px rgba(255,255,255,0.22))',
+                  }}
+                >
+                  FUND
+                </span>
+              </h1>
+            </div>
+
+            {/* P2P tagline */}
+            <div className="fade-up mt-4 flex flex-wrap gap-2" style={{ animationDelay: '0.28s' }}>
+              {['⚡ Instant Payment', 'P2P Direct', '∞ No Withdrawal Limits'].map((t) => (
+                <span
+                  key={t}
+                  className="rounded-full border border-orange-700/40 bg-orange-950/30 px-3 py-1 text-[11px] font-bold tracking-wide text-[#FBBF24]/80"
+                >
+                  {t}
+                </span>
+              ))}
+            </div>
+
+            <p className="fade-up mt-3 text-sm text-white/30 font-mono max-w-xs" style={{ animationDelay: '0.38s' }}>
+              No banks. No bureaucracy. No KYC.
+            </p>
+          </div>
+
+          {/* BOTTOM — game menu + HUD */}
+          <div className="pointer-events-auto">
+            <nav className="mb-8 space-y-1 fade-up" style={{ animationDelay: '0.45s' }}>
+              {!ready || !isConnected ? (
+                <>
+                  <button onClick={() => openWallet(true)} className="group flex items-center gap-4 w-full text-left">
+                    <span className="menu-glow text-[#FBBF24] font-mono text-2xl w-8 shrink-0">▶</span>
+                    <span
+                      className="menu-glow font-black tracking-[0.18em] text-[#FBBF24] group-hover:text-white transition-colors"
+                      style={{ fontSize: 'clamp(1.25rem, 3vw, 1.75rem)' }}
+                    >
+                      CONNECT WALLET
+                    </span>
+                  </button>
+                  <Link href="/fundraisers" className="group flex items-center gap-4">
+                    <span className="font-mono text-2xl w-8 text-white/20 group-hover:text-white/50 transition-colors shrink-0">▷</span>
+                    <span className="font-black tracking-[0.18em] text-white/35 group-hover:text-white/75 transition-colors" style={{ fontSize: 'clamp(1rem, 2.5vw, 1.4rem)' }}>BROWSE CAMPAIGNS</span>
+                  </Link>
+                </>
+              ) : hasAcceptedTOS ? (
+                <>
+                  <Link href="/fundraisers/new" className="group flex items-center gap-4">
+                    <span className="menu-glow text-[#FBBF24] font-mono text-2xl w-8 shrink-0">▶</span>
+                    <span
+                      className="menu-glow font-black tracking-[0.18em] text-[#FBBF24] group-hover:text-white transition-colors"
+                      style={{ fontSize: 'clamp(1.25rem, 3vw, 1.75rem)' }}
+                    >
+                      NEW MISSION
+                    </span>
+                  </Link>
+                  <Link href="/fundraisers" className="group flex items-center gap-4">
+                    <span className="font-mono text-2xl w-8 text-white/20 group-hover:text-white/50 transition-colors shrink-0">▷</span>
+                    <span className="font-black tracking-[0.18em] text-white/35 group-hover:text-white/75 transition-colors" style={{ fontSize: 'clamp(1rem, 2.5vw, 1.4rem)' }}>ACTIVE MISSIONS</span>
+                  </Link>
+                </>
+              ) : (
+                <Link href="/fundraisers" className="group flex items-center gap-4">
+                  <span className="menu-glow text-[#FBBF24] font-mono text-2xl w-8 shrink-0">▶</span>
+                  <span className="menu-glow font-black tracking-[0.18em] text-[#FBBF24] group-hover:text-white transition-colors" style={{ fontSize: 'clamp(1.25rem, 3vw, 1.75rem)' }}>BROWSE MISSIONS</span>
+                </Link>
+              )}
+
+              <Link href="/leaderboard" className="group flex items-center gap-4">
+                <span className="font-mono text-2xl w-8 text-white/20 group-hover:text-white/50 transition-colors shrink-0">▷</span>
+                <span className="font-black tracking-[0.18em] text-white/35 group-hover:text-white/75 transition-colors" style={{ fontSize: 'clamp(1rem, 2.5vw, 1.4rem)' }}>HALL OF FAME</span>
+              </Link>
+
+              <Link href="/faq" className="group flex items-center gap-4">
+                <span className="font-mono text-2xl w-8 text-white/15 group-hover:text-white/40 transition-colors shrink-0">▷</span>
+                <span className="font-black tracking-[0.18em] text-white/20 group-hover:text-white/55 transition-colors" style={{ fontSize: 'clamp(0.85rem, 2vw, 1.1rem)' }}>INTEL</span>
+              </Link>
+            </nav>
+
+            {/* HUD */}
+            <div className="fade-up flex flex-wrap items-center gap-x-5 gap-y-1 text-[10px] font-mono border-t border-orange-900/25 pt-3" style={{ animationDelay: '0.65s' }}>
+              {[
+                { k: 'FEE',        v: '0.000%', c: 'text-green-400'  },
+                { k: 'KYC',        v: 'NONE',   c: 'text-red-400'    },
+                { k: 'CHAIN',      v: 'SOLANA', c: 'text-[#F97316]'  },
+                { k: 'SETTLEMENT', v: 'INSTANT',c: 'text-[#FBBF24]'  },
+              ].map(({ k, v, c }) => (
+                <span key={k} className="text-white/25">
+                  {k}: <span className={c}>{v}</span>
+                </span>
+              ))}
+              <span className="flex items-center gap-1.5 text-green-400/70">
+                <span className="inline-block h-1.5 w-1.5 rounded-full bg-green-400 animate-pulse" />
+                ONLINE
+              </span>
+            </div>
+
+            {CONTRACT_ADDRESS && (
+              <p className="mt-2 text-[9px] font-mono text-white/15">
+                CA: <span className="text-orange-500/40">{CONTRACT_ADDRESS}</span>
               </p>
-            </div>
-            <div className="flex flex-wrap items-center justify-center gap-2 w-full sm:w-auto">
-              <button
-                onClick={copyCA}
-                className="rounded-lg bg-gradient-to-r from-[#9945FF] to-[#14F195] px-4 py-2.5 text-sm font-semibold text-black hover:opacity-90 transition-opacity whitespace-nowrap"
-              >
-                {copied ? '✓ Copied!' : '📋 Copy CA'}
-              </button>
-              <a
-                href={DEXSCREENER_CHART_URL}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="rounded-lg border border-purple-500/50 bg-purple-500/10 px-4 py-2.5 text-sm font-semibold text-purple-300 hover:bg-purple-500/20 transition-colors whitespace-nowrap"
-              >
-                📈 View chart
-              </a>
-            </div>
+            )}
           </div>
         </div>
 
-        {/* 0% Fees Banner */}
-        <div className="mb-8 rounded-2xl border border-purple-900/40 bg-white/5 p-6 shadow-lg backdrop-blur-sm">
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-            <div className="flex items-center gap-2">
-              <div className="text-left">
-                <h3 className="text-3xl font-black gradient-text">
-                  0% FEES
-                </h3>
-                <p className="text-sm font-semibold text-white/60">
-                  100% Direct P2P
-                </p>
-              </div>
-            </div>
-            <div className="hidden sm:block text-white/20">|</div>
-            <p className="text-center sm:text-left text-sm text-white/60 max-w-md">
-              <span className="font-bold text-white">Sellers keep 100%</span> of every sale. Direct payments via Solana USDC. Zero platform fees, forever.
-            </p>
+        {/* Corner decorations */}
+        {[
+          { cls: 'top-0 right-0',   d: 'M80,0 L80,3 L3,80 L0,80 L0,0 Z',   fill: 'rgba(249,115,22,0.18)' },
+          { cls: 'bottom-0 left-0', d: 'M0,80 L0,77 L77,0 L80,0 L80,80 Z', fill: 'rgba(249,115,22,0.18)' },
+        ].map((c, i) => (
+          <div key={i} className={`absolute pointer-events-none z-30 ${c.cls}`}>
+            <svg width="80" height="80" viewBox="0 0 80 80" fill="none">
+              <path d={c.d} fill={c.fill} />
+            </svg>
           </div>
-        </div>
+        ))}
 
-        {/* Status Cards */}
-        {isConnected ? (
-          <div className="mb-8 space-y-4">
-            {/* Loading State */}
-            {isLoading && (
-              <div className="rounded-lg border border-purple-900/40 bg-white/5 p-6 shadow-sm backdrop-blur-sm">
-                <div className="flex items-center justify-center space-x-2">
-                  <div className="h-4 w-4 animate-spin rounded-full border-2 border-[#9945FF] border-t-transparent"></div>
-                  <p className="text-sm text-white/60">Checking authentication...</p>
-                </div>
-              </div>
-            )}
-
-            {/* Error State */}
-            {error && (
-              <div className="rounded-lg border border-red-900/50 bg-red-950/20 p-6 shadow-sm backdrop-blur-sm">
-                <p className="text-sm text-red-400">⚠️ {error}</p>
-              </div>
-            )}
-
-            {/* Success State */}
-            {!isLoading && hasAcceptedTOS && (
-              <div className="space-y-4">
-                {/* Token Gating Status */}
-                <div className={`rounded-lg border p-6 shadow-sm backdrop-blur-sm ${
-                  isTokenGated
-                    ? 'border-[#14F195]/30 bg-[#14F195]/5'
-                    : 'border-yellow-800/40 bg-yellow-950/20'
-                }`}>
-                  <div className="flex items-center justify-center space-x-2">
-                    <span className="text-2xl">{isTokenGated ? '✅' : '⚠️'}</span>
-                    <p className={`text-sm font-medium ${
-                      isTokenGated
-                        ? 'text-[#14F195]'
-                        : 'text-yellow-400'
-                    }`}>
-                      {isTokenGated
-                        ? 'Full Access Granted'
-                        : 'Insufficient $SR Balance — Restricted Access'}
-                    </p>
-                  </div>
-                  {!isTokenGated && (
-                    <p className="mt-2 text-xs text-yellow-500/80">
-                      You need ≥50,000 $SR tokens for full platform access
-                    </p>
-                  )}
-                </div>
-
-                {/* Navigation */}
-                <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-                  <Link
-                    href="/browse"
-                    className="rounded-lg border border-purple-900/40 bg-white/5 p-6 shadow-sm backdrop-blur-sm transition-all hover:border-[#9945FF]/60 hover:bg-purple-950/20 hover:shadow-md hover:scale-105"
-                  >
-                    <div className="text-3xl mb-2">🛒</div>
-                    <h3 className="font-semibold text-white">Browse</h3>
-                    <p className="text-sm text-white/50">Explore the marketplace</p>
-                  </Link>
-
-                  <Link
-                    href="/sell"
-                    className="rounded-lg border border-purple-900/40 bg-white/5 p-6 shadow-sm backdrop-blur-sm transition-all hover:border-[#14F195]/60 hover:bg-[#14F195]/5 hover:shadow-md hover:scale-105"
-                  >
-                    <div className="text-3xl mb-2">📦</div>
-                    <h3 className="font-semibold text-white">Sell</h3>
-                    <p className="text-sm text-white/50">List your products</p>
-                  </Link>
-
-                  <Link
-                    href="/my-listings"
-                    className="rounded-lg border border-purple-900/40 bg-white/5 p-6 shadow-sm backdrop-blur-sm transition-all hover:border-[#9945FF]/60 hover:bg-purple-950/20 hover:shadow-md hover:scale-105"
-                  >
-                    <div className="text-3xl mb-2">📋</div>
-                    <h3 className="font-semibold text-white">My Listings</h3>
-                    <p className="text-sm text-white/50">Manage your shop</p>
-                  </Link>
-                </div>
-              </div>
-            )}
-          </div>
-        ) : (
-          // Disconnected State
-          <div className="mb-8">
-            <div className="rounded-lg border border-purple-900/40 bg-white/5 p-8 shadow-lg backdrop-blur-sm">
-              <div className="mb-6">
-                <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-br from-[#9945FF]/20 to-[#14F195]/20 border border-purple-800/40">
-                  <span className="text-3xl">🔐</span>
-                </div>
-                <h2 className="mb-2 text-xl font-semibold text-white">
-                  Connect Your Wallet
-                </h2>
-                <p className="text-sm text-white/50">
-                  Connect your Solana wallet to access the marketplace
-                </p>
-              </div>
-              <WalletMultiButton className="!bg-gradient-to-r !from-[#9945FF] !to-[#14F195] hover:!opacity-90 !rounded-lg !h-12 !w-full !text-base !font-medium transition-opacity" />
-            </div>
-          </div>
-        )}
-
-        {/* Feature Cards */}
-        <div className="grid grid-cols-1 gap-6 sm:grid-cols-3 text-left">
-          <div className="rounded-lg border border-purple-900/40 bg-white/5 p-6 backdrop-blur-sm hover:scale-105 transition-transform">
-            <div className="text-2xl mb-3">🕵️</div>
-            <h3 className="mb-2 font-semibold text-[#9945FF]">Anonymous</h3>
-            <p className="text-sm text-white/50">
-              No KYC, no emails. Your wallet is your identity. Shop privately on-chain.
-            </p>
-          </div>
-
-          <div className="rounded-lg border border-purple-900/40 bg-white/5 p-6 backdrop-blur-sm hover:scale-105 transition-transform">
-            <div className="text-2xl mb-3">⚡</div>
-            <h3 className="mb-2 font-semibold text-[#14F195]">0% Platform Fees</h3>
-            <p className="text-sm text-white/50">
-              Sellers keep 100% of every sale. Direct P2P payments via USDC on Solana.
-            </p>
-          </div>
-
-          <div className="rounded-lg border border-purple-900/40 bg-white/5 p-6 backdrop-blur-sm hover:scale-105 transition-transform">
-            <div className="text-2xl mb-3">🔒</div>
-            <h3 className="mb-2 font-semibold text-[#9945FF]">Token Gated</h3>
-            <p className="text-sm text-white/50">
-              Hold $SR tokens for full access to the marketplace. Coming soon.
-            </p>
-          </div>
-        </div>
+        {/* Vignette */}
+        <div
+          className="absolute inset-0 pointer-events-none z-10"
+          style={{ background: 'radial-gradient(ellipse at 28% 50%, transparent 35%, rgba(1,1,6,0.72) 100%)' }}
+        />
       </div>
-    </div>
+    </>
   );
 }
