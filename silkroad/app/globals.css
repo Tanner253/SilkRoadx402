@@ -53,6 +53,63 @@ body::before {
   background-clip: text;
 }
 
+/* Solana wallet adapter overrides — kill all default purple */
+.wallet-adapter-button {
+  background-color: #F97316 !important;
+  color: #000 !important;
+  border-radius: 0.5rem !important;
+  font-weight: 600 !important;
+  transition: background-color 0.15s !important;
+}
+.wallet-adapter-button:hover {
+  background-color: #ea6c0e !important;
+}
+.wallet-adapter-button-trigger {
+  background-color: #F97316 !important;
+}
+.wallet-adapter-dropdown-list {
+  background: #1a1714 !important;
+  border: 1px solid rgba(249, 115, 22, 0.3) !important;
+  border-radius: 0.5rem !important;
+}
+.wallet-adapter-dropdown-list-item {
+  background: transparent !important;
+  color: #f5f3f0 !important;
+}
+.wallet-adapter-dropdown-list-item:hover {
+  background: rgba(249, 115, 22, 0.15) !important;
+}
+.wallet-adapter-dropdown-list-active {
+  background: rgba(249, 115, 22, 0.2) !important;
+}
+.wallet-adapter-modal-wrapper {
+  background: #1a1714 !important;
+  border: 1px solid rgba(249, 115, 22, 0.3) !important;
+}
+.wallet-adapter-modal-button-close {
+  background: rgba(249, 115, 22, 0.2) !important;
+}
+.wallet-adapter-modal-button-close:hover {
+  background: rgba(249, 115, 22, 0.4) !important;
+}
+.wallet-adapter-modal-title {
+  color: #f5f3f0 !important;
+}
+.wallet-adapter-modal-list .wallet-adapter-button {
+  background-color: transparent !important;
+  color: #f5f3f0 !important;
+}
+.wallet-adapter-modal-list .wallet-adapter-button:hover {
+  background-color: rgba(249, 115, 22, 0.15) !important;
+}
+.wallet-adapter-modal-middle {
+  background: transparent !important;
+}
+.wallet-adapter-modal-middle-button {
+  background-color: #F97316 !important;
+  color: #000 !important;
+}
+
 /* Falling Leaves Animation */
 @keyframes fall {
   0% {
