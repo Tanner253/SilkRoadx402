@@ -25,7 +25,7 @@ interface Fundraiser {
 }
 
 function FundraisersPageContent() {
-  const { isConnected, hasAcceptedTOS, isTokenGated, mounted } = useAuth();
+  const { isConnected, isTokenGated, mounted } = useAuth();
   const { publicKey } = useWallet();
   const searchParams = useSearchParams();
 
@@ -114,38 +114,20 @@ function FundraisersPageContent() {
     Math.min(((f.raisedAmount || 0) / (f.goalAmount || f.price)) * 100, 100);
 
   return (
-    <div className="min-h-screen bg-[#0f0f14] py-6 px-4 pb-20 relative">
+    <div className="min-h-screen bg-background py-6 px-4 pb-20 relative">
       <div className="mx-auto max-w-[1600px]">
         {/* Page Header */}
         <div className="mb-6">
-          <h1 className="text-3xl font-bold text-white mb-2">
+          <h1 className="text-3xl font-bold text-foreground mb-2">
             💝 Browse Fundraisers
           </h1>
-          <p className="text-sm text-white/50">
+          <p className="text-sm text-muted-foreground">
             Support anonymous fundraising campaigns using crypto
           </p>
         </div>
 
         {/* Info Banners */}
-        {!isConnected ? (
-          <div className="mb-4 rounded-lg border border-purple-900/40 bg-purple-950/20 p-3">
-            <p className="text-sm text-purple-300">
-              <strong>👀 Browse Mode:</strong> Connect your wallet to donate or create fundraisers.
-            </p>
-          </div>
-        ) : !hasAcceptedTOS ? (
-          <div className="mb-4 rounded-lg border border-yellow-800/40 bg-yellow-950/20 p-3">
-            <p className="text-sm text-yellow-400">
-              <strong>⚠️ Action Required:</strong> Accept TOS to interact with fundraisers.
-            </p>
-          </div>
-        ) : !isTokenGated ? (
-          <div className="mb-4 rounded-lg border border-yellow-800/40 bg-yellow-950/20 p-3">
-            <p className="text-sm text-yellow-400">
-              <strong>👀 Browse Mode:</strong> Need 50,000 $SR tokens to donate/create.
-            </p>
-          </div>
-        ) : null}
+
 
         {/* Mobile Category Filter - Horizontal Scroll */}
         <div className="mb-4 lg:hidden">
@@ -158,15 +140,15 @@ function FundraisersPageContent() {
                   onClick={() => setSelectedCategory(category.id)}
                   className={`flex-shrink-0 flex items-center gap-2 rounded-full px-4 py-2 text-sm font-medium transition-all ${
                     isActive
-                      ? 'bg-[#9945FF] text-white shadow-md shadow-purple-900/30'
-                      : 'bg-white/5 text-white/70 border border-purple-900/30 hover:bg-white/10'
+                      ? 'bg-primary text-primary-foreground shadow-md shadow-none'
+                      : 'bg-muted text-muted-foreground border border-border hover:bg-muted'
                   }`}
                 >
                   <span>{category.icon}</span>
                   {sidebarOpen && <span>{category.label}</span>}
                   {category.count > 0 && (
                     <span className={`rounded-full px-2 py-0.5 text-xs font-bold ${
-                      isActive ? 'bg-white/20' : 'bg-white/10'
+                      isActive ? 'bg-muted' : 'bg-muted'
                     }`}>
                       {category.count}
                     </span>
@@ -181,25 +163,25 @@ function FundraisersPageContent() {
         <div className="flex gap-6 pb-20">
           {/* Sidebar - Desktop Only */}
           <div className={`hidden lg:block flex-shrink-0 transition-all duration-300 ${sidebarOpen ? 'w-72' : 'w-16'}`}>
-            <div className="sticky top-4 rounded-lg border border-purple-900/30 bg-[#0f0f14]/95 backdrop-blur-sm overflow-hidden max-h-[calc(100vh-8rem)]">
+            <div className="sticky top-4 rounded-lg border border-border bg-background/95 backdrop-blur-sm overflow-hidden max-h-[calc(100vh-8rem)]">
               {/* Sidebar Header */}
-              <div className="border-b border-purple-900/30 p-3 flex items-center justify-between flex-shrink-0">
+              <div className="border-b border-border p-3 flex items-center justify-between flex-shrink-0">
                 {sidebarOpen && (
-                  <h3 className="font-semibold text-sm text-white/80">
+                  <h3 className="font-semibold text-sm text-foreground">
                     Categories
                   </h3>
                 )}
                 <button
                   onClick={() => setSidebarOpen(!sidebarOpen)}
-                  className="rounded-lg p-1.5 hover:bg-white/5 transition-colors"
+                  className="rounded-lg p-1.5 hover:bg-muted transition-colors"
                   title={sidebarOpen ? 'Collapse sidebar' : 'Expand sidebar'}
                 >
                   {sidebarOpen ? (
-                    <svg className="w-4 h-4 text-white/50" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <svg className="w-4 h-4 text-muted-foreground" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 19l-7-7 7-7m8 14l-7-7 7-7" />
                     </svg>
                   ) : (
-                    <svg className="w-4 h-4 text-white/50" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <svg className="w-4 h-4 text-muted-foreground" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
                     </svg>
                   )}
@@ -218,8 +200,8 @@ function FundraisersPageContent() {
                         onClick={() => setSelectedCategory(category.id)}
                         className={`w-full flex items-center gap-3 rounded-lg px-3 py-2.5 text-left transition-all ${
                           isActive
-                            ? 'bg-[#9945FF] text-white shadow-sm shadow-purple-900/30'
-                            : 'text-white/70 hover:bg-white/5'
+                            ? 'bg-primary text-primary-foreground shadow-sm shadow-none'
+                            : 'text-muted-foreground hover:bg-muted'
                         }`}
                       >
                         <span className="text-xl flex-shrink-0">{category.icon}</span>
@@ -230,7 +212,7 @@ function FundraisersPageContent() {
                             </span>
                             {category.count > 0 && (
                               <span className={`rounded-full px-2 py-0.5 text-xs font-bold ${
-                                isActive ? 'bg-white/20' : 'bg-white/10'
+                                isActive ? 'bg-muted' : 'bg-muted'
                               }`}>
                                 {category.count}
                               </span>
@@ -248,7 +230,7 @@ function FundraisersPageContent() {
           {/* Main Content */}
           <div className="flex-1 min-w-0 w-full lg:w-auto">
             {/* Toolbar */}
-            <div className="mb-4 rounded-lg border border-purple-900/30 bg-white/5 backdrop-blur-sm p-4">
+            <div className="mb-4 rounded-lg border border-border bg-muted backdrop-blur-sm p-4">
               <div className="flex flex-col md:flex-row gap-4 items-start md:items-center justify-between">
                 {/* Left: Search */}
                 <div className="flex-1 w-full md:max-w-md">
@@ -257,20 +239,20 @@ function FundraisersPageContent() {
                     placeholder="🔍 Search by organizer wallet..."
                     value={walletSearch}
                     onChange={(e) => setWalletSearch(e.target.value)}
-                    className="w-full rounded-lg border border-purple-900/40 bg-black/40 px-4 py-2 text-sm text-white placeholder-white/30 focus:border-[#9945FF] focus:outline-none focus:ring-2 focus:ring-[#9945FF]/30"
+                    className="w-full rounded-lg border border-border bg-muted px-4 py-2 text-sm text-foreground placeholder-white/30 focus:border-border focus:outline-none focus:ring-2 focus:ring-ring"
                   />
                 </div>
 
                 {/* Right: View & Hide toggles */}
                 <div className="flex items-center gap-3">
                   {/* View Mode Toggle */}
-                  <div className="flex items-center rounded-lg border border-purple-900/30 bg-black/30 p-1">
+                  <div className="flex items-center rounded-lg border border-border bg-muted p-1">
                     <button
                       onClick={() => setViewMode('grid')}
                       className={`p-2 rounded transition-colors ${
                         viewMode === 'grid'
-                          ? 'bg-[#9945FF] text-white'
-                          : 'text-white/40 hover:text-white/80'
+                          ? 'bg-primary text-primary-foreground'
+                          : 'text-muted-foreground hover:text-foreground'
                       }`}
                       title="Grid view"
                     >
@@ -282,8 +264,8 @@ function FundraisersPageContent() {
                       onClick={() => setViewMode('list')}
                       className={`p-2 rounded transition-colors ${
                         viewMode === 'list'
-                          ? 'bg-[#9945FF] text-white'
-                          : 'text-white/40 hover:text-white/80'
+                          ? 'bg-primary text-primary-foreground'
+                          : 'text-muted-foreground hover:text-foreground'
                       }`}
                       title="List view"
                     >
@@ -302,8 +284,8 @@ function FundraisersPageContent() {
                         onChange={(e) => setHideMyFundraisers(e.target.checked)}
                         className="sr-only peer"
                       />
-                      <div className="w-11 h-6 bg-white/10 rounded-full peer peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-[#9945FF]/20 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-white/30 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#9945FF] relative"></div>
-                      <span className="ms-2 text-xs font-medium text-white/60 whitespace-nowrap hidden sm:inline">
+                      <div className="w-11 h-6 bg-muted rounded-full peer peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-ring peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-border after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-card after:border-border after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary relative"></div>
+                      <span className="ms-2 text-xs font-medium text-muted-foreground whitespace-nowrap hidden sm:inline">
                         Hide mine
                       </span>
                     </label>
@@ -312,10 +294,10 @@ function FundraisersPageContent() {
               </div>
 
               {/* Results Count */}
-              <div className="mt-3 pt-3 border-t border-purple-900/30">
-                <p className="text-sm text-white/50">
-                  <span className="font-semibold text-white">{filteredFundraisers.length}</span> {filteredFundraisers.length === 1 ? 'fundraiser' : 'fundraisers'} found
-                  {selectedCategory !== 'all' && <span> in <strong className="text-white/70">{categories.find(c => c.id === selectedCategory)?.label}</strong></span>}
+              <div className="mt-3 pt-3 border-t border-border">
+                <p className="text-sm text-muted-foreground">
+                  <span className="font-semibold text-foreground">{filteredFundraisers.length}</span> {filteredFundraisers.length === 1 ? 'fundraiser' : 'fundraisers'} found
+                  {selectedCategory !== 'all' && <span> in <strong className="text-muted-foreground">{categories.find(c => c.id === selectedCategory)?.label}</strong></span>}
                 </p>
               </div>
             </div>
@@ -323,14 +305,14 @@ function FundraisersPageContent() {
             {/* Loading State */}
             {loading && (
               <div className="flex justify-center py-16">
-                <div className="h-8 w-8 animate-spin rounded-full border-4 border-[#9945FF] border-t-transparent"></div>
+                <div className="h-8 w-8 animate-spin rounded-full border-4 border-border border-t-transparent"></div>
               </div>
             )}
 
             {/* Error State */}
             {error && (
-              <div className="rounded-lg border border-red-900/50 bg-red-950/20 p-6">
-                <p className="text-sm text-red-400">⚠️ {error}</p>
+              <div className="rounded-lg border border-red-200 bg-red-50 p-6">
+                <p className="text-sm text-red-700">⚠️ {error}</p>
               </div>
             )}
 
@@ -340,11 +322,11 @@ function FundraisersPageContent() {
             {filteredFundraisers.length === 0 ? (
               <div className="text-center py-12">
                 <div className="mb-4 text-6xl">💝</div>
-                <p className="text-white/50 mb-4">No fundraisers found in this category</p>
+                <p className="text-muted-foreground mb-4">No fundraisers found in this category</p>
                 {isTokenGated && (
                   <Link
                     href="/fundraisers/new"
-                    className="inline-flex items-center gap-2 rounded-lg bg-[#F97316] px-6 py-3 text-sm font-medium text-black hover:bg-[#ea6c0e] transition-colors"
+                    className="inline-flex items-center gap-2 rounded-lg bg-primary px-6 py-3 text-sm font-medium text-primary-foreground hover:bg-primary transition-colors"
                   >
                     <span>💝</span>
                     Be the first to create a fundraiser here!
@@ -357,10 +339,10 @@ function FundraisersPageContent() {
                 {filteredFundraisers.map((fundraiser) => (
                   <div
                     key={fundraiser._id}
-                    className="group overflow-hidden rounded-lg border border-purple-900/30 bg-white/5 backdrop-blur-sm transition-all hover:border-purple-600/50 hover:bg-white/[0.08]"
+                    className="group overflow-hidden rounded-lg border border-border bg-muted backdrop-blur-sm transition-all hover:border-border hover:bg-muted"
                   >
                     {/* Image */}
-                    <div className="relative h-48 w-full overflow-hidden bg-white/5">
+                    <div className="relative h-48 w-full overflow-hidden bg-muted">
                       <Image
                         src={fundraiser.imageUrl}
                         alt={fundraiser.title}
@@ -368,12 +350,12 @@ function FundraisersPageContent() {
                         className="object-cover transition-transform group-hover:scale-105"
                       />
                       {fundraiser.pinned === true && (
-                        <div className="absolute top-2 left-2 rounded-full bg-yellow-500 px-3 py-1 text-xs font-medium text-white shadow-lg animate-pulse">
+                        <div className="absolute top-2 left-2 rounded-full bg-yellow-500 px-3 py-1 text-xs font-medium text-primary-foreground shadow-lg animate-pulse">
                           📌 Featured
                         </div>
                       )}
                       {fundraiser.riskLevel === 'high-risk' && (
-                        <div className="absolute top-2 right-2 rounded-full bg-red-600 px-3 py-1 text-xs font-medium text-white">
+                        <div className="absolute top-2 right-2 rounded-full bg-red-600 px-3 py-1 text-xs font-medium text-primary-foreground">
                           High Risk
                         </div>
                       )}
@@ -382,28 +364,28 @@ function FundraisersPageContent() {
                     {/* Content */}
                     <div className="p-4">
                       <div className="mb-2 flex items-start justify-between">
-                        <h3 className="font-semibold text-white line-clamp-2">
+                        <h3 className="font-semibold text-foreground line-clamp-2">
                           {fundraiser.title}
                         </h3>
                       </div>
 
-                      <p className="mb-4 text-sm text-white/50 line-clamp-2">
+                      <p className="mb-4 text-sm text-muted-foreground line-clamp-2">
                         {fundraiser.description}
                       </p>
 
                       {/* Progress Bar */}
                       <div className="mb-4">
-                        <div className="flex items-center justify-between text-xs text-white/50 mb-1">
-                          <span className="font-medium text-[#14F195]">${(fundraiser.raisedAmount || 0).toFixed(2)} raised</span>
+                        <div className="flex items-center justify-between text-xs text-muted-foreground mb-1">
+                          <span className="font-medium text-primary">${(fundraiser.raisedAmount || 0).toFixed(2)} raised</span>
                           <span>of ${(fundraiser.goalAmount || fundraiser.price).toFixed(2)}</span>
                         </div>
-                        <div className="h-2 w-full rounded-full bg-white/10 overflow-hidden">
+                        <div className="h-2 w-full rounded-full bg-muted overflow-hidden">
                           <div
-                            className="h-full bg-[#F97316] transition-all duration-500"
+                            className="h-full bg-primary transition-all duration-500"
                             style={{ width: `${getFundedPct(fundraiser)}%` }}
                           />
                         </div>
-                        <div className="text-xs text-[#9945FF] mt-1 font-medium">
+                        <div className="text-xs text-primary mt-1 font-medium">
                           {Math.round(getFundedPct(fundraiser))}% funded
                         </div>
                       </div>
@@ -411,22 +393,22 @@ function FundraisersPageContent() {
                       <div className="flex items-center justify-end">
                         <Link
                           href={`/fundraisers/${fundraiser._id}`}
-                          className="rounded-lg bg-[#F97316] px-6 py-2 text-sm font-medium text-black hover:bg-[#ea6c0e] transition-colors"
+                          className="rounded-lg bg-primary px-6 py-2 text-sm font-medium text-primary-foreground hover:bg-primary transition-colors"
                         >
                           💝 Donate Now
                         </Link>
                       </div>
 
-                      <div className="mt-3 pt-3 border-t border-purple-900/30">
+                      <div className="mt-3 pt-3 border-t border-border">
                         <div className="flex items-center justify-between mb-2">
-                          <span className="inline-flex items-center rounded-full bg-white/10 px-2.5 py-0.5 text-xs font-medium text-white/70">
+                          <span className="inline-flex items-center rounded-full bg-muted px-2.5 py-0.5 text-xs font-medium text-muted-foreground">
                             {fundraiser.category}
                           </span>
-                          <span className="flex items-center gap-1 text-xs text-white/40">
+                          <span className="flex items-center gap-1 text-xs text-muted-foreground">
                             👁️ {fundraiser.views || 0}
                           </span>
                         </div>
-                        <span className="text-xs text-white/40 font-mono">
+                        <span className="text-xs text-muted-foreground font-mono">
                           {truncateWallet(fundraiser.wallet)}
                         </span>
                       </div>
@@ -443,9 +425,9 @@ function FundraisersPageContent() {
                     href={`/fundraisers/${fundraiser._id}`}
                     className="group block"
                   >
-                    <div className="relative flex items-center gap-3 rounded-lg border border-purple-900/30 bg-white/5 px-4 py-2 transition-all hover:border-[#9945FF]/60 hover:bg-purple-950/20 overflow-hidden">
+                    <div className="relative flex items-center gap-3 rounded-lg border border-border bg-muted px-4 py-2 transition-all hover:border-border hover:bg-accent overflow-hidden">
                       {/* Bottom progress bar indicator */}
-                      <div className="absolute bottom-0 left-0 h-0.5 bg-[#F97316] transition-all duration-500"
+                      <div className="absolute bottom-0 left-0 h-0.5 bg-primary transition-all duration-500"
                         style={{ width: `${getFundedPct(fundraiser)}%` }}
                       />
 
@@ -461,39 +443,39 @@ function FundraisersPageContent() {
 
                       {/* Title */}
                       <div className="flex-1 min-w-0">
-                        <h3 className="text-sm font-semibold text-white truncate group-hover:text-[#9945FF]">
+                        <h3 className="text-sm font-semibold text-foreground truncate group-hover:text-primary">
                           {fundraiser.title}
                         </h3>
                       </div>
 
                       {/* Progress Amount */}
-                      <div className="flex items-center gap-1 text-xs text-[#14F195] font-medium flex-shrink-0">
+                      <div className="flex items-center gap-1 text-xs text-primary font-medium flex-shrink-0">
                         <span className="hidden sm:inline">${(fundraiser.raisedAmount || 0).toFixed(0)}</span>
-                        <span className="hidden sm:inline text-white/30">/</span>
-                        <span className="hidden sm:inline text-white/50">${(fundraiser.goalAmount || fundraiser.price).toFixed(0)}</span>
+                        <span className="hidden sm:inline text-muted-foreground">/</span>
+                        <span className="hidden sm:inline text-muted-foreground">${(fundraiser.goalAmount || fundraiser.price).toFixed(0)}</span>
                       </div>
 
                       {/* Category */}
-                      <span className="hidden md:inline-flex items-center rounded-full bg-white/10 px-2 py-0.5 text-xs font-medium text-white/60 flex-shrink-0">
+                      <span className="hidden md:inline-flex items-center rounded-full bg-muted px-2 py-0.5 text-xs font-medium text-muted-foreground flex-shrink-0">
                         {fundraiser.category}
                       </span>
 
                       {/* Organizer */}
-                      <span className="hidden lg:block text-xs text-white/40 font-mono flex-shrink-0">
+                      <span className="hidden lg:block text-xs text-muted-foreground font-mono flex-shrink-0">
                         {truncateWallet(fundraiser.wallet)}
                       </span>
 
                       {/* Views */}
-                      <span className="hidden xl:flex items-center gap-1 text-xs text-white/40 flex-shrink-0">
+                      <span className="hidden xl:flex items-center gap-1 text-xs text-muted-foreground flex-shrink-0">
                         👁️ {fundraiser.views || 0}
                       </span>
 
                       {/* Percentage */}
                       <div className="flex items-center gap-2 flex-shrink-0">
-                        <span className="text-xs text-[#9945FF] font-bold">
+                        <span className="text-xs text-primary font-bold">
                           {Math.round(getFundedPct(fundraiser))}%
                         </span>
-                        <svg className="w-4 h-4 text-white/20 group-hover:text-[#9945FF]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <svg className="w-4 h-4 text-muted-foreground group-hover:text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                         </svg>
                       </div>
@@ -514,10 +496,10 @@ function FundraisersPageContent() {
 export default function FundraisersPage() {
   return (
     <Suspense fallback={
-      <div className="flex min-h-screen items-center justify-center bg-[#0f0f14] relative">
+      <div className="flex min-h-screen items-center justify-center bg-background relative">
         <div className="text-center">
-          <div className="h-8 w-8 animate-spin rounded-full border-4 border-[#9945FF] border-t-transparent mx-auto"></div>
-          <p className="mt-4 text-white/50">Loading...</p>
+          <div className="h-8 w-8 animate-spin rounded-full border-4 border-border border-t-transparent mx-auto"></div>
+          <p className="mt-4 text-muted-foreground">Loading...</p>
         </div>
       </div>
     }>

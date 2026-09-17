@@ -1,0 +1,104 @@
+/* Piggy mascot motion — cheap CSS keyframes, GPU transforms only.
+   Every animated node sets transform-box: fill-box so percentages resolve
+   against the shape itself rather than the whole SVG viewport. */
+
+@keyframes piggy-bob {
+  0%, 100% { transform: translateY(0) rotate(-.6deg); }
+  50%      { transform: translateY(-9px) rotate(.6deg); }
+}
+.piggy-bob { animation: piggy-bob 4.2s ease-in-out infinite; transform-origin: 50% 70%; }
+
+/* Slower, deeper rise and fall for the sleeping pose. */
+@keyframes piggy-breathe {
+  0%, 100% { transform: translateY(0) scale(1); }
+  50%      { transform: translateY(-3px) scale(1.018); }
+}
+.piggy-breathe { animation: piggy-breathe 5.2s ease-in-out infinite; transform-origin: 50% 88%; }
+
+@keyframes piggy-blink {
+  0%, 91%, 100% { transform: scaleY(1); }
+  94%, 96%      { transform: scaleY(.08); }
+}
+.piggy-eye {
+  animation: piggy-blink 5.6s ease-in-out infinite;
+  transform-origin: center; transform-box: fill-box;
+}
+
+@keyframes piggy-ear {
+  0%, 82%, 100% { transform: rotate(0deg); }
+  87%           { transform: rotate(-11deg); }
+  92%           { transform: rotate(4deg); }
+}
+.piggy-ear {
+  animation: piggy-ear 6.4s ease-in-out infinite;
+  transform-origin: 50% 92%; transform-box: fill-box;
+}
+
+@keyframes piggy-tail {
+  0%, 100% { transform: rotate(-7deg); }
+  50%      { transform: rotate(9deg); }
+}
+.piggy-tail {
+  animation: piggy-tail 2.8s ease-in-out infinite;
+  transform-origin: 8% 60%; transform-box: fill-box;
+}
+
+/* Snore bubble: swells out of the snout, then pops. */
+@keyframes piggy-snore {
+  0%, 46%  { transform: scale(.12); opacity: 0; }
+  62%      { opacity: .85; }
+  84%      { transform: scale(1); opacity: .7; }
+  92%, 100% { transform: scale(1.12); opacity: 0; }
+}
+.piggy-snore {
+  animation: piggy-snore 5.2s ease-in-out infinite;
+  transform-origin: 90% 60%; transform-box: fill-box;
+}
+
+/* zZz drift — each letter offset so they ladder upward. */
+@keyframes piggy-zzz {
+  0%   { transform: translate(0, 6px) scale(.8); opacity: 0; }
+  22%  { opacity: .9; }
+  70%  { opacity: .55; }
+  100% { transform: translate(16px, -34px) scale(1.1); opacity: 0; }
+}
+.piggy-zzz { animation: piggy-zzz 4.4s ease-out infinite; transform-box: fill-box; }
+.piggy-zzz-1 { animation-delay: 0s; }
+.piggy-zzz-2 { animation-delay: 1.45s; }
+.piggy-zzz-3 { animation-delay: 2.9s; }
+
+/* Coin falls in through the slot. The coin is clipped at the slot line in the
+   SVG, so sliding it straight down reads as it dropping inside. */
+@keyframes piggy-coin-drop {
+  0%        { transform: translate(30px, -110px) rotate(-180deg); opacity: 0; }
+  14%       { opacity: 1; }
+  52%       { transform: translate(0, 0) rotate(0deg); opacity: 1; }
+  72%       { transform: translate(0, 50px) rotate(0deg); opacity: 1; }
+  74%, 100% { transform: translate(0, 50px) rotate(0deg); opacity: 0; }
+}
+.piggy-coin { animation: piggy-coin-drop 2.9s cubic-bezier(.42,0,.7,1) infinite; transform-box: fill-box; }
+
+/* Body squashes a touch as the coin lands. */
+@keyframes piggy-impact {
+  0%, 54%, 100% { transform: scaleY(1) translateY(0); }
+  62%           { transform: scaleY(.972) translateY(3px); }
+  70%           { transform: scaleY(1.008) translateY(-1px); }
+}
+.piggy-impact { animation: piggy-impact 2.9s ease-out infinite; transform-origin: 50% 96%; }
+
+@keyframes piggy-sparkle {
+  0%, 100% { transform: scale(.4) rotate(0deg); opacity: 0; }
+  40%      { transform: scale(1.12) rotate(22deg); opacity: 1; }
+  70%      { transform: scale(.85) rotate(38deg); opacity: .5; }
+}
+.piggy-sparkle { animation: piggy-sparkle 1.9s ease-in-out infinite; transform-box: fill-box; }
+.piggy-sparkle-2 { animation-delay: .55s; }
+
+@media (prefers-reduced-motion: reduce) {
+  .piggy-bob, .piggy-breathe, .piggy-eye, .piggy-ear, .piggy-tail,
+  .piggy-snore, .piggy-zzz, .piggy-coin, .piggy-impact, .piggy-sparkle {
+    animation: none;
+  }
+  /* Without the drop animation the coin would sit at its start offset. */
+  .piggy-coin { opacity: 1; }
+}

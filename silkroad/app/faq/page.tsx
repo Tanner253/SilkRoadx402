@@ -6,20 +6,19 @@ import { Breadcrumbs } from '@/components/ui/Breadcrumbs';
 
 export default function FAQPage() {
   return (
-    <div className="min-h-screen bg-[#0f0d0a] py-12 px-4">
+    <div className="min-h-screen bg-background py-12 px-4">
       <div className="mx-auto max-w-4xl">
-        {/* Breadcrumbs */}
         <Breadcrumbs />
 
-        {/* Back Button */}
         <Link
           href="/"
-          className="mb-6 inline-flex items-center text-sm text-white/50 hover:text-white transition-colors"
+          className="mb-6 inline-flex items-center text-sm text-muted-foreground hover:text-foreground transition-colors"
         >
           ← Back to Home
         </Link>
 
         <FAQ />
+
       </div>
     </div>
   );

@@ -11,7 +11,7 @@ import { Connection, PublicKey } from '@solana/web3.js';
 import { getAssociatedTokenAddress } from '@solana/spl-token';
 
 function NewFundraiserPageContent() {
-  const { isConnected, hasAcceptedTOS, isTokenGated, mounted } = useAuth();
+  const { isConnected, isTokenGated, mounted } = useAuth();
   const { publicKey } = useWallet();
   const router = useRouter();
 
@@ -208,19 +208,19 @@ function NewFundraiserPageContent() {
     return null;
   }
 
-  if (!isConnected || !hasAcceptedTOS) {
+  if (!isConnected) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-[#0f0f14]">
+      <div className="flex min-h-screen items-center justify-center bg-background">
         <div className="text-center">
-          <h1 className="text-2xl font-bold text-white mb-4">
+          <h1 className="text-2xl font-bold text-foreground mb-4">
             Connect Your Wallet
           </h1>
-          <p className="text-white/50 mb-6">
-            You need to connect your wallet and accept TOS to create fundraisers
+          <p className="text-muted-foreground mb-6">
+            You need to connect your wallet to create fundraisers
           </p>
           <Link
             href="/"
-            className="inline-flex items-center justify-center rounded-lg bg-[#F97316] px-6 py-3 text-sm font-medium text-black hover:bg-[#ea6c0e] transition-colors"
+            className="inline-flex items-center justify-center rounded-lg bg-primary px-6 py-3 text-sm font-medium text-primary-foreground hover:bg-primary transition-colors"
           >
             Go to Homepage
           </Link>
@@ -230,39 +230,39 @@ function NewFundraiserPageContent() {
   }
 
   return (
-    <div className="min-h-screen bg-[#0f0f14] py-12 px-4 pb-24">
+    <div className="min-h-screen bg-background py-12 px-4 pb-24">
       <div className="mx-auto max-w-3xl">
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-4xl font-bold text-white mb-2">
+          <h1 className="text-4xl font-bold text-foreground mb-2">
             Create a Fundraiser
           </h1>
-          <p className="text-lg text-white/50">
+          <p className="text-lg text-muted-foreground">
             Start an anonymous fundraising campaign using crypto
           </p>
         </div>
 
         {/* Token Gating Warning */}
         {!isTokenGated && (
-          <div className="mb-6 rounded-lg border border-yellow-800/40 bg-yellow-950/20 p-4">
-            <p className="text-sm text-yellow-400">
-              ⚠️ You don't have enough $SR tokens. Fundraiser creation may be restricted.
+          <div className="mb-6 rounded-lg border border-yellow-200 bg-yellow-50 p-4">
+            <p className="text-sm text-yellow-700">
+              ⚠️ You don't have enough $OPEN tokens. Fundraiser creation may be restricted.
             </p>
           </div>
         )}
 
         {/* Critical USDC Account Warning */}
-        <div className="mb-6 rounded-lg border-2 border-red-600 bg-red-950/20 p-4">
+        <div className="mb-6 rounded-lg border-2 border-red-200 bg-red-50 p-4">
           <div className="flex items-start gap-3">
             <span className="text-2xl flex-shrink-0">🚨</span>
             <div>
-              <h3 className="text-sm font-bold text-red-400 mb-2">
+              <h3 className="text-sm font-bold text-red-700 mb-2">
                 CRITICAL: USDC Account Required
               </h3>
-              <p className="text-sm text-red-400/80">
+              <p className="text-sm text-red-700">
                 <strong>YOU MUST HAVE A USDC ACCOUNT ON YOUR WALLET TO RECEIVE USDC FROM DONATIONS.</strong> If you don't do this, it will error for donors in Phantom when they try to donate.
               </p>
-              <p className="text-sm text-red-400/80 mt-2">
+              <p className="text-sm text-red-700 mt-2">
                 ✅ <strong>Ensure you have a USDC account by transferring at least $0.10 USDC to your wallet before creating your fundraiser.</strong>
               </p>
             </div>
@@ -270,14 +270,14 @@ function NewFundraiserPageContent() {
         </div>
 
         {/* Delivery URL Info */}
-        <div className="mb-6 rounded-lg border border-purple-900/40 bg-purple-950/20 p-4">
+        <div className="mb-6 rounded-lg border border-border bg-accent p-4">
           <div className="flex items-start gap-3">
             <span className="text-xl flex-shrink-0">ℹ️</span>
             <div>
-              <h3 className="text-sm font-semibold text-purple-300 mb-1">
+              <h3 className="text-sm font-semibold text-primary mb-1">
                 Important: Delivery URL Cannot Be Changed
               </h3>
-              <p className="text-sm text-purple-300/80">
+              <p className="text-sm text-primary">
                 Once your fundraiser is created, the <strong>delivery URL cannot be edited</strong>. This is the thank you message or reward link donors receive after donating. Make sure it's correct before submitting! You can edit all other fields later.
               </p>
             </div>
@@ -285,55 +285,55 @@ function NewFundraiserPageContent() {
         </div>
 
         {/* Form */}
-        <form onSubmit={handleSubmit} className="rounded-lg border border-purple-900/30 bg-white/5 backdrop-blur-sm p-6">
+        <form onSubmit={handleSubmit} className="rounded-lg border border-border bg-muted backdrop-blur-sm p-6">
           {/* Error Message */}
           {error && (
-            <div className="mb-6 rounded-lg border border-red-900/50 bg-red-950/20 p-4">
-              <p className="text-sm text-red-400">⚠️ {error}</p>
+            <div className="mb-6 rounded-lg border border-red-200 bg-red-50 p-4">
+              <p className="text-sm text-red-700">⚠️ {error}</p>
             </div>
           )}
 
           {/* Title */}
           <div className="mb-6">
-            <label className="mb-2 block text-sm font-medium text-white/70">
-              Fundraiser Title <span className="text-red-400">*</span>
+            <label className="mb-2 block text-sm font-medium text-muted-foreground">
+              Fundraiser Title <span className="text-red-700">*</span>
             </label>
             <input
               type="text"
               value={formData.title}
               onChange={(e) => setFormData({ ...formData, title: e.target.value })}
               placeholder="e.g. Help Fund Medical Treatment for My Family Member"
-              className="w-full rounded-lg border border-purple-900/40 bg-black/40 px-4 py-2 text-white placeholder-white/30 focus:border-[#9945FF] focus:outline-none focus:ring-2 focus:ring-[#9945FF]/30"
+              className="w-full rounded-lg border border-border bg-muted px-4 py-2 text-foreground placeholder-white/30 focus:border-border focus:outline-none focus:ring-2 focus:ring-ring"
               maxLength={100}
               required
             />
-            <p className="mt-1 text-xs text-white/40">{formData.title.length}/100 characters</p>
+            <p className="mt-1 text-xs text-muted-foreground">{formData.title.length}/100 characters</p>
           </div>
 
           {/* Description */}
           <div className="mb-6">
-            <label className="mb-2 block text-sm font-medium text-white/70">
-              Fundraiser Description <span className="text-red-400">*</span>
+            <label className="mb-2 block text-sm font-medium text-muted-foreground">
+              Fundraiser Description <span className="text-red-700">*</span>
             </label>
             <textarea
               value={formData.description}
               onChange={(e) => setFormData({ ...formData, description: e.target.value })}
               placeholder="Describe your fundraiser in detail. What is the cause? How will the funds be used? Why is this important?"
               rows={6}
-              className="w-full rounded-lg border border-purple-900/40 bg-black/40 px-4 py-2 text-white placeholder-white/30 focus:border-[#9945FF] focus:outline-none focus:ring-2 focus:ring-[#9945FF]/30"
+              className="w-full rounded-lg border border-border bg-muted px-4 py-2 text-foreground placeholder-white/30 focus:border-border focus:outline-none focus:ring-2 focus:ring-ring"
               maxLength={2000}
               required
             />
-            <p className="mt-1 text-xs text-white/40">{formData.description.length}/2000 characters (min 50)</p>
+            <p className="mt-1 text-xs text-muted-foreground">{formData.description.length}/2000 characters (min 50)</p>
           </div>
 
           {/* Amount */}
           <div className="mb-6">
-            <label className="mb-2 block text-sm font-medium text-white/70">
-              Donation Amount (USDC) <span className="text-red-400">*</span>
+            <label className="mb-2 block text-sm font-medium text-muted-foreground">
+              Donation Amount (USDC) <span className="text-red-700">*</span>
             </label>
             <div className="relative">
-              <span className="absolute left-4 top-2 text-white/40">$</span>
+              <span className="absolute left-4 top-2 text-muted-foreground">$</span>
               <input
                 type="number"
                 step="0.01"
@@ -341,22 +341,22 @@ function NewFundraiserPageContent() {
                 value={formData.price}
                 onChange={(e) => setFormData({ ...formData, price: e.target.value })}
                 placeholder="0.00"
-                className="w-full rounded-lg border border-purple-900/40 bg-black/40 px-4 py-2 pl-8 text-white placeholder-white/30 focus:border-[#9945FF] focus:outline-none focus:ring-2 focus:ring-[#9945FF]/30"
+                className="w-full rounded-lg border border-border bg-muted px-4 py-2 pl-8 text-foreground placeholder-white/30 focus:border-border focus:outline-none focus:ring-2 focus:ring-ring"
                 required
               />
             </div>
-            <p className="mt-1 text-xs text-white/40">Minimum $0.10 USDC per donation</p>
+            <p className="mt-1 text-xs text-muted-foreground">Minimum $0.10 USDC per donation</p>
           </div>
 
           {/* Category */}
           <div className="mb-6">
-            <label className="mb-2 block text-sm font-medium text-white/70">
-              Category <span className="text-red-400">*</span>
+            <label className="mb-2 block text-sm font-medium text-muted-foreground">
+              Category <span className="text-red-700">*</span>
             </label>
             <select
               value={formData.category}
               onChange={(e) => setFormData({ ...formData, category: e.target.value })}
-              className="w-full rounded-lg border border-purple-900/40 bg-black/40 px-4 py-2 text-white focus:border-[#9945FF] focus:outline-none focus:ring-2 focus:ring-[#9945FF]/30"
+              className="w-full rounded-lg border border-border bg-muted px-4 py-2 text-foreground focus:border-border focus:outline-none focus:ring-2 focus:ring-ring"
               required
             >
               <option value="">Select a category...</option>
@@ -391,12 +391,12 @@ function NewFundraiserPageContent() {
 
           {/* Image Upload */}
           <div className="mb-6">
-            <label className="mb-2 block text-sm font-medium text-white/70">
-              Fundraiser Image <span className="text-red-400">*</span>
+            <label className="mb-2 block text-sm font-medium text-muted-foreground">
+              Fundraiser Image <span className="text-red-700">*</span>
             </label>
             <div className="flex items-start space-x-4">
               {imagePreview && (
-                <div className="relative h-32 w-32 overflow-hidden rounded-lg border border-purple-900/40">
+                <div className="relative h-32 w-32 overflow-hidden rounded-lg border border-border">
                   <img src={imagePreview} alt="Preview" className="h-full w-full object-cover" />
                 </div>
               )}
@@ -405,29 +405,29 @@ function NewFundraiserPageContent() {
                   type="file"
                   accept="image/jpeg,image/png,image/webp"
                   onChange={handleImageChange}
-                  className="block w-full text-sm text-white/50 file:mr-4 file:rounded-lg file:border-0 file:bg-[#F97316] file:px-4 file:py-2 file:text-sm file:font-medium file:text-black hover:file:bg-[#ea6c0e]"
+                  className="block w-full text-sm text-muted-foreground file:mr-4 file:rounded-lg file:border-0 file:bg-primary file:px-4 file:py-2 file:text-sm file:font-medium file:text-primary-foreground hover:file:bg-primary"
                 />
-                <p className="mt-2 text-xs text-white/40">
+                <p className="mt-2 text-xs text-muted-foreground">
                   JPEG, PNG, or WebP. Max 5MB. Recommended 800x600px
                 </p>
                 {uploadingImage && (
-                  <p className="mt-2 text-sm text-[#14F195]">Uploading...</p>
+                  <p className="mt-2 text-sm text-primary">Uploading...</p>
                 )}
               </div>
             </div>
           </div>
 
           {/* Private Delivery URL Section */}
-          <div className="mb-6 rounded-lg border-2 border-red-900/50 bg-red-950/20 p-4">
+          <div className="mb-6 rounded-lg border-2 border-red-200 bg-red-50 p-4">
             <div className="flex items-start space-x-3 mb-4">
-              <div className="flex h-8 w-8 items-center justify-center rounded-full bg-red-600 text-white font-bold flex-shrink-0">
+              <div className="flex h-8 w-8 items-center justify-center rounded-full bg-red-600 text-primary-foreground font-bold flex-shrink-0">
                 🔒
               </div>
               <div>
-                <h3 className="text-sm font-bold text-red-400 mb-1">
-                  Private Thank You / Reward URL <span className="text-red-400">*</span>
+                <h3 className="text-sm font-bold text-red-700 mb-1">
+                  Private Thank You / Reward URL <span className="text-red-700">*</span>
                 </h3>
-                <p className="text-xs text-red-400/80">
+                <p className="text-xs text-red-700">
                   ⚠️ <strong>ENCRYPTED & PRIVATE:</strong> Only shown to donors after successful donation. Never displayed publicly.
                 </p>
               </div>
@@ -438,25 +438,25 @@ function NewFundraiserPageContent() {
               value={formData.deliveryUrl}
               onChange={(e) => setFormData({ ...formData, deliveryUrl: e.target.value })}
               placeholder="https://docs.google.com/document/... (Thank you message, reward link, etc.)"
-              className="w-full rounded-lg border border-red-900/50 bg-black/40 px-4 py-2 text-white placeholder-white/30 focus:border-red-600 focus:outline-none focus:ring-2 focus:ring-red-600/30"
+              className="w-full rounded-lg border border-red-200 bg-muted px-4 py-2 text-foreground placeholder-white/30 focus:border-red-200 focus:outline-none focus:ring-2 focus:ring-red-600/30"
               required
             />
-            <p className="mt-2 text-xs text-red-400/70">
+            <p className="mt-2 text-xs text-red-700">
               The thank you message or reward link donors receive after donating (Google Doc, Discord invite, etc.)
             </p>
           </div>
 
           {/* Public Information Section */}
-          <div className="mb-6 rounded-lg border-2 border-[#14F195]/20 bg-[#14F195]/5 p-4">
+          <div className="mb-6 rounded-lg border-2 border-border bg-accent p-4">
             <div className="flex items-start space-x-3 mb-4">
-              <div className="flex h-8 w-8 items-center justify-center rounded-full bg-[#14F195] text-black font-bold flex-shrink-0">
+              <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary text-primary-foreground font-bold flex-shrink-0">
                 👁️
               </div>
               <div>
-                <h3 className="text-sm font-bold text-[#14F195] mb-1">
+                <h3 className="text-sm font-bold text-primary mb-1">
                   Public Resources (Optional)
                 </h3>
-                <p className="text-xs text-[#14F195]/80">
+                <p className="text-xs text-primary">
                   ✅ <strong>PUBLICLY VISIBLE:</strong> Shown on your fundraiser page to help donors make informed decisions.
                 </p>
               </div>
@@ -464,7 +464,7 @@ function NewFundraiserPageContent() {
 
             {/* Demo Video URL */}
             <div className="mb-4">
-              <label className="mb-2 block text-sm font-medium text-white/70">
+              <label className="mb-2 block text-sm font-medium text-muted-foreground">
                 🎥 Demo/Story Video URL (YouTube)
               </label>
               <input
@@ -472,16 +472,16 @@ function NewFundraiserPageContent() {
                 value={formData.demoVideoUrl}
                 onChange={(e) => setFormData({ ...formData, demoVideoUrl: e.target.value })}
                 placeholder="https://youtube.com/watch?v=dQw4w9WgXcQ or https://youtu.be/dQw4w9WgXcQ"
-                className="w-full rounded-lg border border-[#14F195]/20 bg-black/40 px-4 py-2 text-white placeholder-white/30 focus:border-[#14F195] focus:outline-none focus:ring-2 focus:ring-[#14F195]/30"
+                className="w-full rounded-lg border border-border bg-muted px-4 py-2 text-foreground placeholder-white/30 focus:border-border focus:outline-none focus:ring-2 focus:ring-ring"
               />
-              <p className="mt-1 text-xs text-[#14F195]/60">
+              <p className="mt-1 text-xs text-primary">
                 YouTube video that will auto-play (muted) on your fundraiser page
               </p>
             </div>
 
             {/* Whitepaper URL */}
             <div className="mb-4">
-              <label className="mb-2 block text-sm font-medium text-white/70">
+              <label className="mb-2 block text-sm font-medium text-muted-foreground">
                 📄 Details Document URL
               </label>
               <input
@@ -489,16 +489,16 @@ function NewFundraiserPageContent() {
                 value={formData.whitepaperUrl}
                 onChange={(e) => setFormData({ ...formData, whitepaperUrl: e.target.value })}
                 placeholder="https://docs.google.com/document/..."
-                className="w-full rounded-lg border border-[#14F195]/20 bg-black/40 px-4 py-2 text-white placeholder-white/30 focus:border-[#14F195] focus:outline-none focus:ring-2 focus:ring-[#14F195]/30"
+                className="w-full rounded-lg border border-border bg-muted px-4 py-2 text-foreground placeholder-white/30 focus:border-border focus:outline-none focus:ring-2 focus:ring-ring"
               />
-              <p className="mt-1 text-xs text-[#14F195]/60">
+              <p className="mt-1 text-xs text-primary">
                 Public document with more details about your fundraiser shown on your page
               </p>
             </div>
 
             {/* GitHub URL */}
             <div>
-              <label className="mb-2 block text-sm font-medium text-white/70">
+              <label className="mb-2 block text-sm font-medium text-muted-foreground">
                 💻 Project Link (GitHub, Website, etc.)
               </label>
               <input
@@ -506,34 +506,34 @@ function NewFundraiserPageContent() {
                 value={formData.githubUrl}
                 onChange={(e) => setFormData({ ...formData, githubUrl: e.target.value })}
                 placeholder="https://github.com/username/project"
-                className="w-full rounded-lg border border-[#14F195]/20 bg-black/40 px-4 py-2 text-white placeholder-white/30 focus:border-[#14F195] focus:outline-none focus:ring-2 focus:ring-[#14F195]/30"
+                className="w-full rounded-lg border border-border bg-muted px-4 py-2 text-foreground placeholder-white/30 focus:border-border focus:outline-none focus:ring-2 focus:ring-ring"
               />
-              <p className="mt-1 text-xs text-[#14F195]/60">
+              <p className="mt-1 text-xs text-primary">
                 Public project link shown on your fundraiser page
               </p>
             </div>
           </div>
 
           {/* Submit Buttons */}
-          <div className="flex items-center justify-between pt-6 border-t border-purple-900/30">
+          <div className="flex items-center justify-between pt-6 border-t border-border">
             <Link
               href="/fundraisers/my"
-              className="text-sm text-white/50 hover:text-white transition-colors"
+              className="text-sm text-muted-foreground hover:text-foreground transition-colors"
             >
               Cancel
             </Link>
             <button
               type="submit"
               disabled={loading || uploadingImage}
-              className="rounded-lg bg-[#F97316] px-6 py-2 text-sm font-medium text-black hover:bg-[#ea6c0e] disabled:cursor-not-allowed disabled:opacity-50 transition-colors"
+              className="rounded-lg bg-primary px-6 py-2 text-sm font-medium text-primary-foreground hover:bg-primary disabled:cursor-not-allowed disabled:opacity-50 transition-colors"
             >
               {loading ? 'Creating...' : 'Create Fundraiser'}
             </button>
           </div>
 
           {/* Info Box */}
-          <div className="mt-6 rounded-lg border border-purple-900/40 bg-purple-950/20 p-4">
-            <p className="text-sm text-purple-300">
+          <div className="mt-6 rounded-lg border border-border bg-accent p-4">
+            <p className="text-sm text-primary">
               ℹ️ Your fundraiser will be reviewed by admins before going live.
               This usually takes 24-48 hours.
             </p>

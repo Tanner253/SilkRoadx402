@@ -1,0 +1,107 @@
+.openfund-home { max-width: 1456px; margin: auto; padding: 0 32px; }
+
+/* ----------------------------------------------------------------- hero -- */
+.fund-hero {
+  position: relative;
+  display: grid; grid-template-columns: .85fr 1.15fr; align-items: center;
+  min-height: min(760px, calc(100svh - 150px)); gap: 16px; padding: 46px 0 90px;
+}
+.fund-intro { z-index: 1; padding-left: 24px; }
+.fund-eyebrow { display: flex; align-items: center; gap: 9px; color: #59684a; font-size: 10px; font-weight: 600; letter-spacing: 1.5px; }
+.fund-eyebrow > span { width: 6px; height: 6px; border-radius: 50%; background: #62754d; }
+.fund-intro h1 { font-size: clamp(60px, 6.7vw, 98px); line-height: .99; letter-spacing: -5px; font-weight: 450; margin: 28px 0; animation-delay: 80ms; }
+.fund-intro h1 em { font-family: Georgia, 'Times New Roman', serif; font-weight: 400; color: #59684a; }
+.fund-description { max-width: 345px; font-size: 15px; line-height: 1.85; color: #696b60; }
+.fund-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 22px; margin-top: 30px; }
+.fund-button { display: inline-flex; justify-content: center; align-items: center; gap: 22px; background: #3d5136; color: #fff; padding: 16px 21px; border-radius: 6px; font-size: 13px; font-weight: 500; transition: background 180ms, transform 180ms; }
+.fund-button:hover { background: #293d23; transform: translateY(-2px); }
+.fund-text-link { display: inline-flex; gap: 10px; align-items: center; font-size: 13px; border-bottom: 1px solid #292d2540; padding: 8px 0; }
+
+/* --------------------------------------------------------------- mascot -- */
+.piggy-stage { position: relative; min-width: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+.piggy-figure { width: min(100%, 520px); height: auto; }
+.piggy-figure svg { width: 100%; height: auto; display: block; }
+.piggy-hint { margin-top: 4px; color: #9aa08d; font-size: 11px; letter-spacing: .3px; }
+
+/* Sits at the bottom of the hero; the line drifts down on a loop. */
+.fund-scrollcue {
+  position: absolute; left: 50%; bottom: 14px; transform: translateX(-50%);
+  display: flex; flex-direction: column; align-items: center; gap: 10px;
+  color: #9aa08d; font-size: 10px; font-weight: 600; letter-spacing: 2.2px; text-transform: uppercase;
+}
+.fund-scrollcue i { width: 1px; height: 38px; background: linear-gradient(#c3c8b6, transparent); animation: fund-cue 2.4s ease-in-out infinite; transform-origin: top; }
+@keyframes fund-cue { 0%, 100% { transform: scaleY(.35); opacity: .5; } 50% { transform: scaleY(1); opacity: 1; } }
+
+/* ----------------------------------------------------------- statements -- */
+/* One idea per screen: a lot of air, a short heading, a single paragraph. */
+.fund-statement { display: flex; padding: clamp(90px, 15vh, 170px) 24px; }
+.fund-statement-inner { max-width: 520px; }
+.fund-statement--right { justify-content: flex-end; text-align: left; }
+.fund-statement h2 { font-size: clamp(38px, 5vw, 66px); line-height: 1.02; letter-spacing: -2.4px; font-weight: 450; margin-bottom: 26px; }
+.fund-statement p { font-size: 15px; line-height: 1.9; color: #696b60; }
+
+/* -------------------------------------------------------------- numbers -- */
+.fund-numbers { padding: clamp(50px, 8vh, 90px) 24px; border-top: 1px solid #292d251c; }
+.fund-numbers-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 54px; }
+.fund-number span { display: block; font-family: Georgia, serif; font-size: 13px; color: #59684a; letter-spacing: 1px; margin-bottom: 18px; }
+.fund-number h3 { font-size: 21px; font-weight: 500; letter-spacing: -.5px; margin-bottom: 9px; }
+.fund-number p { font-size: 14px; line-height: 1.8; color: #696b60; }
+
+/* ------------------------------------------------------------ start CTA -- */
+.fund-start { padding: clamp(90px, 14vh, 160px) 24px; text-align: center; }
+.fund-start h2 { font-size: clamp(38px, 5.2vw, 68px); line-height: 1.04; letter-spacing: -2.6px; font-weight: 450; margin-bottom: clamp(44px, 7vh, 76px); }
+.fund-start-grid { display: grid; grid-template-columns: 1fr 1fr; gap: clamp(28px, 6vw, 96px); max-width: 940px; margin: auto; }
+.fund-start-col { display: flex; flex-direction: column; align-items: center; gap: 20px; }
+/* Big tactile slab — the main affordance on the page. */
+.fund-card {
+  display: grid; place-items: center; width: 100%; aspect-ratio: 1 / 1; max-width: 330px;
+  border-radius: 34px; background: linear-gradient(160deg, #fdfcf8, #e6e8dc);
+  box-shadow: 0 2px 3px #292d2508, 0 18px 46px #292d2514;
+  font-size: clamp(26px, 3.1vw, 38px); line-height: 1.16; letter-spacing: -1.4px; font-weight: 450; color: #2a2d26;
+  transition: transform 420ms cubic-bezier(.2,.65,.25,1), box-shadow 420ms cubic-bezier(.2,.65,.25,1);
+}
+.fund-card:hover { transform: translateY(-9px) scale(1.018); box-shadow: 0 3px 5px #292d250a, 0 30px 68px #292d251f; }
+.fund-card:active { transform: translateY(-3px) scale(.995); }
+.fund-card-link { display: inline-flex; align-items: center; gap: 8px; background: #eceee4; border-radius: 999px; padding: 11px 19px; font-size: 12.5px; font-weight: 500; transition: background 180ms; }
+.fund-card-link:hover { background: #e0e3d5; }
+
+/* ---------------------------------------------------------------- token -- */
+.fund-token { border-top: 1px solid #292d251c; margin: 0 24px; color: #696b60; font-size: 11px; }
+.fund-token summary { cursor: pointer; padding: 22px 0; display: flex; justify-content: space-between; gap: 20px; }
+.fund-token > div { padding-bottom: 24px; line-height: 1.8; }
+.fund-token code { display: inline-block; margin-left: 8px; overflow-wrap: anywhere; color: #3d5136; }
+.fund-token a { display: inline-flex; align-items: center; gap: 5px; text-decoration: underline; margin-top: 10px; }
+
+/* --------------------------------------------------------- entry reveal -- */
+.fund-reveal { animation: fund-arrive 800ms cubic-bezier(.2,.65,.25,1) both; }
+.fund-description.fund-reveal { animation-delay: 160ms; }
+.fund-actions.fund-reveal { animation-delay: 240ms; }
+@keyframes fund-arrive { from { opacity: 0; transform: translateY(18px); } to { opacity: 1; transform: translateY(0); } }
+
+@media (max-width: 900px) {
+  .fund-numbers-grid { grid-template-columns: 1fr; gap: 38px; }
+}
+
+@media (max-width: 760px) {
+  .openfund-home { padding-inline: 22px; }
+  .fund-hero { grid-template-columns: 1fr; padding: 38px 0 64px; min-height: auto; gap: 10px; }
+  .fund-intro { padding-left: 0; }
+  .fund-intro h1 { font-size: clamp(60px, 12vw, 86px); letter-spacing: -3.8px; margin-block: 24px; }
+  .fund-description { font-size: 14px; }
+  .fund-actions { margin-top: 24px; gap: 18px; }
+  .fund-button { padding: 15px 18px; }
+  .piggy-stage { margin-inline: -18px; }
+  .fund-scrollcue { display: none; }
+  .fund-statement, .fund-numbers, .fund-start { padding-inline: 0; }
+  .fund-statement--right { justify-content: flex-start; }
+  .fund-start-grid { grid-template-columns: 1fr; gap: 44px; }
+  .fund-card { max-width: none; aspect-ratio: 3 / 2; border-radius: 26px; }
+  .fund-token { margin: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fund-reveal { animation: none; }
+  .fund-scrollcue i { animation: none; }
+  .fund-button, .fund-card { transition: none; }
+  .fund-button:hover, .fund-card:hover { transform: none; }
+}

@@ -8,7 +8,6 @@ import { useX403Auth } from './useX403Auth';
 
 interface AuthState {
   isConnected: boolean;
-  hasAcceptedTOS: boolean;
   isTokenGated: boolean;
   isLoading: boolean;
   error: string | null;
@@ -18,12 +17,10 @@ export function useAuth() {
   const { publicKey, connected, disconnect } = useWallet();
   const [authState, setAuthState] = useState<AuthState>({
     isConnected: false,
-    hasAcceptedTOS: false,
     isTokenGated: false,
     isLoading: false,
     error: null,
   });
-  const [showTOSModal, setShowTOSModal] = useState(false);
   const [showTokenGateModal, setShowTokenGateModal] = useState(false);
   const [tokenBalance, setTokenBalance] = useState(0);
   const [mounted, setMounted] = useState(false);
@@ -60,12 +57,10 @@ export function useAuth() {
       
       setAuthState({
         isConnected: false,
-        hasAcceptedTOS: false,
         isTokenGated: false,
         isLoading: false,
         error: null,
       });
-      setShowTOSModal(false);
       setShowTokenGateModal(false);
       setTokenBalance(0);
       
@@ -121,36 +116,18 @@ export function useAuth() {
       console.log(`💾 Using cached balance: ${cached.tokenBalance.toLocaleString()} tokens`);
       setTokenBalance(cached.tokenBalance);
       
-      // Still need to check TOS status (fast, no RPC call)
-      try {
-        const response = await axios.post('/api/auth/connect', {
-          wallet,
-          skipTokenCheck: true, // Tell backend to skip balance check
-        });
+      setAuthState({
+        isConnected: true,
+        isTokenGated: cached.isTokenGated,
+        isLoading: false,
+        error: null,
+      });
 
-        const { hasAcceptedTOS } = response.data;
-
-        setAuthState({
-          isConnected: true,
-          hasAcceptedTOS,
-          isTokenGated: cached.isTokenGated,
-          isLoading: false,
-          error: null,
-        });
-
-        // Show appropriate modal
-        if (!cached.isTokenGated) {
-          setShowTokenGateModal(true);
-          setShowTOSModal(false);
-        } else if (!hasAcceptedTOS) {
-          setShowTOSModal(true);
-          setShowTokenGateModal(false);
-        }
-
-        return;
-      } catch (error) {
-        console.warn('⚠️ TOS check failed, will do full auth check');
+      if (!cached.isTokenGated) {
+        setShowTokenGateModal(true);
       }
+
+      return;
     }
 
     // No cache or forced refresh - do full check (includes RPC call)
@@ -167,9 +144,8 @@ export function useAuth() {
         wallet,
       });
 
-      const { tokenGatingPassed, hasAcceptedTOS, tokenBalance: balance } = response.data;
+      const { tokenGatingPassed, tokenBalance: balance } = response.data;
 
-      // Cache the token gating result
       if (balance !== undefined) {
         setTokenBalance(balance);
         setCachedTokenGate(wallet, balance, tokenGatingPassed);
@@ -178,21 +154,13 @@ export function useAuth() {
 
       setAuthState({
         isConnected: true,
-        hasAcceptedTOS,
         isTokenGated: tokenGatingPassed,
         isLoading: false,
         error: null,
       });
 
-      // Priority 1: Show token gate modal if insufficient tokens
       if (!tokenGatingPassed) {
         setShowTokenGateModal(true);
-        setShowTOSModal(false);
-      }
-      // Priority 2: Show TOS modal if tokens are sufficient but TOS not accepted
-      else if (!hasAcceptedTOS && tokenGatingPassed) {
-        setShowTOSModal(true);
-        setShowTokenGateModal(false);
       }
     } catch (error: any) {
       console.error('❌ Auth check failed:', error);
@@ -205,7 +173,6 @@ export function useAuth() {
         setTokenBalance(cached.tokenBalance);
         setAuthState({
           isConnected: true,
-          hasAcceptedTOS: authState.hasAcceptedTOS, // Keep current TOS state
           isTokenGated: cached.isTokenGated,
           isLoading: false,
           error: null,
@@ -222,7 +189,6 @@ export function useAuth() {
       
       setAuthState({
         isConnected: false,
-        hasAcceptedTOS: false,
         isTokenGated: false,
         isLoading: false,
         error: errorMessage,
@@ -230,52 +196,13 @@ export function useAuth() {
     }
   };
 
-  const acceptTOS = async () => {
-    if (!publicKey) return;
-
-    setAuthState(prev => ({ ...prev, isLoading: true, error: null }));
-
-    try {
-      // Call /api/auth/tos to update TOS acceptance
-      const response = await axios.post('/api/auth/tos', {
-        wallet: publicKey.toBase58(),
-      });
-
-      if (response.data.success) {
-        setAuthState(prev => ({
-          ...prev,
-          hasAcceptedTOS: true,
-          isLoading: false,
-        }));
-        setShowTOSModal(false);
-        console.log('✅ TOS accepted');
-      }
-    } catch (error: any) {
-      console.error('❌ TOS acceptance failed:', error);
-      
-      setAuthState(prev => ({
-        ...prev,
-        isLoading: false,
-        error: 'Failed to accept TOS',
-      }));
-    }
-  };
-
-  const declineTOS = () => {
-    disconnect();
-    setShowTOSModal(false);
-  };
-
   return {
     ...authState,
-    showTOSModal,
+    hasAcceptedTOS: true,
     showTokenGateModal,
     tokenBalance,
-    acceptTOS,
-    declineTOS,
     checkAuthStatus,
     mounted,
-    // x403 state for modal
     x403,
   };
 }

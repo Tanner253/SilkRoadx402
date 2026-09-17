@@ -1,15 +1,15 @@
 /**
  * Token Gating Utilities
  * 
- * Check $SRx402 token balance for marketplace access
+ * Check $OPEN token balance for platform access
  */
 
 import { PublicKey } from '@solana/web3.js';
 import { mainnetConnection } from './connection';
-import { CONFIG, MIN_SRX402_BALANCE } from '@/config/constants';
+import { CONFIG, MIN_OPEN_BALANCE } from '@/config/constants';
 import type { TokenAccountInfo, TokenBalanceResult } from '@/types/solana';
 
-const SRX402_MINT_ADDRESS = CONFIG.SRX402_MINT;
+const OPEN_MINT_ADDRESS = CONFIG.OPEN_TOKEN_MINT;
 
 /**
  * Get all token accounts for a wallet
@@ -20,7 +20,7 @@ const SRX402_MINT_ADDRESS = CONFIG.SRX402_MINT;
 async function getTokenAccounts(walletAddress: string): Promise<TokenAccountInfo[]> {
   try {
     const walletPubkey = new PublicKey(walletAddress);
-    const mintPubkey = new PublicKey(SRX402_MINT_ADDRESS);
+    const mintPubkey = new PublicKey(OPEN_MINT_ADDRESS);
 
     const accounts = await mainnetConnection.getParsedTokenAccountsByOwner(
       walletPubkey,
@@ -62,23 +62,22 @@ export async function checkTokenBalance(walletAddress: string): Promise<TokenBal
     const total = sumTokenBalances(accounts);
 
     // Check if meets requirement
-    const meetsRequirement = total >= MIN_SRX402_BALANCE;
+    const meetsRequirement = total >= MIN_OPEN_BALANCE;
 
     return {
       total,
       accounts,
       meetsRequirement,
-      required: MIN_SRX402_BALANCE,
+      required: MIN_OPEN_BALANCE,
     };
   } catch (error) {
     console.error('Error checking token balance:', error);
     
-    // Return failure result
     return {
       total: 0,
       accounts: [],
       meetsRequirement: false,
-      required: MIN_SRX402_BALANCE,
+      required: MIN_OPEN_BALANCE,
     };
   }
 }

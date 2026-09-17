@@ -47,26 +47,26 @@ export default function AdminLoginPage() {
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gradient-to-b from-zinc-50 to-zinc-100 dark:from-zinc-950 dark:to-black px-4">
+    <div className="flex min-h-screen items-center justify-center bg-gradient-to-b from-background to-background   px-4">
       <div className="w-full max-w-md">
         <div className="mb-8 text-center">
-          <h1 className="text-3xl font-bold text-zinc-900 dark:text-zinc-50 mb-2">
+          <h1 className="text-3xl font-bold text-foreground  mb-2">
             Admin Login
           </h1>
-          <p className="text-zinc-600 dark:text-zinc-400">
+          <p className="text-muted-foreground ">
             Enter your admin code to access the dashboard
           </p>
         </div>
 
-        <form onSubmit={handleSubmit} className="rounded-lg border border-zinc-200 bg-white p-8 shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
+        <form onSubmit={handleSubmit} className="rounded-lg border border-border bg-card p-8 shadow-sm  ">
           {error && (
-            <div className="mb-6 rounded-lg border border-red-200 bg-red-50 p-4 dark:border-red-900 dark:bg-red-950">
-              <p className="text-sm text-red-600 dark:text-red-400">⚠️ {error}</p>
+            <div className="mb-6 rounded-lg border border-red-200 bg-red-50 p-4  ">
+              <p className="text-sm text-red-600 ">⚠️ {error}</p>
             </div>
           )}
 
           <div className="mb-6">
-            <label className="mb-2 block text-sm font-medium text-zinc-900 dark:text-zinc-50">
+            <label className="mb-2 block text-sm font-medium text-foreground ">
               Admin Code
             </label>
             <input
@@ -74,7 +74,7 @@ export default function AdminLoginPage() {
               value={code}
               onChange={(e) => setCode(e.target.value)}
               placeholder="Enter admin code"
-              className="w-full rounded-lg border border-zinc-300 bg-white px-4 py-3 text-zinc-900 placeholder-zinc-400 focus:border-green-600 focus:outline-none focus:ring-2 focus:ring-green-600 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-50 dark:placeholder-zinc-500"
+              className="w-full rounded-lg border border-border bg-card px-4 py-3 text-foreground placeholder-zinc-400 focus:border-green-200 focus:outline-none focus:ring-2 focus:ring-green-600    "
               required
             />
           </div>
@@ -82,12 +82,12 @@ export default function AdminLoginPage() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full rounded-lg bg-green-600 py-3 text-sm font-medium text-white hover:bg-green-700 disabled:cursor-not-allowed disabled:opacity-50 transition-colors"
+            className="w-full rounded-lg bg-green-600 py-3 text-sm font-medium text-primary-foreground hover:bg-green-700 disabled:cursor-not-allowed disabled:opacity-50 transition-colors"
           >
             {loading ? 'Logging in...' : 'Login'}
           </button>
 
-          <p className="mt-4 text-center text-xs text-zinc-500">
+          <p className="mt-4 text-center text-xs text-muted-foreground">
             🔒 Admin access only. Unauthorized access is logged.
           </p>
         </form>

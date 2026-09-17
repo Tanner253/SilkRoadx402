@@ -4,7 +4,7 @@ import { createContext, useContext, useState, useCallback, ReactNode } from 'rea
 
 interface ConfirmOptions {
   title: string;
-  message: string;
+  message: string | ReactNode;
   confirmLabel?: string;
   cancelLabel?: string;
   variant?: 'danger' | 'warning' | 'info';
@@ -53,20 +53,20 @@ export function ConfirmDialogProvider({ children }: { children: ReactNode }) {
       case 'danger':
         return {
           icon: '⚠️',
-          confirmBtn: 'bg-red-600 hover:bg-red-700 text-white',
-          iconBg: 'bg-red-950/30',
+          confirmBtn: 'bg-red-600 hover:bg-red-700 text-foreground',
+          iconBg: 'bg-red-50',
         };
       case 'warning':
         return {
           icon: '⚠️',
-          confirmBtn: 'bg-yellow-600 hover:bg-yellow-700 text-white',
-          iconBg: 'bg-yellow-950/30',
+          confirmBtn: 'bg-yellow-600 hover:bg-yellow-700 text-foreground',
+          iconBg: 'bg-yellow-50',
         };
       default:
         return {
           icon: 'ℹ️',
-          confirmBtn: 'bg-[#F97316] text-black hover:bg-[#ea6c0e]',
-          iconBg: 'bg-purple-950/30',
+          confirmBtn: 'bg-primary text-primary-foreground hover:bg-primary',
+          iconBg: 'bg-accent',
         };
     }
   };
@@ -82,12 +82,12 @@ export function ConfirmDialogProvider({ children }: { children: ReactNode }) {
         <div className="fixed inset-0 z-[200] flex items-center justify-center p-4">
           {/* Backdrop */}
           <div
-            className="absolute inset-0 bg-black/50 backdrop-blur-sm animate-in fade-in duration-200"
+            className="absolute inset-0 bg-muted backdrop-blur-sm animate-in fade-in duration-200"
             onClick={handleCancel}
           />
 
           {/* Dialog */}
-          <div className="relative bg-[#0f0f14] rounded-lg shadow-2xl max-w-md w-full animate-in zoom-in-95 duration-200 border border-purple-900/30">
+          <div className="relative bg-background rounded-lg shadow-2xl max-w-lg w-full animate-in zoom-in-95 duration-200 border border-border max-h-[85vh] overflow-y-auto">
             <div className="p-6">
               {/* Icon */}
               <div className={`flex h-12 w-12 items-center justify-center rounded-full ${styles.iconBg} mb-4`}>
@@ -95,20 +95,20 @@ export function ConfirmDialogProvider({ children }: { children: ReactNode }) {
               </div>
 
               {/* Title */}
-              <h3 className="text-lg font-semibold text-white mb-2">
+              <h3 className="text-lg font-semibold text-foreground mb-2">
                 {options.title}
               </h3>
 
               {/* Message */}
-              <p className="text-sm text-white/50 mb-6">
+              <div className="text-sm text-muted-foreground mb-6">
                 {options.message}
-              </p>
+              </div>
 
               {/* Actions */}
               <div className="flex gap-3">
                 <button
                   onClick={handleCancel}
-                  className="flex-1 rounded-lg border border-purple-900/40 bg-white/5 px-4 py-2.5 text-sm font-medium text-white/70 hover:bg-white/10 transition-colors"
+                  className="flex-1 rounded-lg border border-border bg-muted px-4 py-2.5 text-sm font-medium text-muted-foreground hover:bg-muted transition-colors"
                 >
                   {options.cancelLabel || 'Cancel'}
                 </button>

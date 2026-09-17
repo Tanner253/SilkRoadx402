@@ -10,89 +10,60 @@ export function FAQ() {
       question: 'What is OpenFund?',
       answer: (
         <p>
-          OpenFund is a pseudonymous, no-KYC crowdfunding platform built on Solana. Anyone with a
-          Solana wallet can create a fundraiser or donate to a campaign — no identity verification,
-          no bank accounts, no gatekeepers. Payments are made directly in USDC on-chain.
+          OpenFund is no-KYC crowdfunding. Anyone can start a fundraiser for what matters to them,
+          and anyone can chip in — no identity checks, no bank account, no gatekeepers.
+          Contributions go straight to the fundraiser&apos;s own wallet. OpenFund is moving to
+          Robinhood Chain, where donations are made in ETH.
         </p>
       ),
     },
     {
-      question: 'Do I need to sign up or verify my identity?',
+      question: 'Do I need to sign up, connect a wallet or verify my identity?',
       answer: (
         <>
-          <p className="mb-3">
-            <strong>No</strong> — there is zero sign-up. Your Solana wallet is your account.
-          </p>
+          <p className="mb-3"><strong>No.</strong> There is nothing to sign up for.</p>
           <ul className="list-disc list-inside space-y-1">
-            <li>No email required</li>
+            <li>No email</li>
             <li>No ID or KYC verification</li>
-            <li>No personal information stored</li>
-            <li>Connect your wallet → accept Terms → you&apos;re in</li>
+            <li>No connecting your wallet to this site</li>
           </ul>
+          <p className="mt-3">To give, you send from the wallet you already use, the same way you&apos;d pay a friend.</p>
         </>
       ),
     },
     {
-      question: 'What wallet do I need?',
-      answer: (
-        <>
-          <p className="mb-3">Any Solana-compatible wallet works. We recommend:</p>
-          <ul className="list-disc list-inside space-y-2">
-            <li><strong>Phantom</strong> — most popular, sets up USDC automatically</li>
-            <li><strong>Solflare</strong> — full SPL token support</li>
-          </ul>
-          <p className="mt-3 text-sm text-white/50">
-            You&apos;ll also need a small amount of SOL for transaction fees (~$0.00025 per tx).
-          </p>
-        </>
-      ),
-    },
-    {
-      question: 'How do payments work?',
+      question: 'Which network and currency do donations use?',
       answer: (
         <>
           <p className="mb-3">
-            All donations are made in <strong>USDC on Solana</strong> and go <strong>directly</strong> to
-            the fundraiser creator&apos;s wallet — no escrow, no platform intermediary.
+            <strong>ETH on Robinhood Chain</strong> (chain ID 4663) — the network pons runs on.
           </p>
-          <ul className="list-disc list-inside space-y-2">
-            <li>Instant settlement (~400ms on Solana)</li>
-            <li>Network fees are less than $0.001</li>
-            <li>OpenFund takes <strong>0% of every donation</strong></li>
-          </ul>
-          <p className="mt-3 text-sm text-yellow-400 bg-yellow-950/20 border border-yellow-800/40 p-3 rounded">
-            ⚠️ <strong>Donations are non-refundable.</strong> Do your research before donating to any campaign.
+          <p className="text-sm text-primary bg-accent border border-border p-3 rounded">
+            Robinhood Chain is not Ethereum mainnet. ETH sent on any other network won&apos;t be counted
+            toward the campaign and may be difficult or impossible to recover. Check that your wallet
+            is on Robinhood Chain before you send.
           </p>
         </>
+      ),
+    },
+    {
+      question: 'How will donating work?',
+      answer: (
+        <ol className="list-decimal list-inside space-y-2">
+          <li>Open a campaign and choose how much to give</li>
+          <li>Send that amount of ETH from your own wallet to the address the campaign shows</li>
+          <li>OpenFund picks the payment up on-chain and adds it to the campaign&apos;s total and donation log</li>
+        </ol>
       ),
     },
     {
       question: 'How do I start a fundraiser?',
       answer: (
-        <ol className="list-decimal list-inside space-y-2">
-          <li>Connect your Solana wallet and accept the Terms of Service</li>
-          <li>Click <strong>&quot;Start a Fund&quot;</strong> in the navigation</li>
-          <li>Fill in your campaign title, description, goal amount, and category</li>
-          <li>Upload a campaign image</li>
-          <li>Submit for admin review — approved campaigns go live on the platform</li>
-        </ol>
-      ),
-    },
-    {
-      question: 'Who can see my fundraiser?',
-      answer: (
-        <>
-          <p className="mb-3">
-            All approved fundraisers are publicly visible on the <strong>Campaigns</strong> page.
-            Your campaign will show:
-          </p>
-          <ul className="list-disc list-inside space-y-1">
-            <li>Campaign title, description, and image</li>
-            <li>Progress toward your goal</li>
-            <li>Anonymized donor list (truncated wallet addresses)</li>
-            <li>Your wallet address as the creator</li>
-          </ul>
-        </>
+        <p>
+          Fundraisers open with our Robinhood Chain launch. You&apos;ll give your campaign a title,
+          tell people why it matters, set a goal, and enter the wallet address donations should go
+          to. Campaigns are reviewed before they appear publicly.
+        </p>
       ),
     },
     {
@@ -101,14 +72,15 @@ export function FAQ() {
         <>
           <p className="mb-3"><strong>Tips for donors:</strong></p>
           <ul className="list-disc list-inside space-y-2 mb-3">
-            <li>Research the campaign creator&apos;s wallet history on Solscan</li>
-            <li>Start with a small donation to test</li>
-            <li>Use the 🚩 report button for suspicious campaigns</li>
-            <li>Never share your wallet seed phrase with anyone</li>
+            <li>Read the campaign and look up the creator&apos;s address on a block explorer</li>
+            <li>Start with a small amount</li>
+            <li>Double-check you&apos;re sending on Robinhood Chain</li>
+            <li>Report anything that looks wrong</li>
+            <li>Never share your seed phrase with anyone — OpenFund will never ask for it</li>
           </ul>
-          <p className="text-sm text-orange-400 bg-orange-950/20 border border-orange-900/50 p-3 rounded">
-            ⚠️ OpenFund is a permissionless platform. We review campaigns but cannot guarantee outcomes.
-            Only donate what you can afford to lose.
+          <p className="text-sm text-primary bg-accent border border-border p-3 rounded">
+            OpenFund is permissionless. We review campaigns but can&apos;t guarantee outcomes.
+            Only give what you can afford to lose.
           </p>
         </>
       ),
@@ -117,48 +89,56 @@ export function FAQ() {
       question: 'How do I report a suspicious campaign?',
       answer: (
         <ol className="list-decimal list-inside space-y-2">
-          <li>Open the campaign detail page</li>
-          <li>Click the flag icon 🚩 in the top-right corner</li>
-          <li>Optionally add a reason</li>
-          <li>Submit — our admins will review it</li>
+          <li>Open the campaign page</li>
+          <li>Use the report option at the top right</li>
+          <li>Tell us what&apos;s wrong — our admins review every report</li>
         </ol>
       ),
     },
     {
-      question: 'What happens if a campaign doesn\'t reach its goal?',
+      question: "What happens if a campaign doesn't reach its goal?",
       answer: (
         <p>
-          OpenFund uses a <strong>keep-what-you-raise</strong> model. All donations go directly to
-          the creator&apos;s wallet instantly — there is no holding period or goal-based release.
-          If a campaign doesn&apos;t reach its goal, the creator still keeps everything donated so far.
-          This is by design: it means donors&apos; funds are never locked.
+          The fundraiser keeps everything that was given. Contributions go straight to their
+          wallet as they&apos;re made, so there&apos;s nothing held back or returned — the goal is a
+          target, not a threshold.
+        </p>
+      ),
+    },
+    {
+      question: 'What is $OPEN?',
+      answer: (
+        <p>
+          $OPEN is the OpenFund community token, launching on pons on Robinhood Chain. The contract
+          address will be posted here at launch — until then, treat any address claiming to be
+          $OPEN as fake.
         </p>
       ),
     },
   ];
 
   return (
-    <div className="rounded-xl border border-orange-900/30 bg-white/3 backdrop-blur-sm p-8">
-      <h2 className="mb-8 text-3xl font-bold text-white">
-        ❓ Frequently Asked Questions
+    <div className="rounded-xl border border-border bg-muted backdrop-blur-sm p-8">
+      <h2 className="mb-8 text-3xl font-bold text-foreground">
+        Frequently asked questions
       </h2>
       <div className="space-y-3">
         {faqs.map((faq, index) => (
           <div
             key={index}
-            className="rounded-lg border border-orange-900/30 overflow-hidden"
+            className="rounded-lg border border-border overflow-hidden"
           >
             <button
               onClick={() => setOpenIndex(openIndex === index ? null : index)}
-              className="w-full flex items-center justify-between p-4 text-left hover:bg-white/5 transition-colors"
+              className="w-full flex items-center justify-between p-4 text-left hover:bg-muted transition-colors"
             >
-              <span className="font-semibold text-white pr-4">{faq.question}</span>
-              <span className="text-2xl text-white/40 flex-shrink-0">
+              <span className="font-semibold text-foreground pr-4">{faq.question}</span>
+              <span className="text-2xl text-muted-foreground flex-shrink-0">
                 {openIndex === index ? '−' : '+'}
               </span>
             </button>
             {openIndex === index && (
-              <div className="px-4 pb-4 text-sm text-white/70 leading-relaxed">
+              <div className="px-4 pb-4 text-sm text-muted-foreground leading-relaxed">
                 {faq.answer}
               </div>
             )}

@@ -1,6 +1,7 @@
 'use client';
 
 import { use, useState, useEffect } from 'react';
+import { LaunchNotice } from '@/components/ui/LaunchNotice';
 import { useAuth } from '@/hooks/useAuth';
 import { useWallet, useConnection } from '@solana/wallet-adapter-react';
 import { useRouter } from 'next/navigation';
@@ -47,7 +48,7 @@ function FundraiserDetail({ params }: { params: Promise<{ id: string }> }) {
   // Unwrap params Promise
   const { id } = use(params);
 
-  const { isConnected, hasAcceptedTOS, mounted } = useAuth();
+  const { isConnected, mounted } = useAuth();
   const { publicKey, signTransaction } = useWallet();
   const { connection } = useConnection();
   const router = useRouter();
@@ -176,8 +177,8 @@ function FundraiserDetail({ params }: { params: Promise<{ id: string }> }) {
   const handleDonate = async () => {
     if (!publicKey || !fundraiser) return;
 
-    if (!isConnected || !hasAcceptedTOS) {
-      toast.warning('Please connect your wallet and accept TOS first');
+    if (!isConnected) {
+      toast.warning('Please connect your wallet first');
       router.push('/');
       return;
     }
@@ -411,8 +412,8 @@ function FundraiserDetail({ params }: { params: Promise<{ id: string }> }) {
   const handleAgentDonate = async () => {
     if (!publicKey || !fundraiser || !signTransaction) return;
 
-    if (!isConnected || !hasAcceptedTOS) {
-      toast.warning('Please connect your wallet and accept TOS first');
+    if (!isConnected) {
+      toast.warning('Please connect your wallet first');
       return;
     }
 
@@ -423,9 +424,60 @@ function FundraiserDetail({ params }: { params: Promise<{ id: string }> }) {
     }
 
     const confirmed = await confirm({
-      title: 'Donate via Agent Token',
-      message: `Support "${fundraiser.title}" with $${donationAmount.toFixed(2)} USDC via the OpenFund agent token? A portion of this payment supports automatic token buybacks.`,
-      confirmLabel: 'Donate with Agent',
+      title: 'Donate via Pump.fun Agent Token',
+      message: (
+        <div className="space-y-3 text-left">
+          <p>
+            You are about to donate <strong className="text-foreground">${donationAmount.toFixed(2)} USDC</strong> to
+            &ldquo;{fundraiser.title}&rdquo; using the <strong className="text-primary">Pump.fun Tokenized Agent</strong> payment path.
+          </p>
+
+          <div className="rounded-lg border border-border bg-accent p-3 text-xs space-y-2">
+            <p className="font-semibold text-primary">How Agent Payments Work</p>
+            <p>
+              Unlike a standard x402 direct transfer, this route processes your USDC through the
+              OpenFund <strong className="text-foreground">Tokenized Agent smart contract</strong> built on Pump.fun&apos;s bonding curve.
+            </p>
+            <p>
+              A configurable portion of the payment is automatically reserved for <strong className="text-foreground">buybacks
+              of the $OPEN token</strong> on-chain. The rest goes directly to the campaign creator.
+              Buybacks happen automatically over time via the smart contract — no human intervention.
+            </p>
+          </div>
+
+          <div className="rounded-lg border border-border bg-accent p-3 text-xs space-y-1.5">
+            <p className="font-semibold text-primary">What happens when you confirm</p>
+            <ol className="list-decimal ml-4 space-y-1 text-muted-foreground">
+              <li>OpenFund&apos;s server builds a Solana transaction using the Pump Agent SDK</li>
+              <li>Your wallet will prompt you to <strong className="text-foreground">review and sign</strong> the transaction</li>
+              <li>The signed transaction is sent to Solana (~400ms settlement)</li>
+              <li>The server verifies the invoice was paid on-chain</li>
+              <li>Your donation is recorded and campaign progress updates</li>
+              <li>You&apos;re redirected to the thank-you page</li>
+            </ol>
+          </div>
+
+          <div className="rounded-lg border border-border bg-muted p-3 text-xs space-y-1.5">
+            <p className="font-semibold text-foreground">Agent vs Normal Donation</p>
+            <div className="grid grid-cols-2 gap-2 text-muted-foreground">
+              <div>
+                <p className="text-[10px] text-muted-foreground mb-0.5">NORMAL (x402)</p>
+                <p>100% of USDC goes directly to the creator via P2P transfer</p>
+              </div>
+              <div>
+                <p className="text-[10px] text-primary mb-0.5">AGENT (Pump.fun)</p>
+                <p>USDC routed through agent contract — a portion triggers $OPEN buybacks, rest goes to creator</p>
+              </div>
+            </div>
+          </div>
+
+          <p className="text-[10px] text-muted-foreground">
+            Your private keys are never exposed. You sign the transaction in your wallet.
+            This is NOT a token swap — you are paying in USDC.
+          </p>
+        </div>
+      ),
+      confirmLabel: 'Pay with Agent',
       variant: 'info',
     });
 
@@ -569,10 +621,10 @@ function FundraiserDetail({ params }: { params: Promise<{ id: string }> }) {
 
   if (!mounted) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-[#0f0f14]">
+      <div className="flex min-h-screen items-center justify-center bg-background">
         <div className="text-center">
-          <div className="h-8 w-8 animate-spin rounded-full border-4 border-[#9945FF] border-t-transparent mx-auto mb-4"></div>
-          <p className="text-white/50">Loading...</p>
+          <div className="h-8 w-8 animate-spin rounded-full border-4 border-border border-t-transparent mx-auto mb-4"></div>
+          <p className="text-muted-foreground">Loading...</p>
         </div>
       </div>
     );
@@ -580,10 +632,10 @@ function FundraiserDetail({ params }: { params: Promise<{ id: string }> }) {
 
   if (loading) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-[#0f0f14]">
+      <div className="flex min-h-screen items-center justify-center bg-background">
         <div className="text-center">
-          <div className="h-8 w-8 animate-spin rounded-full border-4 border-[#9945FF] border-t-transparent mx-auto mb-4"></div>
-          <p className="text-white/50">Loading fundraiser...</p>
+          <div className="h-8 w-8 animate-spin rounded-full border-4 border-border border-t-transparent mx-auto mb-4"></div>
+          <p className="text-muted-foreground">Loading fundraiser...</p>
         </div>
       </div>
     );
@@ -591,14 +643,14 @@ function FundraiserDetail({ params }: { params: Promise<{ id: string }> }) {
 
   if (error || !fundraiser) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-[#0f0f14] px-4">
+      <div className="flex min-h-screen items-center justify-center bg-background px-4">
         <div className="text-center">
-          <h1 className="text-2xl font-bold text-white mb-4">
+          <h1 className="text-2xl font-bold text-foreground mb-4">
             {error || 'Fundraiser Not Found'}
           </h1>
           <Link
             href={backUrl}
-            className="inline-flex items-center justify-center rounded-lg bg-[#F97316] px-6 py-3 text-sm font-medium text-black hover:bg-[#ea6c0e] transition-colors"
+            className="inline-flex items-center justify-center rounded-lg bg-primary px-6 py-3 text-sm font-medium text-primary-foreground hover:bg-primary transition-colors"
           >
             {backUrl === '/listings/my' ? 'Back to My Listings' : 'Back to Fundraisers'}
           </Link>
@@ -608,31 +660,31 @@ function FundraiserDetail({ params }: { params: Promise<{ id: string }> }) {
   }
 
   return (
-    <div className="min-h-screen bg-[#0f0f14] py-12 px-4">
+    <div className="min-h-screen bg-background py-12 px-4">
       <div className="mx-auto max-w-5xl">
         {/* Back Button */}
         <Link
           href={backUrl}
-          className="mb-6 inline-flex items-center text-sm text-white/50 hover:text-white transition-colors"
+          className="mb-6 inline-flex items-center text-sm text-muted-foreground hover:text-foreground transition-colors"
         >
           {backUrl === '/listings/my' ? '← Back to My Listings' : '← Back to Fundraisers'}
         </Link>
 
         {/* Critical Warning Banner (Toggleable) */}
         {showWarning && (
-          <div className="mb-8 rounded-lg border-2 border-red-600 bg-red-950/20 p-6">
+          <div className="mb-8 rounded-lg border-2 border-red-200 bg-red-50 p-6">
             <div className="flex items-start space-x-4">
-              <div className="flex h-12 w-12 items-center justify-center rounded-full bg-red-600 text-white text-2xl font-bold flex-shrink-0">
+              <div className="flex h-12 w-12 items-center justify-center rounded-full bg-red-600 text-primary-foreground text-2xl font-bold flex-shrink-0">
                 ⚠️
               </div>
               <div>
-                <h2 className="text-lg font-bold text-red-400 mb-2">
+                <h2 className="text-lg font-bold text-red-700 mb-2">
                   CRITICAL WARNING
                 </h2>
-                <p className="text-red-400 mb-3">
+                <p className="text-red-700 mb-3">
                   This fundraiser has been flagged as <strong>HIGH RISK</strong>. Exercise extreme caution before donating.
                 </p>
-                <ul className="list-disc list-inside text-sm text-red-400/80 space-y-1 mb-4">
+                <ul className="list-disc list-inside text-sm text-red-700 space-y-1 mb-4">
                   <li>Only donate what you can afford to lose</li>
                   <li>Be aware that this may be a scam or fraudulent fundraiser</li>
                   <li>There are NO refunds or chargebacks in crypto</li>
@@ -640,7 +692,7 @@ function FundraiserDetail({ params }: { params: Promise<{ id: string }> }) {
                 </ul>
                 <button
                   onClick={() => setShowWarning(false)}
-                  className="text-sm text-red-400 hover:text-red-300 underline transition-colors"
+                  className="text-sm text-red-700 hover:text-red-700 underline transition-colors"
                 >
                   I understand the risks, dismiss warning
                 </button>
@@ -651,7 +703,7 @@ function FundraiserDetail({ params }: { params: Promise<{ id: string }> }) {
 
         <div className="grid grid-cols-1 gap-8 lg:grid-cols-2">
           {/* Image */}
-          <div className="relative aspect-[4/3] w-full overflow-hidden rounded-lg border border-purple-900/30 bg-white/5">
+          <div className="relative aspect-[4/3] w-full overflow-hidden rounded-lg border border-border bg-muted">
             <Image
               src={fundraiser.imageUrl}
               alt={fundraiser.title}
@@ -659,12 +711,12 @@ function FundraiserDetail({ params }: { params: Promise<{ id: string }> }) {
               className="object-cover"
             />
             {fundraiser.riskLevel === 'high-risk' && (
-              <div className="absolute top-4 right-4 rounded-full bg-red-600 px-4 py-2 text-sm font-medium text-white shadow-lg">
+              <div className="absolute top-4 right-4 rounded-full bg-red-600 px-4 py-2 text-sm font-medium text-primary-foreground shadow-lg">
                 ⚠️ High Risk
               </div>
             )}
             {/* Fundraiser Badge */}
-            <div className="absolute top-4 left-4 rounded-full bg-[#F97316] px-4 py-2 text-sm font-medium text-black shadow-lg flex items-center gap-2">
+            <div className="absolute top-4 left-4 rounded-full bg-primary px-4 py-2 text-sm font-medium text-primary-foreground shadow-lg flex items-center gap-2">
               💝 Fundraiser
             </div>
           </div>
@@ -672,7 +724,7 @@ function FundraiserDetail({ params }: { params: Promise<{ id: string }> }) {
           {/* Details */}
           <div>
             <div className="mb-6 relative">
-              <span className="inline-flex items-center rounded-full bg-white/10 px-3 py-1 text-xs font-medium text-white/70 mb-3">
+              <span className="inline-flex items-center rounded-full bg-muted px-3 py-1 text-xs font-medium text-muted-foreground mb-3">
                 {fundraiser.category}
               </span>
 
@@ -682,7 +734,7 @@ function FundraiserDetail({ params }: { params: Promise<{ id: string }> }) {
                 {fundraiser.riskLevel === 'high-risk' && (
                   <button
                     onClick={() => setShowWarning(!showWarning)}
-                    className="rounded-full bg-red-950/30 p-2 text-red-400 hover:bg-red-950/50 transition-colors"
+                    className="rounded-full bg-red-50 p-2 text-red-700 hover:bg-red-50 transition-colors"
                     title="Show risk warning"
                   >
                     <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 20 20">
@@ -694,7 +746,7 @@ function FundraiserDetail({ params }: { params: Promise<{ id: string }> }) {
                 {/* Report Button */}
                 <button
                   onClick={() => setShowReportForm(!showReportForm)}
-                  className="rounded-full bg-white/5 p-2 text-white/40 hover:bg-white/10 transition-colors"
+                  className="rounded-full bg-muted p-2 text-muted-foreground hover:bg-muted transition-colors"
                   title="Report fundraiser"
                 >
                   <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -703,124 +755,78 @@ function FundraiserDetail({ params }: { params: Promise<{ id: string }> }) {
                 </button>
               </div>
 
-              <h1 className="text-3xl font-bold text-white mb-2">
+              <h1 className="text-3xl font-bold text-foreground mb-2">
                 {fundraiser.title}
               </h1>
 
               {/* Donation Progress */}
-              <div className="mb-6 rounded-lg border border-purple-900/30 bg-white/5 p-4">
+              <div className="mb-6 rounded-lg border border-border bg-muted p-4">
                 <div className="flex justify-between text-sm mb-2">
-                  <span className="font-semibold text-[#14F195]">
+                  <span className="font-semibold text-primary">
                     ${totalRaised.toFixed(2)} raised
                   </span>
-                  <span className="text-white/50">
+                  <span className="text-muted-foreground">
                     of ${(fundraiser.goalAmount || fundraiser.price).toFixed(2)} goal
                   </span>
                 </div>
-                <div className="w-full bg-white/10 rounded-full h-3 overflow-hidden">
+                <div className="w-full bg-muted rounded-full h-3 overflow-hidden">
                   <div
-                    className="bg-[#F97316] h-3 rounded-full transition-all duration-500"
+                    className="bg-primary h-3 rounded-full transition-all duration-500"
                     style={{ width: `${Math.min((totalRaised / (fundraiser.goalAmount || fundraiser.price)) * 100, 100)}%` }}
                   />
                 </div>
-                <div className="text-sm text-white/50 mt-2 font-medium">
+                <div className="text-sm text-muted-foreground mt-2 font-medium">
                   {Math.round((totalRaised / (fundraiser.goalAmount || fundraiser.price)) * 100)}% funded
                 </div>
               </div>
             </div>
 
-            <p className="text-white/70 mb-6 whitespace-pre-wrap">
+            <p className="text-muted-foreground mb-6 whitespace-pre-wrap">
               {fundraiser.description}
             </p>
 
             {/* CTA Button - Hide if viewing own fundraiser */}
             {publicKey && fundraiser.wallet === publicKey.toBase58() ? (
-              <div className="w-full rounded-lg border border-purple-900/30 bg-white/5 px-6 py-3 text-sm font-medium text-white/50 text-center mb-3">
+              <div className="w-full rounded-lg border border-border bg-muted px-6 py-3 text-sm font-medium text-muted-foreground text-center mb-3">
                 👤 This is your fundraiser
               </div>
             ) : (
-              <>
-                {/* Custom Donation Amount Input */}
-                <div className="mb-4">
-                  <label className="block text-sm font-medium text-white/70 mb-2">
-                    Donation Amount (USDC)
-                  </label>
-                  <div className="relative">
-                    <span className="absolute left-4 top-3 text-white/40 text-sm">$</span>
-                    <input
-                      type="number"
-                      step="0.01"
-                      min="0.10"
-                      value={customDonationAmount}
-                      onChange={(e) => setCustomDonationAmount(e.target.value)}
-                      placeholder="Enter amount (e.g. 10.00)"
-                      className="w-full rounded-lg border border-purple-900/40 bg-black/40 px-4 py-3 pl-8 text-sm text-white placeholder-white/30 focus:border-[#9945FF] focus:outline-none focus:ring-2 focus:ring-[#9945FF]/30"
-                    />
-                  </div>
-                  <p className="mt-1 text-xs text-white/40">
-                    Choose your donation amount. Every contribution helps reach the ${fundraiser.goalAmount?.toFixed(2) || fundraiser.price.toFixed(2)} goal!
-                  </p>
-                </div>
-
-                <button
-                  onClick={handleDonate}
-                  disabled={donating || !isConnected || !hasAcceptedTOS || !customDonationAmount}
-                  className="w-full rounded-lg bg-[#F97316] px-6 py-3 text-sm font-medium text-black hover:bg-[#ea6c0e] disabled:cursor-not-allowed disabled:opacity-50 transition-colors mb-3"
-                >
-                  {donating ? 'Processing...' : hasDonated ? '💝 Donate Again' : '💝 Support This Cause'}
-                </button>
-
-                {process.env.NEXT_PUBLIC_AGENT_TOKEN_MINT && (
-                  <button
-                    onClick={handleAgentDonate}
-                    disabled={agentDonating || donating || !isConnected || !hasAcceptedTOS || !customDonationAmount}
-                    className="w-full rounded-lg border border-[#FBBF24]/40 bg-[#FBBF24]/10 px-6 py-3 text-sm font-medium text-[#FBBF24] hover:bg-[#FBBF24]/20 disabled:cursor-not-allowed disabled:opacity-50 transition-colors mb-3"
-                  >
-                    {agentDonating ? 'Processing...' : 'Donate via Agent Token'}
-                  </button>
-                )}
-
-                {!isConnected && (
-                  <p className="text-xs text-center text-white/40">
-                    Connect your wallet to donate
-                  </p>
-                )}
-                {isConnected && !hasAcceptedTOS && (
-                  <p className="text-xs text-center text-red-400">
-                    Accept Terms of Service in your profile to donate
-                  </p>
-                )}
-              </>
+              // Donating ran on a connected Solana wallet (handleDonate /
+              // handleAgentDonate below). It returns wallet-less with the
+              // Robinhood Chain migration; until then, say so.
+              <div className="mb-3">
+                <LaunchNotice subject="Donations" />
+              </div>
             )}
             {/* Error */}
             {error && (
-              <div className="mt-3 rounded-lg border border-red-900/50 bg-red-950/20 p-3">
-                <p className="text-sm text-red-400">⚠️ {error}</p>
+              <div className="mt-3 rounded-lg border border-red-200 bg-red-50 p-3">
+                <p className="text-sm text-red-700">⚠️ {error}</p>
               </div>
             )}
 
             {/* Stats */}
             <div className="mt-6 grid grid-cols-2 sm:grid-cols-3 gap-4">
-              <div className="rounded-lg border border-purple-900/30 bg-white/5 p-4">
-                <div className="text-xs text-white/40 mb-1">Views</div>
-                <span className="text-lg font-bold text-white">
+              <div className="rounded-lg border border-border bg-muted p-4">
+                <div className="text-xs text-muted-foreground mb-1">Views</div>
+                <span className="text-lg font-bold text-foreground">
                   {fundraiser.views?.toLocaleString() || 0}
                 </span>
               </div>
 
-              <div className="rounded-lg border border-purple-900/30 bg-white/5 p-4">
-                <div className="text-xs text-white/40 mb-1">Donations</div>
-                <span className="text-lg font-bold text-[#14F195]">
+              <div className="rounded-lg border border-border bg-muted p-4">
+                <div className="text-xs text-muted-foreground mb-1">Donations</div>
+                <span className="text-lg font-bold text-primary">
                   {donationCount.toLocaleString()}
                 </span>
               </div>
 
               {/* Organizer Info */}
-              <div className="rounded-lg border border-purple-900/30 bg-white/5 p-4 col-span-2 sm:col-span-1">
-                <div className="text-xs text-white/40 mb-1">Organizer</div>
+              <div className="rounded-lg border border-border bg-muted p-4 col-span-2 sm:col-span-1">
+                <div className="text-xs text-muted-foreground mb-1">Organizer</div>
                 <Link
                   href={`/fundraisers?wallet=${fundraiser.wallet}`}
-                  className="text-xs font-mono text-[#9945FF] hover:text-[#9945FF]/80 transition-colors block truncate"
+                  className="text-xs font-mono text-primary hover:text-primary transition-colors block truncate"
                   title={fundraiser.wallet}
                 >
                   {fundraiser.wallet.slice(0, 6)}...{fundraiser.wallet.slice(-4)}
@@ -833,10 +839,10 @@ function FundraiserDetail({ params }: { params: Promise<{ id: string }> }) {
         {/* Demo Video Section */}
         {fundraiser.demoVideoUrl && getYouTubeVideoId(fundraiser.demoVideoUrl) && (
           <div className="mt-8">
-            <h2 className="text-2xl font-bold text-white mb-4">
+            <h2 className="text-2xl font-bold text-foreground mb-4">
               🎥 Campaign Video
             </h2>
-            <div className="relative w-full overflow-hidden rounded-lg border border-purple-900/30 bg-white/5" style={{ paddingBottom: '56.25%' }}>
+            <div className="relative w-full overflow-hidden rounded-lg border border-border bg-muted" style={{ paddingBottom: '56.25%' }}>
               <iframe
                 className="absolute top-0 left-0 h-full w-full"
                 src={`https://www.youtube.com/embed/${getYouTubeVideoId(fundraiser.demoVideoUrl)}?autoplay=1&mute=1&rel=0`}
@@ -851,7 +857,7 @@ function FundraiserDetail({ params }: { params: Promise<{ id: string }> }) {
         {/* Additional Resources Section */}
         {(fundraiser.whitepaperUrl || fundraiser.githubUrl) && (
           <div className="mt-8">
-            <h2 className="text-2xl font-bold text-white mb-4">
+            <h2 className="text-2xl font-bold text-foreground mb-4">
               📚 Additional Information
             </h2>
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -860,10 +866,10 @@ function FundraiserDetail({ params }: { params: Promise<{ id: string }> }) {
                   href={fundraiser.whitepaperUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex items-center justify-between rounded-lg border border-purple-900/30 bg-white/5 p-4 hover:border-[#9945FF] hover:bg-white/10 transition-colors"
+                  className="flex items-center justify-between rounded-lg border border-border bg-muted p-4 hover:border-border hover:bg-muted transition-colors"
                 >
-                  <span className="text-sm font-medium text-white">📄 Documentation</span>
-                  <svg className="h-4 w-4 text-white/40" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <span className="text-sm font-medium text-foreground">📄 Documentation</span>
+                  <svg className="h-4 w-4 text-muted-foreground" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
                   </svg>
                 </a>
@@ -874,10 +880,10 @@ function FundraiserDetail({ params }: { params: Promise<{ id: string }> }) {
                   href={fundraiser.githubUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex items-center justify-between rounded-lg border border-purple-900/30 bg-white/5 p-4 hover:border-[#9945FF] hover:bg-white/10 transition-colors"
+                  className="flex items-center justify-between rounded-lg border border-border bg-muted p-4 hover:border-border hover:bg-muted transition-colors"
                 >
-                  <span className="text-sm font-medium text-white">💻 GitHub</span>
-                  <svg className="h-4 w-4 text-white/40" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <span className="text-sm font-medium text-foreground">💻 GitHub</span>
+                  <svg className="h-4 w-4 text-muted-foreground" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
                   </svg>
                 </a>
@@ -888,11 +894,11 @@ function FundraiserDetail({ params }: { params: Promise<{ id: string }> }) {
 
         {/* Report Form */}
         {showReportForm && (
-          <div className="mt-8 rounded-lg border-2 border-red-900/50 bg-red-950/20 p-6">
-            <h3 className="text-lg font-bold text-red-400 mb-3">
+          <div className="mt-8 rounded-lg border-2 border-red-200 bg-red-50 p-6">
+            <h3 className="text-lg font-bold text-red-700 mb-3">
               🚨 Report This Fundraiser
             </h3>
-            <p className="text-sm text-red-400/80 mb-4">
+            <p className="text-sm text-red-700 mb-4">
               Help us keep the community safe. If you believe this fundraiser violates our terms or is fraudulent, please report it.
             </p>
             <textarea
@@ -901,19 +907,19 @@ function FundraiserDetail({ params }: { params: Promise<{ id: string }> }) {
               placeholder="Optional: Describe the issue (max 100 characters)"
               maxLength={100}
               rows={2}
-              className="w-full rounded-lg border border-red-900/50 bg-black/40 px-4 py-2 text-sm text-white placeholder-white/30 focus:border-red-600 focus:outline-none focus:ring-2 focus:ring-red-600/30 mb-3"
+              className="w-full rounded-lg border border-red-200 bg-muted px-4 py-2 text-sm text-foreground placeholder-white/30 focus:border-red-200 focus:outline-none focus:ring-2 focus:ring-red-600/30 mb-3"
             />
             <div className="flex items-center space-x-3">
               <button
                 onClick={handleReport}
                 disabled={reporting || !isConnected}
-                className="rounded-lg bg-red-600 px-6 py-2 text-sm font-medium text-white hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-50 transition-colors"
+                className="rounded-lg bg-red-600 px-6 py-2 text-sm font-medium text-primary-foreground hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-50 transition-colors"
               >
                 {reporting ? 'Submitting...' : '🚨 Submit Report'}
               </button>
               {!isConnected && (
-                <p className="text-xs text-red-400">
-                  Connect your wallet to report
+                <p className="text-xs text-muted-foreground">
+                  Reporting opens with our Robinhood Chain launch.
                 </p>
               )}
             </div>
@@ -923,38 +929,38 @@ function FundraiserDetail({ params }: { params: Promise<{ id: string }> }) {
         {/* Recent Donations */}
         {transactions.length > 0 && (
           <div className="mt-8">
-            <h2 className="text-2xl font-bold text-white mb-4">
+            <h2 className="text-2xl font-bold text-foreground mb-4">
               💝 Recent Donations ({donationCount})
             </h2>
-            <div className="rounded-lg border border-purple-900/30 bg-white/5 backdrop-blur-sm">
+            <div className="rounded-lg border border-border bg-muted backdrop-blur-sm">
               <div className="max-h-96 overflow-y-auto">
                 {transactions.map((txn, index) => (
                   <div
                     key={txn._id}
                     className={`flex items-center justify-between p-4 ${
-                      index !== transactions.length - 1 ? 'border-b border-purple-900/30' : ''
-                    } hover:bg-white/5 transition-colors`}
+                      index !== transactions.length - 1 ? 'border-b border-border' : ''
+                    } hover:bg-muted transition-colors`}
                   >
                     <div className="flex items-center gap-3 flex-1 min-w-0">
-                      <div className="flex h-10 w-10 items-center justify-center rounded-full bg-purple-900/40 flex-shrink-0">
+                      <div className="flex h-10 w-10 items-center justify-center rounded-full bg-accent flex-shrink-0">
                         <span className="text-lg">💝</span>
                       </div>
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2 mb-1">
-                          <span className="text-sm font-mono text-white truncate">
+                          <span className="text-sm font-mono text-foreground truncate">
                             {txn.wallet.slice(0, 8)}...{txn.wallet.slice(-6)}
                           </span>
-                          <span className="text-xs text-white/40">
+                          <span className="text-xs text-muted-foreground">
                             {new Date(txn.createdAt).toLocaleDateString()}
                           </span>
                         </div>
-                        <div className="text-xs text-white/40 flex items-center gap-1">
+                        <div className="text-xs text-muted-foreground flex items-center gap-1">
                           <span>Tx:</span>
                           <a
                             href={`https://solscan.io/tx/${txn.txnHash}?cluster=${process.env.NEXT_PUBLIC_SOLANA_NETWORK === 'devnet' ? 'devnet' : 'mainnet'}`}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="font-mono hover:text-[#9945FF] transition-colors truncate max-w-[150px]"
+                            className="font-mono hover:text-primary transition-colors truncate max-w-[150px]"
                             title={txn.txnHash}
                           >
                             {txn.txnHash.slice(0, 8)}...
@@ -963,10 +969,10 @@ function FundraiserDetail({ params }: { params: Promise<{ id: string }> }) {
                       </div>
                     </div>
                     <div className="text-right flex-shrink-0 ml-4">
-                      <div className="text-lg font-bold text-[#14F195]">
+                      <div className="text-lg font-bold text-primary">
                         ${txn.amount.toFixed(2)}
                       </div>
-                      <div className="text-xs text-white/40">
+                      <div className="text-xs text-muted-foreground">
                         USDC
                       </div>
                     </div>
@@ -975,16 +981,16 @@ function FundraiserDetail({ params }: { params: Promise<{ id: string }> }) {
               </div>
 
               {/* Summary Footer */}
-              <div className="border-t border-purple-900/30 bg-white/5 p-4">
+              <div className="border-t border-border bg-muted p-4">
                 <div className="flex items-center justify-between">
-                  <span className="text-sm font-medium text-white/70">
+                  <span className="text-sm font-medium text-muted-foreground">
                     Total Raised
                   </span>
                   <div className="text-right">
-                    <div className="text-2xl font-bold text-[#14F195]">
+                    <div className="text-2xl font-bold text-primary">
                       ${totalRaised.toFixed(2)}
                     </div>
-                    <div className="text-xs text-white/40">
+                    <div className="text-xs text-muted-foreground">
                       of ${fundraiser.goalAmount?.toFixed(2) || fundraiser.price.toFixed(2)} goal
                     </div>
                   </div>
@@ -996,14 +1002,14 @@ function FundraiserDetail({ params }: { params: Promise<{ id: string }> }) {
 
         {/* Reviews/Comments Section */}
         <div className="mt-8">
-          <h2 className="text-2xl font-bold text-white mb-4">
+          <h2 className="text-2xl font-bold text-foreground mb-4">
             📝 Reviews ({comments.length})
           </h2>
 
           {/* Comments List */}
           {comments.length === 0 ? (
-            <div className="rounded-lg border border-purple-900/30 bg-white/5 p-8 text-center">
-              <p className="text-white/50">
+            <div className="rounded-lg border border-border bg-muted p-8 text-center">
+              <p className="text-muted-foreground">
                 No reviews yet. Be the first to review after donating!
               </p>
             </div>
@@ -1032,27 +1038,27 @@ function FundraiserDetail({ params }: { params: Promise<{ id: string }> }) {
                 return (
                   <div
                     key={comment._id}
-                    className="rounded-lg border border-purple-900/30 bg-white/5 p-4"
+                    className="rounded-lg border border-border bg-muted p-4"
                   >
                     <div className="flex items-center justify-between mb-2">
                       <div className="flex items-center gap-2">
-                        <div className="h-8 w-8 rounded-full bg-[#F97316] flex items-center justify-center text-black text-xs font-bold">
+                        <div className="h-8 w-8 rounded-full bg-primary flex items-center justify-center text-primary-foreground text-xs font-bold">
                           {wallet.slice(0, 2).toUpperCase()}
                         </div>
                         <div>
-                          <p className="text-sm font-medium text-white">
+                          <p className="text-sm font-medium text-foreground">
                             {truncatedWallet}
                           </p>
-                          <p className="text-xs text-white/40">
+                          <p className="text-xs text-muted-foreground">
                             Verified Donor
                           </p>
                         </div>
                       </div>
-                      <span className="text-xs text-white/40">
+                      <span className="text-xs text-muted-foreground">
                         {timeAgo()}
                       </span>
                     </div>
-                    <p className="text-sm text-white/70">
+                    <p className="text-sm text-muted-foreground">
                       {comment.comment}
                     </p>
                   </div>
@@ -1063,8 +1069,8 @@ function FundraiserDetail({ params }: { params: Promise<{ id: string }> }) {
 
           {/* Comment Form */}
           {hasDonated && !hasCommented && (
-            <div className="mt-6 rounded-lg border border-[#14F195]/20 bg-[#14F195]/5 p-6">
-              <h3 className="text-lg font-bold text-[#14F195] mb-3">
+            <div className="mt-6 rounded-lg border border-border bg-accent p-6">
+              <h3 className="text-lg font-bold text-primary mb-3">
                 Leave a Review
               </h3>
               <form onSubmit={handleSubmitComment}>
@@ -1074,12 +1080,12 @@ function FundraiserDetail({ params }: { params: Promise<{ id: string }> }) {
                   placeholder="Share your thoughts about this fundraiser... (max 200 characters)"
                   maxLength={200}
                   rows={3}
-                  className="w-full rounded-lg border border-purple-900/40 bg-black/40 px-4 py-3 text-sm text-white placeholder-white/30 focus:border-[#9945FF] focus:outline-none focus:ring-2 focus:ring-[#9945FF]/30 mb-3"
+                  className="w-full rounded-lg border border-border bg-muted px-4 py-3 text-sm text-foreground placeholder-white/30 focus:border-border focus:outline-none focus:ring-2 focus:ring-ring mb-3"
                 />
                 <button
                   type="submit"
                   disabled={submittingComment || !newComment.trim()}
-                  className="rounded-lg bg-[#F97316] px-6 py-2 text-sm font-medium text-black hover:bg-[#ea6c0e] disabled:cursor-not-allowed disabled:opacity-50 transition-colors"
+                  className="rounded-lg bg-primary px-6 py-2 text-sm font-medium text-primary-foreground hover:bg-primary disabled:cursor-not-allowed disabled:opacity-50 transition-colors"
                 >
                   {submittingComment ? 'Submitting...' : 'Post Review'}
                 </button>
@@ -1088,8 +1094,8 @@ function FundraiserDetail({ params }: { params: Promise<{ id: string }> }) {
           )}
 
           {!hasDonated && isConnected && (
-            <div className="mt-6 rounded-lg border border-purple-900/30 bg-white/5 p-4 text-center">
-              <p className="text-sm text-white/50">
+            <div className="mt-6 rounded-lg border border-border bg-muted p-4 text-center">
+              <p className="text-sm text-muted-foreground">
                 💝 Donate to this fundraiser to leave a review
               </p>
             </div>

@@ -28,7 +28,8 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const domain = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
+    const origin = request.headers.get('origin') || request.headers.get('referer') || '';
+    const domain = origin ? new URL(origin).origin : (process.env.NEXT_PUBLIC_APP_URL || 'https://openfund.fun');
     const now = Date.now();
     const expiresAt = now + (3 * 60 * 1000); // 3 minutes
 

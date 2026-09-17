@@ -7,6 +7,8 @@ import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
 import { AppInitializer } from "@/components/providers/AppInitializer";
 import { UIProviders } from "@/components/providers/UIProviders";
+import { CoinCTAModal } from "@/components/modals/CoinCTAModal";
+import { SmoothScroll } from "@/components/providers/SmoothScroll";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -19,8 +21,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "OpenFund - No KYC Crowdfunding on Solana",
-  description: "Raise funds for anything, anywhere, anonymously. No banks, no bureaucracy. Powered by Solana.",
+  title: "OpenFund — Open Fundraising",
+  description: "Raise funds for what matters with OpenFund. Preparing for ETH donations on Robinhood Chain.",
 };
 
 export default function RootLayout({
@@ -35,12 +37,14 @@ export default function RootLayout({
         suppressHydrationWarning
       >
         <AppInitializer />
+        <SmoothScroll />
         <SolanaWalletProvider>
           <AuthProvider>
             <UIProviders>
-              <div className="relative">
+              <CoinCTAModal />
+              <div className={`app-shell ${process.env.NEXT_PUBLIC_X_COMMUNITY_URL ? "has-community-banner" : ""}`}>
                 <Navbar />
-                <main className="pt-24 pb-16">
+                <main className="app-main">
                   {children}
                 </main>
                 <Footer />

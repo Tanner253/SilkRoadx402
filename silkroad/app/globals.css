@@ -2,229 +2,74 @@
 @tailwind components;
 @tailwind utilities;
 
-body {
-  background: #0f0d0a;
-  color: #f5f3f0;
-  font-family: var(--font-geist-sans), Arial, Helvetica, sans-serif;
-  position: relative;
-}
-
-/* Ensure page gradients render behind particles */
-body::before {
-  content: '';
-  position: fixed;
-  inset: 0;
-  z-index: 0;
-  pointer-events: none;
-}
-
-/* Custom Scrollbar Styles */
-::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
-}
-
-::-webkit-scrollbar-track {
-  background: rgba(0, 0, 0, 0.1);
-  border-radius: 10px;
-}
-
-::-webkit-scrollbar-thumb {
-  background: rgba(249, 115, 22, 0.5);
-  border-radius: 10px;
-  transition: background 0.2s;
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background: rgba(249, 115, 22, 0.8);
-}
-
-/* Firefox scrollbar */
-* {
-  scrollbar-width: thin;
-  scrollbar-color: rgba(249, 115, 22, 0.5) rgba(0, 0, 0, 0.1);
-}
-
-/* Gradient text utility */
-.gradient-text {
-  background: linear-gradient(to right, #F97316, #FBBF24);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-}
-
-/* Solana wallet adapter overrides — kill all default purple */
-.wallet-adapter-button {
-  background-color: #F97316 !important;
-  color: #000 !important;
-  border-radius: 0.5rem !important;
-  font-weight: 600 !important;
-  transition: background-color 0.15s !important;
-}
-.wallet-adapter-button:hover {
-  background-color: #ea6c0e !important;
-}
-.wallet-adapter-button-trigger {
-  background-color: #F97316 !important;
-}
-.wallet-adapter-dropdown-list {
-  background: #1a1714 !important;
-  border: 1px solid rgba(249, 115, 22, 0.3) !important;
-  border-radius: 0.5rem !important;
-}
-.wallet-adapter-dropdown-list-item {
-  background: transparent !important;
-  color: #f5f3f0 !important;
-}
-.wallet-adapter-dropdown-list-item:hover {
-  background: rgba(249, 115, 22, 0.15) !important;
-}
-.wallet-adapter-dropdown-list-active {
-  background: rgba(249, 115, 22, 0.2) !important;
-}
-.wallet-adapter-modal-wrapper {
-  background: #1a1714 !important;
-  border: 1px solid rgba(249, 115, 22, 0.3) !important;
-}
-.wallet-adapter-modal-button-close {
-  background: rgba(249, 115, 22, 0.2) !important;
-}
-.wallet-adapter-modal-button-close:hover {
-  background: rgba(249, 115, 22, 0.4) !important;
-}
-.wallet-adapter-modal-title {
-  color: #f5f3f0 !important;
-}
-.wallet-adapter-modal-list .wallet-adapter-button {
-  background-color: transparent !important;
-  color: #f5f3f0 !important;
-}
-.wallet-adapter-modal-list .wallet-adapter-button:hover {
-  background-color: rgba(249, 115, 22, 0.15) !important;
-}
-.wallet-adapter-modal-middle {
-  background: transparent !important;
-}
-.wallet-adapter-modal-middle-button {
-  background-color: #F97316 !important;
-  color: #000 !important;
-}
-
-/* Falling Leaves Animation */
-@keyframes fall {
-  0% {
-    top: -50px;
-    opacity: 0;
-  }
-  10% {
-    opacity: 0.7;
-  }
-  90% {
-    opacity: 0.7;
-  }
-  100% {
-    top: 100vh;
-    opacity: 0;
-  }
-}
-
-@keyframes sway {
-  0% {
-    margin-left: -20px;
-  }
-  50% {
-    margin-left: 20px;
-  }
-  100% {
-    margin-left: -20px;
-  }
-}
-
-@keyframes spin {
-  0% {
-    transform: rotate(0deg);
-  }
-  100% {
-    transform: rotate(360deg);
-  }
-}
-
-.falling-leaf {
-  position: absolute;
-  pointer-events: none;
-  user-select: none;
-  animation:
-    fall linear infinite,
-    sway ease-in-out infinite,
-    spin linear infinite;
-}
-
-.falling-leaf-once {
-  position: absolute;
-  pointer-events: none;
-  user-select: none;
-  animation:
-    fall linear forwards,
-    sway ease-in-out,
-    spin linear;
-  animation-iteration-count: 1, 1, 1;
-}
-
-/* Falling Snow Animation */
-@keyframes snowfall {
-  0% {
-    top: -50px;
-    opacity: 0;
-    transform: translateX(0) rotate(0deg);
-  }
-  10% {
-    opacity: 1;
-  }
-  90% {
-    opacity: 0.8;
-  }
-  100% {
-    top: 100vh;
-    opacity: 0;
-    transform: translateX(var(--drift)) rotate(360deg);
-  }
-}
-
-.falling-snow {
-  position: absolute;
-  pointer-events: none;
-  user-select: none;
-  animation: snowfall linear infinite;
-  color: #e0f2fe;
-  text-shadow: 0 0 5px rgba(255, 255, 255, 0.8);
-}
-
 @layer base {
   :root {
-    --background: 30 20% 5%;
-    --foreground: 30 10% 96%;
-    --card: 30 15% 7%;
-    --card-foreground: 30 10% 96%;
-    --popover: 30 15% 7%;
-    --popover-foreground: 30 10% 96%;
-    --primary: 25 95% 53%;
-    --primary-foreground: 0 0% 100%;
-    --secondary: 30 15% 12%;
-    --secondary-foreground: 30 10% 96%;
-    --muted: 30 15% 12%;
-    --muted-foreground: 30 10% 60%;
-    --accent: 43 96% 56%;
-    --accent-foreground: 30 20% 5%;
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 0 0% 98%;
-    --border: 25 30% 18%;
-    --input: 30 15% 12%;
-    --ring: 25 95% 53%;
-    --chart-1: 25 95% 53%;
-    --chart-2: 43 96% 56%;
-    --chart-3: 197 37% 24%;
-    --chart-4: 43 74% 66%;
-    --chart-5: 27 87% 67%;
-    --radius: 0.5rem;
+    color-scheme: light;
+    --background: 40 33% 95%;
+    --foreground: 90 9% 16%;
+    --card: 40 40% 99%;
+    --card-foreground: 90 9% 16%;
+    --popover: 40 40% 99%;
+    --popover-foreground: 90 9% 16%;
+    --primary: 105 20% 26%;
+    --primary-foreground: 40 40% 99%;
+    --secondary: 75 18% 89%;
+    --secondary-foreground: 105 20% 26%;
+    --muted: 45 18% 91%;
+    --muted-foreground: 76 5% 39%;
+    --accent: 78 22% 90%;
+    --accent-foreground: 105 20% 26%;
+    --destructive: 0 62% 43%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 65 13% 82%;
+    --input: 65 13% 78%;
+    --ring: 105 20% 36%;
+    --chart-1: 105 20% 36%;
+    --chart-2: 35 42% 48%;
+    --chart-3: 197 28% 39%;
+    --chart-4: 43 40% 50%;
+    --chart-5: 16 35% 52%;
+    --radius: .5rem;
   }
+  * { border-color: hsl(var(--border)); scrollbar-width: thin; scrollbar-color: #a5ad98 #f6f3ed; }
+  body { background: hsl(var(--background)); color: hsl(var(--foreground)); font-family: var(--font-geist-sans), Arial, sans-serif; }
+  :is(a,button,input,textarea,select,summary):focus-visible { outline: 2px solid hsl(var(--ring)); outline-offset: 3px; }
+  input, textarea, select { accent-color: hsl(var(--primary)); }
+  input::placeholder, textarea::placeholder { color: hsl(var(--muted-foreground)); opacity: 1; }
+  h1 { letter-spacing: -.035em; }
+  button:disabled { cursor: not-allowed; }
 }
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-thumb { background: #a5ad98; border-radius: 8px; }
+.gradient-text { color: hsl(var(--primary)); }
+.app-shell { min-height: 100svh; display: flex; flex-direction: column; }
+.app-main { flex: 1; padding-top: 72px; }
+.app-shell.has-community-banner .app-main { padding-top: 104px; }
+.app-navbar { height: 72px; background: hsl(var(--background) / .96); }
+.app-navbar > div { height: 72px; max-width: 1456px; }
+.app-footer { position: relative; background: hsl(var(--background)); }
+.app-footer > div { justify-content: flex-start; max-width: 1400px; padding: 22px 28px; gap: 10px; }
+.app-footer .hidden { display: inline; }
+.app-main > :not(.openfund-home) { padding-top: 42px; }
+.app-main > :not(.openfund-home) h1 { font-weight: 500; }
+.wallet-adapter-button { background: hsl(var(--primary)) !important; color: hsl(var(--primary-foreground)) !important; border-radius: 6px !important; font-weight: 500 !important; }
+.wallet-adapter-button:hover { background: #293d23 !important; }
+.wallet-adapter-dropdown-list, .wallet-adapter-modal-wrapper { background: hsl(var(--card)) !important; border: 1px solid hsl(var(--border)) !important; box-shadow: 0 16px 60px #292d251c !important; }
+.wallet-adapter-dropdown-list-item, .wallet-adapter-modal-title, .wallet-adapter-modal-list .wallet-adapter-button { color: hsl(var(--foreground)) !important; }
+.wallet-adapter-modal-list .wallet-adapter-button { background: transparent !important; }
+.wallet-adapter-dropdown-list-item:hover, .wallet-adapter-modal-list .wallet-adapter-button:hover { background: hsl(var(--accent)) !important; }
+.wallet-adapter-modal-button-close { background: hsl(var(--muted)) !important; }
+.wallet-adapter-modal-button-close svg { fill: hsl(var(--foreground)); }
+.wallet-adapter-modal-middle { background: transparent !important; }
+.wallet-adapter-modal-middle-button { background: hsl(var(--primary)) !important; color: hsl(var(--primary-foreground)) !important; }
+@media (max-width: 760px) { .app-footer > div { flex-wrap: wrap; padding-inline: 22px; } }
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
+}
+
+/* Lenis smooth scroll — required base styles (lenis/dist/lenis.css). */
+html.lenis, html.lenis body { height: auto; }
+.lenis.lenis-smooth { scroll-behavior: auto !important; }
+.lenis.lenis-smooth [data-lenis-prevent] { overscroll-behavior: contain; }
+.lenis.lenis-stopped { overflow: hidden; }
+.lenis.lenis-smooth iframe { pointer-events: none; }

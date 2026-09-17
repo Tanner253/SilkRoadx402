@@ -8,6 +8,24 @@ export function Updates() {
   const updates = [
     {
       date: 'March 13, 2026',
+      version: 'v1.1.0',
+      title: 'Pump.fun Tokenized Agent Integration',
+      items: [
+        'NEW: Integrated Pump.fun Tokenized Agent payment system alongside existing x402 protocol',
+        'Donors can now choose "Donate via Agent Token" on any fundraiser campaign',
+        'A portion of every agent donation automatically triggers buybacks of the OpenFund token',
+        'Built on @pump-fun/agent-payments-sdk — the new Tokenized Agents standard from Pump.fun',
+        'Server-side transaction building with client-side wallet signing (no private keys exposed)',
+        'On-chain invoice verification with retry logic for reliable payment confirmation',
+        'Agent payments are recorded in the same database as x402 donations — unified transaction history',
+        'Buyback mechanism creates organic demand for the OpenFund token with every donation',
+        'Zero changes to the existing x402 P2P flow — both payment paths coexist',
+        'New "AGENT: PUMP.FUN" indicator in the homepage HUD',
+        'Full documentation added to FAQ and Updates pages',
+      ],
+    },
+    {
+      date: 'March 13, 2026',
       version: 'v1.0.0',
       title: 'x403 Anti-Bot Security & UI Overhaul',
       items: [
@@ -183,34 +201,34 @@ export function Updates() {
   ];
 
   return (
-    <div className="rounded-lg border border-purple-900/30 bg-white/5 backdrop-blur-sm p-8">
-      <h2 className="mb-6 text-3xl font-bold text-white">
+    <div className="rounded-lg border border-border bg-muted backdrop-blur-sm p-8">
+      <h2 className="mb-6 text-3xl font-bold text-foreground">
         📋 Platform Updates
       </h2>
       <div className="space-y-6">
         {updates.map((update, index) => (
           <div
             key={index}
-            className="border-l-4 border-[#9945FF] pl-6 pb-6 last:pb-0"
+            className="border-l-4 border-border pl-6 pb-6 last:pb-0"
           >
             <div className="mb-2 flex items-center space-x-3">
-              <span className="rounded-full bg-[#F97316] px-3 py-1 text-xs font-bold text-black">
+              <span className="rounded-full bg-primary px-3 py-1 text-xs font-bold text-primary-foreground">
                 {update.version}
               </span>
-              <span className="text-sm text-white/40">
+              <span className="text-sm text-muted-foreground">
                 {update.date}
               </span>
             </div>
-            <h3 className="mb-3 text-xl font-bold text-white">
+            <h3 className="mb-3 text-xl font-bold text-foreground">
               {update.title}
             </h3>
             <ul className="space-y-2">
               {update.items.map((item, itemIndex) => (
                 <li
                   key={itemIndex}
-                  className="flex items-start space-x-2 text-sm text-white/70"
+                  className="flex items-start space-x-2 text-sm text-muted-foreground"
                 >
-                  <span className="mt-1 text-[#14F195]">✓</span>
+                  <span className="mt-1 text-primary">✓</span>
                   <span>{item}</span>
                 </li>
               ))}

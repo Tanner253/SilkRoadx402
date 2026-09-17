@@ -60,7 +60,7 @@ export function useX403Auth() {
       return null;
     }
 
-    const serverUrl = process.env.NEXT_PUBLIC_APP_URL || '';
+    const serverUrl = '';
 
     // Check if we have a valid session token
     const storedToken = localStorage.getItem(X403_SESSION_TOKEN_KEY);

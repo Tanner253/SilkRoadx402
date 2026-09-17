@@ -37,7 +37,7 @@ interface Listing {
 }
 
 export function PublicChat() {
-  const { isConnected, hasAcceptedTOS } = useAuth();
+  const { isConnected } = useAuth();
   const { publicKey } = useWallet();
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
@@ -139,8 +139,8 @@ export function PublicChat() {
   const handleSend = async () => {
     if (!publicKey || !newMessage.trim()) return;
 
-    if (!isConnected || !hasAcceptedTOS) {
-      setError('Connect your wallet and accept TOS to chat');
+    if (!isConnected) {
+      setError('Connect your wallet to chat');
       return;
     }
 
@@ -182,11 +182,11 @@ export function PublicChat() {
   const getMessageColor = (type: string) => {
     switch (type) {
       case 'selling':
-        return 'text-green-400';
+        return 'text-green-700';
       case 'buying':
-        return 'text-cyan-400';
+        return 'text-cyan-700';
       default:
-        return 'text-yellow-300';
+        return 'text-yellow-700';
     }
   };
 
@@ -228,7 +228,7 @@ export function PublicChat() {
     return (
       <button
         onClick={() => setIsOpen(true)}
-        className="fixed bottom-16 sm:bottom-20 right-3 sm:right-6 z-50 flex items-center space-x-2 rounded-lg bg-green-600 px-3 sm:px-4 py-2 sm:py-3 text-xs sm:text-sm font-bold text-white shadow-lg hover:bg-green-700 transition-all hover:scale-105 border-2 border-green-800"
+        className="fixed bottom-16 sm:bottom-20 right-3 sm:right-6 z-50 flex items-center space-x-2 rounded-lg bg-green-600 px-3 sm:px-4 py-2 sm:py-3 text-xs sm:text-sm font-bold text-primary-foreground shadow-lg hover:bg-green-700 transition-all hover:scale-105 border-2 border-green-200"
         title="Open Runescape Market"
         style={{ fontFamily: 'monospace' }}
       >
@@ -239,17 +239,17 @@ export function PublicChat() {
   }
 
   return (
-    <div className="fixed bottom-16 sm:bottom-20 right-3 sm:right-6 left-3 sm:left-auto z-50 sm:w-96 rounded-lg border-4 border-green-900 bg-zinc-900 shadow-2xl" style={{ fontFamily: 'monospace' }}>
+    <div className="fixed bottom-16 sm:bottom-20 right-3 sm:right-6 left-3 sm:left-auto z-50 sm:w-96 rounded-lg border-4 border-green-200 bg-card shadow-2xl" style={{ fontFamily: 'monospace' }}>
       {/* Header */}
-      <div className="flex items-center justify-between bg-green-800 px-4 py-2 border-b-2 border-green-950">
+      <div className="flex items-center justify-between bg-green-50 px-4 py-2 border-b-2 border-green-200">
         <div className="flex items-center space-x-2">
           <span className="text-lg">🏪</span>
-          <span className="font-bold text-green-100 text-sm">Runescape Market</span>
-          <span className="text-xs text-green-200">({messages.length})</span>
+          <span className="font-bold text-green-700 text-sm">Runescape Market</span>
+          <span className="text-xs text-green-700">({messages.length})</span>
         </div>
         <button
           onClick={() => setIsOpen(false)}
-          className="text-green-100 hover:text-white font-bold text-lg"
+          className="text-green-700 hover:text-foreground font-bold text-lg"
         >
           ✕
         </button>
@@ -258,7 +258,7 @@ export function PublicChat() {
       {/* Messages */}
       <div className="h-96 overflow-y-auto overflow-x-hidden bg-black p-3 space-y-2 scrollbar-thin scrollbar-thumb-amber-800 scrollbar-track-zinc-900">
         {messages.length === 0 ? (
-          <div className="text-center text-zinc-500 text-xs py-8">
+          <div className="text-center text-muted-foreground text-xs py-8">
             No messages yet. Start trading!
           </div>
         ) : (
@@ -273,7 +273,7 @@ export function PublicChat() {
               onTouchMove={(e) => {
                 if (swipeStartX === null) return;
                 const swipeDistance = e.touches[0].clientX - swipeStartX;
-                if (swipeDistance > 80 && isConnected && hasAcceptedTOS) {
+                if (swipeDistance > 80 && isConnected) {
                   setReplyingTo(msg);
                   setSwipeStartX(null);
                 }
@@ -293,29 +293,29 @@ export function PublicChat() {
                       if (msgElement) {
                         msgElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
                         // Highlight briefly
-                        msgElement.classList.add('bg-green-900/30');
-                        setTimeout(() => msgElement.classList.remove('bg-green-900/30'), 2000);
+                        msgElement.classList.add('bg-green-50');
+                        setTimeout(() => msgElement.classList.remove('bg-green-50'), 2000);
                       }
                     }
                   }}
-                  className="ml-6 mb-2 pl-3 pr-2 py-1.5 border-l-4 border-green-500 text-zinc-300 text-[11px] bg-zinc-800/80 hover:bg-zinc-700/80 rounded-r transition-all cursor-pointer max-w-full text-left flex items-start gap-2"
+                  className="ml-6 mb-2 pl-3 pr-2 py-1.5 border-l-4 border-green-500 text-foreground text-[11px] bg-card hover:bg-muted rounded-r transition-all cursor-pointer max-w-full text-left flex items-start gap-2"
                   title="Click to view original message"
                 >
-                  <span className="text-green-400 text-sm leading-none mt-0.5">↩</span>
+                  <span className="text-green-700 text-sm leading-none mt-0.5">↩</span>
                   <div className="flex-1 min-w-0">
-                    <div className="text-green-400 font-semibold text-[10px] uppercase tracking-wide mb-0.5">
+                    <div className="text-green-700 font-semibold text-[10px] uppercase tracking-wide mb-0.5">
                       Replying to {truncateWallet(msg.replyTo.wallet)}
                     </div>
-                    <div className="text-zinc-400 leading-snug line-clamp-2">
+                    <div className="text-muted-foreground leading-snug line-clamp-2">
                       {msg.replyTo.message}
                     </div>
                   </div>
-                  <span className="text-zinc-600 text-xs leading-none mt-0.5">›</span>
+                  <span className="text-muted-foreground text-xs leading-none mt-0.5">›</span>
                 </button>
               ) : null}
               
               <div className="flex items-start space-x-2">
-                <span className="text-amber-500 font-bold">
+                <span className="text-amber-700 font-bold">
                   {truncateWallet(msg.wallet)}:
                 </span>
                 <span className={`${getMessageColor(msg.messageType)} break-words flex-1`}>
@@ -324,8 +324,8 @@ export function PublicChat() {
                 {/* Reply button (desktop only, mobile uses swipe) */}
                 <button
                   onClick={() => setReplyingTo(msg)}
-                  disabled={!isConnected || !hasAcceptedTOS}
-                  className="text-zinc-500 hover:text-green-500 transition-colors disabled:opacity-30 disabled:cursor-not-allowed hidden sm:block text-base"
+                  disabled={!isConnected}
+                  className="text-muted-foreground hover:text-green-700 transition-colors disabled:opacity-30 disabled:cursor-not-allowed hidden sm:block text-base"
                   title="Reply to this message"
                 >
                   ↩
@@ -336,7 +336,7 @@ export function PublicChat() {
               {msg.listing && (
                 <Link
                   href={msg.listing.type === 'fundraiser' ? `/fundraisers/${msg.listing._id}` : `/listings/${msg.listing._id}`}
-                  className="mt-1 ml-6 flex items-center space-x-2 rounded border border-amber-700 bg-zinc-800 p-2 hover:bg-zinc-700 transition-colors"
+                  className="mt-1 ml-6 flex items-center space-x-2 rounded border border-amber-200 bg-card p-2 hover:bg-muted transition-colors"
                 >
                   <Image
                     src={msg.listing.imageUrl}
@@ -347,18 +347,18 @@ export function PublicChat() {
                   />
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-1">
-                    <div className="text-yellow-300 font-bold truncate text-xs">
+                    <div className="text-yellow-700 font-bold truncate text-xs">
                       {msg.listing.title}
                       </div>
                       {msg.listing.type === 'fundraiser' && (
-                        <span className="text-purple-400 text-[10px]">💝</span>
+                        <span className="text-primary text-[10px]">💝</span>
                       )}
                     </div>
-                    <div className="text-green-400 text-xs">
+                    <div className="text-green-700 text-xs">
                       ${msg.listing.price.toFixed(2)} USDC
                     </div>
                   </div>
-                  <span className="text-amber-500">→</span>
+                  <span className="text-amber-700">→</span>
                 </Link>
               )}
 
@@ -373,19 +373,19 @@ export function PublicChat() {
                     <button
                       key={emoji}
                       onClick={() => handleReaction(msg._id, emoji)}
-                      disabled={!isConnected || !hasAcceptedTOS}
+                      disabled={!isConnected}
                       className={`
                         flex items-center space-x-1 rounded px-1.5 py-0.5 text-xs transition-all
                         ${userReacted
-                          ? 'bg-amber-700 border border-amber-600'
-                          : 'bg-zinc-800 border border-zinc-700 hover:bg-zinc-700'
+                          ? 'bg-amber-700 border border-amber-200'
+                          : 'bg-card border border-border hover:bg-muted'
                         }
-                        ${!isConnected || !hasAcceptedTOS ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}
+                        ${!isConnected ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}
                       `}
                       title={userReacted ? 'Remove reaction' : 'React'}
                     >
                       <span>{emoji}</span>
-                      <span className={`font-bold ${userReacted ? 'text-yellow-200' : 'text-zinc-400'}`}>
+                      <span className={`font-bold ${userReacted ? 'text-yellow-700' : 'text-muted-foreground'}`}>
                         {wallets.length}
                       </span>
                     </button>
@@ -399,28 +399,28 @@ export function PublicChat() {
                       e.stopPropagation();
                       setShowReactionsFor(showReactionsFor === msg._id ? null : msg._id);
                     }}
-                    disabled={!isConnected || !hasAcceptedTOS}
+                    disabled={!isConnected}
                     className={`
                       flex items-center justify-center w-6 h-6 rounded text-xs transition-all
-                      bg-zinc-800 border border-zinc-700 hover:bg-zinc-700 hover:border-amber-600
-                      ${!isConnected || !hasAcceptedTOS ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}
+                      bg-card border border-border hover:bg-muted hover:border-amber-200
+                      ${!isConnected ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}
                     `}
                     title="Add reaction"
                   >
-                    <span className="text-zinc-400 font-bold">+</span>
+                    <span className="text-muted-foreground font-bold">+</span>
                   </button>
 
                   {/* Reaction picker dropdown */}
                   {showReactionsFor === msg._id && (
                     <div 
-                      className="absolute bottom-full left-0 mb-1 flex space-x-1 bg-zinc-800 border border-amber-700 rounded p-1 shadow-lg z-10"
+                      className="absolute bottom-full left-0 mb-1 flex space-x-1 bg-card border border-amber-200 rounded p-1 shadow-lg z-10"
                       onClick={(e) => e.stopPropagation()}
                     >
                       {['❤️', '👍', '👎', '👀', '🦃'].map((emoji) => (
                         <button
                           key={emoji}
                           onClick={() => handleReaction(msg._id, emoji)}
-                          className="hover:bg-zinc-700 rounded px-2 py-1 text-sm transition-colors"
+                          className="hover:bg-muted rounded px-2 py-1 text-sm transition-colors"
                           title={`React with ${emoji}`}
                         >
                           {emoji}
@@ -437,17 +437,17 @@ export function PublicChat() {
       </div>
 
       {/* Input */}
-      <div className="border-t-2 border-amber-900 bg-zinc-900 p-3 space-y-2">
+      <div className="border-t-2 border-amber-200 bg-card p-3 space-y-2">
         {/* Reply indicator */}
         {replyingTo && (
-          <div className="flex items-center justify-between bg-zinc-800 border border-green-600 rounded px-3 py-2">
+          <div className="flex items-center justify-between bg-card border border-green-200 rounded px-3 py-2">
             <div className="flex-1 min-w-0">
-              <div className="text-[10px] text-green-400 font-semibold">↩ Replying to {truncateWallet(replyingTo.wallet)}</div>
-              <div className="text-xs text-zinc-300 truncate">{replyingTo.message}</div>
+              <div className="text-[10px] text-green-700 font-semibold">↩ Replying to {truncateWallet(replyingTo.wallet)}</div>
+              <div className="text-xs text-foreground truncate">{replyingTo.message}</div>
             </div>
             <button
               onClick={() => setReplyingTo(null)}
-              className="text-zinc-400 hover:text-white ml-2 text-sm"
+              className="text-muted-foreground hover:text-foreground ml-2 text-sm"
               title="Cancel reply"
             >
               ✕
@@ -460,7 +460,7 @@ export function PublicChat() {
           <select
             value={selectedListing}
             onChange={(e) => setSelectedListing(e.target.value)}
-            className="w-full rounded border border-amber-700 bg-zinc-800 px-2 py-1 text-xs text-yellow-200 focus:outline-none focus:ring-2 focus:ring-amber-600"
+            className="w-full rounded border border-amber-200 bg-card px-2 py-1 text-xs text-yellow-700 focus:outline-none focus:ring-2 focus:ring-amber-600"
           >
             <option value="">💬 General chat</option>
             {userListings.map((listing) => (
@@ -480,13 +480,13 @@ export function PublicChat() {
             onKeyPress={(e) => e.key === 'Enter' && !sending && cooldown === 0 && handleSend()}
             placeholder={cooldown > 0 ? `Wait ${cooldown}s...` : 'Type to trade...'}
             maxLength={280}
-            disabled={sending || cooldown > 0 || !isConnected || !hasAcceptedTOS}
-            className="flex-1 rounded border border-amber-700 bg-zinc-800 px-3 py-2 text-xs text-yellow-200 placeholder-zinc-600 focus:outline-none focus:ring-2 focus:ring-amber-600 disabled:opacity-50"
+            disabled={sending || cooldown > 0 || !isConnected}
+            className="flex-1 rounded border border-amber-200 bg-card px-3 py-2 text-xs text-yellow-700 placeholder-zinc-600 focus:outline-none focus:ring-2 focus:ring-amber-600 disabled:opacity-50"
           />
           <button
             onClick={handleSend}
-            disabled={sending || cooldown > 0 || !newMessage.trim() || !isConnected || !hasAcceptedTOS}
-            className="rounded bg-amber-600 px-4 py-2 text-xs font-bold text-white hover:bg-amber-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            disabled={sending || cooldown > 0 || !newMessage.trim() || !isConnected}
+            className="rounded bg-amber-600 px-4 py-2 text-xs font-bold text-primary-foreground hover:bg-amber-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
           >
             {cooldown > 0 ? `${cooldown}s` : sending ? '...' : '💰 Send'}
           </button>
@@ -494,17 +494,17 @@ export function PublicChat() {
 
         {/* Character Counter */}
         <div className="flex items-center justify-between text-xs">
-          <span className={`${newMessage.length > 250 ? 'text-red-400' : 'text-zinc-500'}`}>
+          <span className={`${newMessage.length > 250 ? 'text-red-700' : 'text-muted-foreground'}`}>
             {newMessage.length}/280
           </span>
-          {!isConnected || !hasAcceptedTOS ? (
-            <span className="text-amber-500">Connect wallet + accept TOS to chat</span>
+          {!isConnected ? (
+            <span className="text-amber-700">Connect wallet to chat</span>
           ) : null}
         </div>
 
         {/* Error */}
         {error && (
-          <div className="text-xs text-red-400 bg-red-950 border border-red-800 rounded px-2 py-1">
+          <div className="text-xs text-red-700 bg-red-50 border border-red-200 rounded px-2 py-1">
             {error}
           </div>
         )}

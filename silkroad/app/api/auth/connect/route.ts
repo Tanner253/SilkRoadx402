@@ -3,7 +3,7 @@ import { PublicKey } from '@solana/web3.js';
 import { checkTokenBalance } from '@/lib/solana/tokenGating';
 import { connectDB } from '@/lib/db';
 import { User } from '@/models/User';
-import { CONFIG, MIN_SRX402_BALANCE } from '@/config/constants';
+import { CONFIG, MIN_OPEN_BALANCE } from '@/config/constants';
 import { mockStore } from '@/lib/mockStore';
 
 export async function POST(req: NextRequest) {
