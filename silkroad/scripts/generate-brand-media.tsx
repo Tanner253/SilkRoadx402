@@ -81,12 +81,13 @@ function ogImage() {
   <rect width="1200" height="630" fill="${C.bg}"/>
   ${pool(870, 330, 380, 280)}
   <circle cx="92" cy="170" r="6" fill="${C.sage}"/>
-  <text x="112" y="177" font-family="Segoe UI, Arial" font-size="19" font-weight="600" letter-spacing="3.6" fill="${C.sage}">OPEN FUNDRAISING</text>
+  <text x="112" y="177" font-family="Segoe UI, Arial" font-size="19" font-weight="600" letter-spacing="3.6" fill="${C.sage}">NO-KYC CHARITY</text>
   <text x="86" y="290" font-family="Segoe UI, Arial" font-size="92" font-weight="700" letter-spacing="-3" fill="${C.ink}">OpenFund</text>
   <text x="90" y="360" font-family="Segoe UI, Arial" font-size="34" fill="${C.muted}">Good things start with
     <tspan font-family="Georgia" font-style="italic" font-size="38" fill="${C.sage}"> a little.</tspan></text>
   <line x1="90" y1="410" x2="560" y2="410" stroke="${C.rule}" stroke-width="2"/>
-  <text x="90" y="458" font-family="Segoe UI, Arial" font-size="22" fill="${C.muted}">No KYC · No wallet connection · Robinhood Chain</text>
+  <text x="90" y="458" font-family="Segoe UI, Arial" font-size="22" fill="${C.muted}">No KYC · No wallet connection · ETH on Robinhood Chain</text>
+  <text x="90" y="496" font-family="Segoe UI, Arial" font-size="20" fill="${C.muted}">Charity, wallet to wallet · <tspan fill="${C.forest}" font-weight="600">$OPEN on pons</tspan></text>
   ${pig('receiving', 600, 120, 540)}
 </svg>`;
 }

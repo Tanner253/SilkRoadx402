@@ -8,6 +8,7 @@ import { SmoothScroll } from "@/components/providers/SmoothScroll";
 import { WatchProvider } from "@/components/donations/WatchProvider";
 import { WatchBanner } from "@/components/donations/WatchBanner";
 import { ExternalLinkGuard } from "@/components/ExternalLinkGuard";
+import { SITE_DESCRIPTION, SITE_TAGLINE, SITE_TITLE, siteUrl } from "@/lib/site";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -19,26 +20,23 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
-const SITE_URL = process.env.NEXT_PUBLIC_APP_URL || "https://openfund.fun";
-const DESCRIPTION =
-  "No-KYC crowdfunding on Robinhood Chain. Start a fundraiser in minutes, or give ETH straight from your own wallet — no accounts, no wallet connection.";
-
 export const metadata: Metadata = {
-  metadataBase: new URL(SITE_URL),
-  title: { default: "OpenFund — Open Fundraising", template: "%s · OpenFund" },
-  description: DESCRIPTION,
+  metadataBase: new URL(siteUrl()),
+  title: { default: SITE_TITLE, template: "%s · OpenFund" },
+  description: SITE_DESCRIPTION,
   applicationName: "OpenFund",
   openGraph: {
     type: "website",
     siteName: "OpenFund",
-    title: "OpenFund — Good things start with a little.",
-    description: DESCRIPTION,
-    images: [{ url: "/images/brand/openfund-og-1200x630.png", width: 1200, height: 630, alt: "OpenFund" }],
+    url: "/",
+    title: SITE_TITLE,
+    description: SITE_DESCRIPTION,
+    images: [{ url: "/images/brand/openfund-og-1200x630.png", width: 1200, height: 630, alt: `OpenFund — ${SITE_TAGLINE}` }],
   },
   twitter: {
     card: "summary_large_image",
-    title: "OpenFund — Good things start with a little.",
-    description: DESCRIPTION,
+    title: SITE_TITLE,
+    description: SITE_DESCRIPTION,
     images: ["/images/brand/openfund-og-1200x630.png"],
   },
 };

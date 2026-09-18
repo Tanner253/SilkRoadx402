@@ -1,11 +1,12 @@
 import type { MetadataRoute } from 'next';
 import { connectDB } from '@/lib/db';
 import { Fundraiser } from '@/models/Fundraiser';
+import { siteUrl } from '@/lib/site';
 
 export const revalidate = 3600;
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const site = process.env.NEXT_PUBLIC_APP_URL || 'https://openfund.fun';
+  const site = siteUrl();
   const pages: MetadataRoute.Sitemap = ['', '/fundraisers', '/fundraisers/new', '/leaderboard', '/faq', '/updates'].map((path) => ({
     url: `${site}${path}`,
     changeFrequency: 'daily',
