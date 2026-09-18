@@ -11,8 +11,11 @@ import { checkWatch, viewWatches } from '@/lib/donationWatch';
 import { watchIdsFrom } from '@/lib/watchCookie';
 
 const MAX_PER_REQUEST = 3;
+/** Total chain time per request — well inside the 10 s serverless limit. */
+const REQUEST_BUDGET_MS = 7_000;
 
 export async function POST(req: NextRequest) {
+  const deadline = Date.now() + REQUEST_BUDGET_MS;
   const ids = watchIdsFrom(req);
   if (!ids.length) return NextResponse.json({ watches: [] });
 
@@ -27,8 +30,10 @@ export async function POST(req: NextRequest) {
       .select('_id');
     // Sequential on purpose: keeps the burst on the shared RPC small.
     for (const w of open) {
+      // Leave any remaining watches for the next poll rather than overrun.
+      if (Date.now() > deadline - 1_000) break;
       try {
-        await checkWatch(w._id.toString());
+        await checkWatch(w._id.toString(), undefined, deadline);
       } catch (err) {
         console.error('Watch check failed', w._id.toString(), err);
       }

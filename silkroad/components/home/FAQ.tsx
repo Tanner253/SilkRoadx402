@@ -77,8 +77,9 @@ export function FAQ() {
       answer: (
         <p>
           There are no accounts, so when you publish a campaign you get a private manage link instead.
-          Anyone with it can edit, pause or delete the campaign — so keep it safe and don&apos;t share
-          it. It can&apos;t change where donations go. If you lose it, the campaign keeps running and
+          Anyone with it can edit or pause the campaign — so keep it safe and don&apos;t share it. It
+          can&apos;t change where donations go, and once a campaign has received donations it can&apos;t
+          be deleted, so donors always have a public record of where their money went. If you lose it, the campaign keeps running and
           receiving donations, but you won&apos;t be able to edit it.
         </p>
       ),

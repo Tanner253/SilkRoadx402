@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { isValidObjectId } from 'mongoose';
 import { connectDB } from '@/lib/db';
 import { Fundraiser } from '@/models/Fundraiser';
+import { Transaction } from '@/models/Transaction';
 import { raisedTotals, presentFundraiser } from '@/lib/fundraiserTotals';
 import { manageTokenFrom, manageTokenMatches } from '@/lib/manageToken';
 import { isAdminRequest } from '@/lib/adminAuth';
@@ -102,7 +103,13 @@ export async function PATCH(req: NextRequest, { params }: Params) {
   }
 }
 
-/** DELETE — remove the campaign. Needs the manage token or an admin session. */
+/**
+ * DELETE — remove the campaign. Needs the manage token or an admin session.
+ * Once a campaign has received verified donations its creator can only pause
+ * it, not delete it: donors deserve a lasting public record of where their
+ * money went, and deletion would let a bad actor erase the evidence. Admins
+ * can still delete, for moderation.
+ */
 export async function DELETE(req: NextRequest, { params }: Params) {
   try {
     const { id } = await params;
@@ -112,6 +119,12 @@ export async function DELETE(req: NextRequest, { params }: Params) {
     const { fundraiser, canManage } = await loadWithOwnership(req, id);
     if (!fundraiser) return NextResponse.json({ error: 'Fundraiser not found' }, { status: 404 });
     if (!canManage) return NextResponse.json({ error: 'This needs the campaign’s manage link.' }, { status: 403 });
+    if (!isAdminRequest(req) && (await Transaction.exists({ listingId: id, status: 'success' }))) {
+      return NextResponse.json(
+        { error: 'This campaign has received donations, so it can’t be deleted — you can pause it instead.' },
+        { status: 409 },
+      );
+    }
 
     await fundraiser.deleteOne();
     await createLog('fundraiser_deleted', `Fundraiser "${fundraiser.title}" deleted`, fundraiser.wallet, getIpFromRequest(req));

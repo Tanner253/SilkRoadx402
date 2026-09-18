@@ -2,84 +2,79 @@
 
 /**
  * Campaign links — an editor for the create/edit forms and the display for
- * the campaign page. Any number of links (up to MAX_LINKS); the kind is
- * detected from the URL, and YouTube videos play inline.
+ * the campaign page. Any number of links (up to MAX_LINKS); the platform is
+ * detected from the URL and shown with its logo, and YouTube plays inline.
+ * External clicks go through the site-wide leaving-OpenFund confirmation.
  */
 
-import {
-  ArrowUpRight,
-  Facebook,
-  Github,
-  Globe,
-  Instagram,
-  Linkedin,
-  Mail,
-  MessageCircle,
-  Music2,
-  Plus,
-  Send,
-  Trash2,
-  Twitch,
-  Twitter,
-  Youtube,
-  type LucideIcon,
-} from 'lucide-react';
-import { MAX_LINKS, linkKind, youtubeId, type CampaignLink, type LinkKind } from '@/lib/links';
+import { ArrowUpRight, Plus, Trash2 } from 'lucide-react';
+import { MAX_LINKS, coerceUrl, linkKind, youtubeId, type CampaignLink } from '@/lib/links';
+import { BrandIcon } from './BrandIcon';
 import { inputClass, secondaryButtonClass } from './ui';
 
-const ICONS: Record<LinkKind, LucideIcon> = {
-  youtube: Youtube,
-  x: Twitter,
-  telegram: Send,
-  discord: MessageCircle,
-  github: Github,
-  instagram: Instagram,
-  tiktok: Music2,
-  facebook: Facebook,
-  linkedin: Linkedin,
-  twitch: Twitch,
-  email: Mail,
-  website: Globe,
-};
+/** The URL as it will be saved, or null if it isn't a usable link. */
+function resolved(url: string): string | null {
+  const coerced = coerceUrl(url);
+  if (!coerced) return null;
+  try {
+    const u = new URL(coerced);
+    return ['https:', 'http:', 'mailto:'].includes(u.protocol) ? u.toString() : null;
+  } catch {
+    return null;
+  }
+}
 
 export function LinksEditor({ value, onChange }: { value: CampaignLink[]; onChange: (links: CampaignLink[]) => void }) {
   const rows = value.length ? value : [{ url: '' }];
   const update = (i: number, patch: Partial<CampaignLink>) => onChange(rows.map((row, j) => (j === i ? { ...row, ...patch } : row)));
 
   return (
-    <div className="space-y-2.5">
+    <div className="space-y-3">
       {rows.map((link, i) => {
-        const { kind } = linkKind(link.url);
-        const Icon = link.url ? ICONS[kind] : Globe;
+        const href = resolved(link.url);
+        const invalid = link.url.trim() !== '' && !href;
+        const detected = href ? linkKind(href) : null;
         return (
-          <div key={i} className="flex gap-2">
-            <span className="flex h-[42px] w-10 shrink-0 items-center justify-center rounded-lg border border-input bg-card text-muted-foreground" aria-hidden="true">
-              <Icon size={16} />
-            </span>
-            <input
-              aria-label={`Link ${i + 1} URL`}
-              type="url"
-              value={link.url}
-              onChange={(e) => update(i, { url: e.target.value })}
-              placeholder="https://youtube.com/…, https://x.com/…, your website"
-              className={`${inputClass} min-w-0 flex-[2]`}
-            />
-            <input
-              aria-label={`Link ${i + 1} label`}
-              value={link.label ?? ''}
-              maxLength={60}
-              onChange={(e) => update(i, { label: e.target.value })}
-              placeholder="Label (optional)"
-              className={`${inputClass} hidden min-w-0 flex-1 sm:block`}
-            />
-            <button
-              type="button"
-              onClick={() => onChange(rows.filter((_, j) => j !== i))}
-              aria-label={`Remove link ${i + 1}`}
-              className="flex h-[42px] w-10 shrink-0 items-center justify-center rounded-lg text-muted-foreground hover:bg-accent hover:text-foreground"
-            >
-              <Trash2 size={15} />
-            </button>
+          <div key={i}>
+            <div className="flex gap-2">
+              <span
+                className="flex h-[42px] w-10 shrink-0 items-center justify-center rounded-lg border border-input bg-card text-muted-foreground"
+                title={detected?.name}
+                aria-hidden="true"
+              >
+                <BrandIcon kind={detected?.kind ?? 'website'} color={!!detected} />
+              </span>
+              <div className="flex min-w-0 flex-1 flex-col gap-2 sm:flex-row">
+                <input
+                  aria-label={`Link ${i + 1} URL`}
+                  aria-invalid={invalid}
+                  value={link.url}
+                  onChange={(e) => update(i, { url: e.target.value })}
+                  placeholder="youtube.com/…, x.com/…, your website"
+                  inputMode="url"
+                  autoComplete="off"
+                  spellCheck={false}
+                  className={`${inputClass} min-w-0 sm:flex-[2] ${invalid ? 'border-[#e8c4bd]' : ''}`}
+                />
+                <input
+                  aria-label={`Link ${i + 1} label`}
+                  value={link.label ?? ''}
+                  maxLength={60}
+                  onChange={(e) => update(i, { label: e.target.value })}
+                  placeholder={detected ? `Label (default: ${detected.name})` : 'Label (optional)'}
+                  className={`${inputClass} min-w-0 sm:flex-1`}
+                />
+              </div>
+              <button
+                type="button"
+                onClick={() => onChange(rows.filter((_, j) => j !== i))}
+                aria-label={`Remove link ${i + 1}`}
+                className="flex h-[42px] w-10 shrink-0 items-center justify-center rounded-lg text-muted-foreground hover:bg-accent hover:text-foreground"
+              >
+                <Trash2 size={15} />
+              </button>
+            </div>
+            {invalid ? <p className="ml-12 mt-1 text-xs text-[#9b3b2c]">That doesn&rsquo;t look like a link.</p> : null}
           </div>
         );
       })}
@@ -94,11 +89,14 @@ export function LinksEditor({ value, onChange }: { value: CampaignLink[]; onChan
   );
 }
 
-/** Drop empty rows before sending to the API. */
+/** Rows ready for the API: empty rows dropped; bare domains get https://. */
 export const cleanLinks = (links: CampaignLink[]) =>
   links
-    .map((l) => ({ url: l.url.trim(), label: l.label?.trim() || undefined }))
+    .map((l) => ({ url: resolved(l.url) ?? l.url.trim(), label: l.label?.trim() || undefined }))
     .filter((l) => l.url);
+
+/** True if any row has text that isn't a usable link. */
+export const hasInvalidLinks = (links: CampaignLink[]) => links.some((l) => l.url.trim() !== '' && !resolved(l.url));
 
 export function CampaignLinks({ links }: { links: CampaignLink[] }) {
   if (!links.length) return null;
@@ -120,18 +118,18 @@ export function CampaignLinks({ links }: { links: CampaignLink[] }) {
         </div>
       ) : null}
       <div className="flex flex-wrap gap-2">
-        {links.map((link) => {
+        {links.map((link, i) => {
           const { kind, name } = linkKind(link.url);
-          const Icon = ICONS[kind];
           return (
             <a
-              key={link.url}
+              key={`${link.url}-${i}`}
               href={link.url}
               target="_blank"
               rel="noopener noreferrer nofollow ugc"
+              data-user-link=""
               className="inline-flex max-w-full items-center gap-2 rounded-full border border-border bg-card px-3.5 py-2 text-sm text-foreground transition-colors hover:bg-accent"
             >
-              <Icon size={15} className="shrink-0" />
+              <BrandIcon kind={kind} size={15} />
               <span className="truncate">{link.label || name}</span>
               <ArrowUpRight size={13} className="shrink-0 text-muted-foreground" />
             </a>

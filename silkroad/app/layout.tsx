@@ -7,6 +7,7 @@ import { CoinCTAModal } from "@/components/modals/CoinCTAModal";
 import { SmoothScroll } from "@/components/providers/SmoothScroll";
 import { WatchProvider } from "@/components/donations/WatchProvider";
 import { WatchBanner } from "@/components/donations/WatchBanner";
+import { ExternalLinkGuard } from "@/components/ExternalLinkGuard";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -18,9 +19,28 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
+const SITE_URL = process.env.NEXT_PUBLIC_APP_URL || "https://openfund.fun";
+const DESCRIPTION =
+  "No-KYC crowdfunding on Robinhood Chain. Start a fundraiser in minutes, or give ETH straight from your own wallet — no accounts, no wallet connection.";
+
 export const metadata: Metadata = {
-  title: "OpenFund — Open Fundraising",
-  description: "Raise funds for what matters with OpenFund. Preparing for ETH donations on Robinhood Chain.",
+  metadataBase: new URL(SITE_URL),
+  title: { default: "OpenFund — Open Fundraising", template: "%s · OpenFund" },
+  description: DESCRIPTION,
+  applicationName: "OpenFund",
+  openGraph: {
+    type: "website",
+    siteName: "OpenFund",
+    title: "OpenFund — Good things start with a little.",
+    description: DESCRIPTION,
+    images: [{ url: "/images/brand/openfund-og-1200x630.png", width: 1200, height: 630, alt: "OpenFund" }],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "OpenFund — Good things start with a little.",
+    description: DESCRIPTION,
+    images: ["/images/brand/openfund-og-1200x630.png"],
+  },
 };
 
 export default function RootLayout({
@@ -37,6 +57,7 @@ export default function RootLayout({
         <SmoothScroll />
         <WatchProvider>
           <CoinCTAModal />
+          <ExternalLinkGuard />
           <div className={`app-shell ${process.env.NEXT_PUBLIC_X_COMMUNITY_URL ? "has-community-banner" : ""}`}>
             <Navbar />
             <main className="app-main">{children}</main>

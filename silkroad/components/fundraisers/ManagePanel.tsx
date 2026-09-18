@@ -14,7 +14,7 @@ import type { FundraiserView } from '@/types/fundraiser';
 import { goalOf } from '@/types/fundraiser';
 import { forgetManaged, manageUrl } from '@/lib/manageLinks';
 import { CopyButton, Notice, inputClass, primaryButtonClass, secondaryButtonClass } from './ui';
-import { LinksEditor, cleanLinks } from './links';
+import { LinksEditor, cleanLinks, hasInvalidLinks } from './links';
 import type { CampaignLink } from '@/lib/links';
 import { errorMessage } from '@/lib/errors';
 
@@ -76,6 +76,7 @@ export function ManagePanel({
           className="space-y-4"
           onSubmit={async (e) => {
             e.preventDefault();
+            if (hasInvalidLinks(links)) return setError('One of your links isn’t a valid link — fix it or remove it.');
             const ok = await call('save', `/api/fundraisers/${fundraiser._id}/edit`, {
               method: 'PUT',
               body: JSON.stringify({ ...form, links: cleanLinks(links) }),
@@ -132,7 +133,12 @@ export function ManagePanel({
         </div>
       )}
 
-      {!editing ? (
+      {!editing && (fundraiser.donationCount ?? 0) > 0 ? (
+        <p className="mt-5 border-t border-[#c5d3b8] pt-4 text-xs leading-relaxed text-muted-foreground">
+          This campaign has received donations, so it stays on OpenFund as a public record of where the money went. You can pause it at
+          any time.
+        </p>
+      ) : !editing ? (
         <details className="mt-5 border-t border-[#c5d3b8] pt-4">
           <summary className="cursor-pointer text-xs font-medium text-[#9b3b2c]">Delete campaign</summary>
           <p className="mt-3 text-xs leading-relaxed text-muted-foreground">

@@ -18,6 +18,23 @@ export type LinkKind =
   | 'facebook'
   | 'linkedin'
   | 'twitch'
+  | 'reddit'
+  | 'medium'
+  | 'substack'
+  | 'spotify'
+  | 'soundcloud'
+  | 'vimeo'
+  | 'rumble'
+  | 'patreon'
+  | 'kick'
+  | 'linktree'
+  | 'whatsapp'
+  | 'snapchat'
+  | 'pinterest'
+  | 'threads'
+  | 'bluesky'
+  | 'farcaster'
+  | 'gofundme'
   | 'email'
   | 'website';
 
@@ -37,6 +54,23 @@ const HOSTS: [RegExp, LinkKind, string][] = [
   [/(^|\.)(facebook\.com|fb\.com)$/, 'facebook', 'Facebook'],
   [/(^|\.)linkedin\.com$/, 'linkedin', 'LinkedIn'],
   [/(^|\.)twitch\.tv$/, 'twitch', 'Twitch'],
+  [/(^|\.)(reddit\.com|redd\.it)$/, 'reddit', 'Reddit'],
+  [/(^|\.)medium\.com$/, 'medium', 'Medium'],
+  [/(^|\.)substack\.com$/, 'substack', 'Substack'],
+  [/(^|\.)(spotify\.com|spotify\.link)$/, 'spotify', 'Spotify'],
+  [/(^|\.)soundcloud\.com$/, 'soundcloud', 'SoundCloud'],
+  [/(^|\.)vimeo\.com$/, 'vimeo', 'Vimeo'],
+  [/(^|\.)rumble\.com$/, 'rumble', 'Rumble'],
+  [/(^|\.)patreon\.com$/, 'patreon', 'Patreon'],
+  [/(^|\.)kick\.com$/, 'kick', 'Kick'],
+  [/(^|\.)(linktr\.ee|linktree\.com)$/, 'linktree', 'Linktree'],
+  [/(^|\.)(wa\.me|whatsapp\.com)$/, 'whatsapp', 'WhatsApp'],
+  [/(^|\.)snapchat\.com$/, 'snapchat', 'Snapchat'],
+  [/(^|\.)(pinterest\.com|pin\.it)$/, 'pinterest', 'Pinterest'],
+  [/(^|\.)threads\.(net|com)$/, 'threads', 'Threads'],
+  [/(^|\.)(bsky\.app|bsky\.social)$/, 'bluesky', 'Bluesky'],
+  [/(^|\.)(warpcast\.com|farcaster\.xyz)$/, 'farcaster', 'Farcaster'],
+  [/(^|\.)(gofundme\.com|gofund\.me)$/, 'gofundme', 'GoFundMe'],
 ];
 
 export function linkKind(url: string): { kind: LinkKind; name: string } {
@@ -72,9 +106,34 @@ export function youtubeId(url: string): string | null {
 }
 
 /**
+ * Turn what people actually type into a full URL: "x.com/me" and
+ * "www.site.org" get https:// added. Anything with an explicit scheme is left
+ * alone (and validated by the caller). Returns null for non-URL text.
+ */
+export function coerceUrl(input: string): string | null {
+  const text = input.trim();
+  if (!text) return null;
+  if (/^[a-z][a-z0-9+.-]*:/i.test(text)) return text;
+  if (/^[\w-]+(\.[\w-]+)+(:\d+)?([/?#].*)?$/.test(text) || /^www\./i.test(text)) return `https://${text}`;
+  return null;
+}
+
+/** Is this URL on another site than ours (or unparseable)? */
+export function isExternalUrl(href: string, currentHost: string): boolean {
+  try {
+    const u = new URL(href, `https://${currentHost}`);
+    return (u.protocol === 'http:' || u.protocol === 'https:' || u.protocol === 'mailto:') && u.host !== currentHost;
+  } catch {
+    return false;
+  }
+}
+
+/**
  * Validate and clean user-supplied links (server side). Accepts http(s) and
- * mailto only — never javascript: or data: URLs. Drops blanks, removes
- * duplicates, trims labels. Returns an error message instead of throwing.
+ * mailto only — never javascript: or data: URLs. Adds https:// to bare
+ * domains, drops blank rows, trims labels, and removes only *exact*
+ * duplicates (same URL and same label). Returns an error message rather
+ * than silently dropping anything the creator entered.
  */
 export function normalizeLinks(input: unknown): { links: CampaignLink[] } | { error: string } {
   if (input == null) return { links: [] };
@@ -88,19 +147,21 @@ export function normalizeLinks(input: unknown): { links: CampaignLink[] } | { er
 
     let url: URL;
     try {
-      url = new URL(urlText.trim());
+      url = new URL(coerceUrl(urlText) ?? '');
     } catch {
-      return { error: `“${urlText.trim().slice(0, 60)}” isn’t a full link — include https://` };
+      return { error: `“${urlText.trim().slice(0, 60)}” doesn’t look like a link.` };
     }
     if (!['https:', 'http:', 'mailto:'].includes(url.protocol)) {
       return { error: 'Links must start with https://, http:// or mailto:' };
     }
     const href = url.toString();
     if (href.length > 2048) return { error: 'One of the links is too long.' };
-    if (seen.has(href)) continue;
-    seen.add(href);
 
     const label = typeof raw?.label === 'string' ? raw.label.replace(/\s+/g, ' ').trim().slice(0, MAX_LABEL) : '';
+    // A normalised URL can't contain a space, so this key is unambiguous.
+    const key = `${href} ${label}`;
+    if (seen.has(key)) continue;
+    seen.add(key);
     out.push(label ? { url: href, label } : { url: href });
   }
   if (out.length > MAX_LINKS) return { error: `You can add up to ${MAX_LINKS} links.` };

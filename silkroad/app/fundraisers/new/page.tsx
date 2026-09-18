@@ -15,7 +15,7 @@ import {
   secondaryButtonClass,
 } from '@/components/fundraisers/ui';
 import { PiggyBank } from '@/components/mascot/PiggyBank';
-import { LinksEditor, cleanLinks } from '@/components/fundraisers/links';
+import { LinksEditor, cleanLinks, hasInvalidLinks } from '@/components/fundraisers/links';
 import type { CampaignLink } from '@/lib/links';
 import { errorMessage } from '@/lib/errors';
 
@@ -83,6 +83,7 @@ export default function NewFundraiserPage() {
     if (!address) return setError('Enter the wallet address donations should go to.');
     if (!confirmedAddress) return setError(`Confirm the address is yours and works on ${ROBINHOOD_CHAIN_NAME}.`);
     if (!imageUrl) return setError('Add a cover image.');
+    if (hasInvalidLinks(links)) return setError('One of your links isn’t a valid link — fix it or remove it.');
 
     setSubmitting(true);
     try {

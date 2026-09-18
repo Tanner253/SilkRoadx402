@@ -183,7 +183,7 @@ export default function AdminPage() {
                     {f.network !== 'robinhood' ? <Pill className="bg-muted text-muted-foreground">Solana (legacy)</Pill> : null}
                   </div>
                   <p className="text-xs text-muted-foreground">
-                    {formatAmount(f.raisedAmount, f.currency)} of {formatAmount(goalOf(f), f.currency)} · {f.donationCount} donations ·{' '}
+                    {formatAmount(f.raisedAmount, f.currency)} of {formatAmount(goalOf(f), f.currency)} · {f.donationCount} donation{f.donationCount === 1 ? '' : 's'} ·{' '}
                     <span className="font-mono">{shortAddress(f.wallet)}</span> · created {timeAgo(f.createdAt)}
                   </p>
                 </div>

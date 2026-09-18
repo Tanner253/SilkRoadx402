@@ -5,7 +5,8 @@
  * Cost control (the RPC is shared and rate-limited):
  *  - a watch is checked at most once per CHECK_INTERVAL_MS, however many tabs
  *    poll it — enforced atomically in the database, not by the client;
- *  - an idle check is two RPC calls; finding a transfer is ~15 more;
+ *  - an idle check is two RPC calls; finding a transfer is ~15 more, and a
+ *    busy wallet catches up within a per-request time budget;
  *  - watches expire after WATCH_TTL_MS and are never checked again.
  */
 
@@ -124,7 +125,11 @@ async function creditDonation(fundraiserId: string, hash: `0x${string}`, donor: 
  * Check one watch against the chain. Returns the (possibly updated) watch.
  * Skips the RPC entirely if it was checked within CHECK_INTERVAL_MS.
  */
-export async function checkWatch(id: string, meter: CallMeter = { calls: 0 }): Promise<IDonationWatch | null> {
+export async function checkWatch(
+  id: string,
+  meter: CallMeter = { calls: 0 },
+  deadline: number = Date.now() + 5_000,
+): Promise<IDonationWatch | null> {
   const now = new Date();
 
   // Claim the check atomically so concurrent polls can't all hit the RPC.
@@ -153,7 +158,7 @@ export async function checkWatch(id: string, meter: CallMeter = { calls: 0 }): P
 
   let scan;
   try {
-    scan = await scanSince(donor, { block: BigInt(watch.cursorBlock), nonce: watch.cursorNonce }, meter);
+    scan = await scanSince(donor, { block: BigInt(watch.cursorBlock), nonce: watch.cursorNonce }, meter, deadline);
   } catch (err) {
     if (err instanceof NeedsArchiveError) {
       if (watch.status !== 'needs_archive') {

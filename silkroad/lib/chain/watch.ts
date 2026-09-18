@@ -7,10 +7,10 @@
  *   1. A donor registers their address. We note the block and their nonce.
  *   2. Each check asks one question: "what's their nonce now?" (2 RPC calls).
  *      Unchanged → nothing was sent; move the cursor to now.
- *   3. When it has gone up, each new transaction is found by binary-searching
- *      for the block where the nonce ticked past it (~log2(blocks) calls),
- *      then reading that single block. Transfers to the campaign address are
- *      then verified exactly like any other donation.
+ *   3. When it has gone up, each new transaction is found by searching for
+ *      the block where the nonce ticked past it (gallop, then binary search:
+ *      ~log2(blocks) calls), then reading that single block. Transfers to the
+ *      campaign address are then verified exactly like any other donation.
  *
  * Robinhood Chain makes ~10 blocks a second, so scanning blocks would cost
  * thousands of calls; this costs a handful. The one limit: the public RPC
@@ -29,10 +29,17 @@ import { ROBINHOOD_RPC_URL, robinhoodChain } from './network';
 
 /** How far back the public node reliably serves state (measured ~6,200). */
 export const PUBLIC_STATE_WINDOW = 5_000;
-/** Look-back when a watch starts, to catch "I already sent it" (~8 minutes). */
-export const REGISTER_LOOKBACK = 4_800;
-/** Most nonce steps resolved in one check; the rest wait for the next. Bounds cost. */
-const MAX_STEPS_PER_CHECK = 5;
+/**
+ * Look-back when a watch starts (~1 minute). The campaign address is only
+ * shown after a donor registers, so this just covers clock and UI slack —
+ * and keeps the starting cursor far inside the public state window, so even
+ * a busy wallet has plenty of room to catch up.
+ */
+export const REGISTER_LOOKBACK = 600;
+/** Hard cap on nonce steps per scan; the time budget usually stops it first. */
+const MAX_STEPS_PER_SCAN = 60;
+/** Default time budget for one scan. */
+const DEFAULT_BUDGET_MS = 5_000;
 
 const transport = (url: string) => http(url, { retryCount: 2, retryDelay: 400, timeout: 10_000 });
 
@@ -85,19 +92,31 @@ export interface ScanResult {
   sent: SentTx[];
   /** Where the next check should resume. */
   cursor: { block: bigint; nonce: number };
-  /** True if more steps remain beyond this check's budget. */
+  /** True if more remains beyond this scan's budget. */
   more: boolean;
 }
 
 /**
- * Everything `donor` sent after `cursor`, up to MAX_STEPS_PER_CHECK txs.
- * Throws NeedsArchiveError if history beyond the public window is required
- * and no archive RPC is configured.
+ * Everything `donor` sent after `cursor`, until `deadline` (epoch ms) or
+ * MAX_STEPS_PER_SCAN transactions. Always makes at least one step, so a busy
+ * wallet still progresses. Throws NeedsArchiveError if history beyond the
+ * public window is needed and no archive RPC is configured.
+ *
+ * Locating the block that holds nonce n: gallop forward from the last known
+ * block (+1, +2, +4 …) until the nonce there exceeds n, then binary-search
+ * inside that bracket. Busy wallets send often, so the bracket is usually
+ * small; a one-off donor still costs only ~log2(blocks). Fetched blocks are
+ * cached, so several of the donor's transactions in one block cost one read.
+ *
+ * Invariant: nonce(lo) <= n, where n is the next unresolved nonce. The
+ * returned cursor keeps it, so the next scan resumes exactly where this one
+ * stopped.
  */
 export async function scanSince(
   donor: `0x${string}`,
   cursor: { block: bigint; nonce: number },
   meter: CallMeter = { calls: 0 },
+  deadline: number = Date.now() + DEFAULT_BUDGET_MS,
 ): Promise<ScanResult> {
   const head = await headBlock(meter);
   const nowNonce = await nonceAt(donor, head, meter);
@@ -112,33 +131,62 @@ export async function scanSince(
   const client = withinPublic ? live : archive;
   if (!client) throw new NeedsArchiveError();
 
-  const sent: SentTx[] = [];
-  let lo = cursor.block; // nonce(lo) <= n for the nonce n being searched
-  const target = Math.min(nowNonce, cursor.nonce + MAX_STEPS_PER_CHECK);
-
-  for (let n = cursor.nonce; n < target; n++) {
-    // Smallest block b in (lo, head] with nonce(b) > n: the block holding nonce n.
-    let low = lo;
-    let high = head;
-    while (high - low > BigInt(1)) {
-      const mid = low + (high - low) / BigInt(2);
-      if ((await nonceAt(donor, mid, meter, client)) > n) high = mid;
-      else low = mid;
+  const one = BigInt(1);
+  const two = BigInt(2);
+  const cache = new Map<bigint, Awaited<ReturnType<typeof client.getBlock<true>>>>();
+  const readBlock = async (number: bigint) => {
+    let block = cache.get(number);
+    if (!block) {
+      meter.calls++;
+      block = await client.getBlock({ blockNumber: number, includeTransactions: true });
+      cache.set(number, block);
     }
-    meter.calls++;
-    const block = await client.getBlock({ blockNumber: high, includeTransactions: true });
-    const tx = block.transactions.find((t) => getAddress(t.from) === donor && t.nonce === n);
-    if (tx) sent.push({ hash: tx.hash, to: tx.to ? getAddress(tx.to) : null, block: high, nonce: n });
-    // The next nonce can't be in an earlier block.
-    lo = high - BigInt(1);
+    return block;
+  };
+
+  const sent: SentTx[] = [];
+  let lo = cursor.block;
+  let n = cursor.nonce;
+  const cap = Math.min(nowNonce, cursor.nonce + MAX_STEPS_PER_SCAN);
+
+  while (n < cap && (n === cursor.nonce || Date.now() < deadline)) {
+    // Gallop to a bracket (lo, high] with nonce(high) > n.
+    let step = one;
+    let high = lo + step < head ? lo + step : head;
+    while (high < head && (await nonceAt(donor, high, meter, client)) <= n) {
+      lo = high;
+      step *= two;
+      high = lo + step < head ? lo + step : head;
+    }
+    // Binary-search the smallest block in the bracket with nonce > n.
+    while (high - lo > one) {
+      const mid = lo + (high - lo) / two;
+      if ((await nonceAt(donor, mid, meter, client)) > n) high = mid;
+      else lo = mid;
+    }
+
+    // Block `high` holds nonce n, and possibly the donor's next ones too.
+    const block = await readBlock(high);
+    const mine = block.transactions
+      .filter((t) => getAddress(t.from) === donor && t.nonce >= n)
+      .sort((a, b) => a.nonce - b.nonce);
+    const before = n;
+    for (const tx of mine) {
+      if (tx.nonce !== n) break;
+      sent.push({ hash: tx.hash, to: tx.to ? getAddress(tx.to) : null, block: high, nonce: n });
+      n++;
+    }
+    // Nonce n wasn't where the chain said it was: inconsistent RPC state.
+    // Stop and let the next check retry from here rather than guess.
+    if (n === before) break;
+    // nonce(high - 1) <= the first nonce consumed above <= n.
+    lo = high - one;
   }
 
-  const resolvedAll = target === nowNonce;
+  const done = n >= nowNonce;
   return {
     sent,
-    // If we stopped early, resume just before the last block we resolved so
-    // the next search starts from known ground.
-    cursor: resolvedAll ? { block: head, nonce: nowNonce } : { block: lo, nonce: target },
-    more: !resolvedAll,
+    cursor: done ? { block: head, nonce: nowNonce } : { block: lo, nonce: n },
+    more: !done,
   };
 }
