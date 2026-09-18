@@ -1,188 +1,94 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { useAuth } from '@/hooks/useAuth';
-import { useWallet } from '@solana/wallet-adapter-react';
-import axios from 'axios';
+import { useEffect, useState } from 'react';
+import Link from 'next/link';
+import { ArrowUpRight } from 'lucide-react';
+import { formatAmount, shortAddress, type Currency } from '@/lib/format';
+import { Notice, PageIntro, primaryButtonClass } from '@/components/fundraisers/ui';
+import { errorMessage } from '@/lib/errors';
 
-interface LeaderboardEntry {
+interface Row {
   wallet: string;
   totalRaised: number;
   donationCount: number;
   activeCampaigns: number;
+  currency: Currency;
 }
 
-function LeaderboardPageContent() {
-  const { isConnected, mounted } = useAuth();
-  const { publicKey } = useWallet();
-
-  const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    if (mounted) fetchLeaderboard();
-  }, [mounted]);
-
-  const fetchLeaderboard = async () => {
-    try {
-      setLoading(true);
-      const response = await axios.get('/api/leaderboard?limit=20');
-      setLeaderboard(response.data.leaderboard);
-    } catch (err: any) {
-      setError(err.response?.data?.error || 'Failed to load leaderboard');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const truncateWallet = (wallet: string) =>
-    wallet.length <= 12 ? wallet : `${wallet.slice(0, 6)}...${wallet.slice(-4)}`;
-
-  const isCurrentUser = (wallet: string) => publicKey?.toBase58() === wallet;
-
-  if (!mounted) return null;
-
+function Table({ rows }: { rows: Row[] }) {
   return (
-    <div className="min-h-screen bg-background px-4 py-12">
-      <div className="mx-auto max-w-5xl">
-
-        {/* Header */}
-        <div className="mb-10 text-center">
-          <h1 className="mb-2 text-4xl font-bold tracking-tight text-foreground">
-            🏆 Top Fundraisers
-          </h1>
-          <p className="text-lg text-muted-foreground">
-            The creators who have raised the most on OpenFund
-          </p>
-        </div>
-
-        {/* Info banner */}
-
-
-        {/* Error */}
-        {error && (
-          <div className="mb-6 rounded-lg border border-red-200 bg-red-50 p-4 text-red-700">
-            <p>⚠️ {error}</p>
+    <ol className="divide-y divide-border overflow-hidden rounded-2xl border border-border bg-card">
+      {rows.map((r, i) => (
+        <li key={r.wallet} className="flex items-center gap-4 px-5 py-4">
+          <span
+            className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-sm font-medium tabular-nums ${
+              i === 0 ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground'
+            }`}
+          >
+            {i + 1}
+          </span>
+          <div className="min-w-0 flex-1">
+            <Link href={`/fundraisers?wallet=${r.wallet}`} className="font-mono text-sm text-foreground underline-offset-2 hover:underline">
+              {shortAddress(r.wallet, 8, 6)}
+            </Link>
+            <p className="text-xs text-muted-foreground">
+              {r.donationCount} donation{r.donationCount === 1 ? '' : 's'} · {r.activeCampaigns} active campaign{r.activeCampaigns === 1 ? '' : 's'}
+            </p>
           </div>
-        )}
-
-        {/* Loading */}
-        {loading && (
-          <div className="flex items-center justify-center py-16">
-            <div className="h-8 w-8 animate-spin rounded-full border-4 border-border border-t-transparent"></div>
-            <span className="ml-3 text-muted-foreground">Loading...</span>
-          </div>
-        )}
-
-        {/* Table */}
-        {!loading && leaderboard.length > 0 && (
-          <div className="overflow-hidden rounded-xl border border-border bg-muted backdrop-blur-sm shadow-lg">
-            <table className="min-w-full divide-y divide-border">
-              <thead className="bg-muted">
-                <tr>
-                  <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wide text-muted-foreground">Rank</th>
-                  <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wide text-muted-foreground">Creator</th>
-                  <th className="px-6 py-4 text-right text-xs font-semibold uppercase tracking-wide text-muted-foreground">Total Raised</th>
-                  <th className="px-6 py-4 text-center text-xs font-semibold uppercase tracking-wide text-muted-foreground">Donations</th>
-                  <th className="px-6 py-4 text-center text-xs font-semibold uppercase tracking-wide text-muted-foreground">Active Campaigns</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-border">
-                {leaderboard.map((entry, index) => {
-                  const isTop3 = index < 3;
-                  const isMe = isCurrentUser(entry.wallet);
-                  return (
-                    <tr
-                      key={entry.wallet}
-                      className={`transition-colors ${
-                        isTop3
-                          ? 'bg-accent border-l-4 border-border'
-                          : isMe
-                          ? 'bg-accent'
-                          : 'hover:bg-muted'
-                      }`}
-                    >
-                      {/* Rank */}
-                      <td className="px-6 py-4">
-                        <div className="flex items-center gap-2">
-                          {index === 0 && <span className="text-2xl">🥇</span>}
-                          {index === 1 && <span className="text-2xl">🥈</span>}
-                          {index === 2 && <span className="text-2xl">🥉</span>}
-                          <span className={`text-lg font-bold ${isTop3 ? 'gradient-text' : 'text-muted-foreground'}`}>
-                            #{index + 1}
-                          </span>
-                        </div>
-                      </td>
-
-                      {/* Creator */}
-                      <td className="px-6 py-4">
-                        <div className="flex items-center gap-2">
-                          <code className="font-mono text-sm text-foreground">
-                            {truncateWallet(entry.wallet)}
-                          </code>
-                          {isMe && (
-                            <span className="rounded-full bg-accent px-2 py-0.5 text-xs font-medium text-primary">
-                              You
-                            </span>
-                          )}
-                        </div>
-                      </td>
-
-                      {/* Total Raised */}
-                      <td className="px-6 py-4 text-right">
-                        <div className="text-xl font-bold text-primary">
-                          ${entry.totalRaised.toFixed(2)}
-                        </div>
-                        <div className="text-xs text-muted-foreground">USDC</div>
-                      </td>
-
-                      {/* Donations */}
-                      <td className="px-6 py-4 text-center">
-                        <span className="inline-flex items-center rounded-full bg-muted px-3 py-1 text-sm font-semibold text-muted-foreground">
-                          {entry.donationCount}
-                        </span>
-                      </td>
-
-                      {/* Active Campaigns */}
-                      <td className="px-6 py-4 text-center">
-                        <span className="inline-flex items-center rounded-full bg-muted px-3 py-1 text-sm font-semibold text-muted-foreground">
-                          {entry.activeCampaigns}
-                        </span>
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
-        )}
-
-        {/* Empty state */}
-        {!loading && leaderboard.length === 0 && (
-          <div className="rounded-xl border border-border bg-muted p-16 text-center">
-            <div className="text-5xl mb-4">🚀</div>
-            <h3 className="text-xl font-semibold text-foreground mb-2">No fundraisers yet</h3>
-            <p className="text-sm text-muted-foreground">Be the first to launch a campaign and claim the top spot!</p>
-          </div>
-        )}
-
-        {/* How rankings work */}
-        <div className="mt-8 rounded-xl border border-border bg-accent p-6">
-          <h3 className="mb-3 text-sm font-bold text-primary">📊 How Rankings Work</h3>
-          <ul className="space-y-1 text-sm text-muted-foreground">
-            <li>• Ranked by <strong className="text-foreground">total USDC raised</strong> across all campaigns</li>
-            <li>• Only completed (successful) donations count toward totals</li>
-            <li>• Rankings update in real-time as donations come in</li>
-            <li>• Your rank is highlighted when your wallet appears on the board</li>
-          </ul>
-        </div>
-
-      </div>
-    </div>
+          <span className="shrink-0 text-right text-sm font-medium tabular-nums text-foreground">{formatAmount(r.totalRaised, r.currency)}</span>
+        </li>
+      ))}
+    </ol>
   );
 }
 
 export default function LeaderboardPage() {
-  return <LeaderboardPageContent />;
+  const [rows, setRows] = useState<Row[] | null>(null);
+  const [legacy, setLegacy] = useState<Row[]>([]);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    fetch('/api/leaderboard?limit=25', { cache: 'no-store' })
+      .then(async (res) => {
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'Failed to load');
+        setRows(data.leaderboard ?? []);
+        setLegacy(data.legacy ?? []);
+      })
+      .catch((err) => setError(errorMessage(err)));
+  }, []);
+
+  return (
+    <div className="mx-auto max-w-[860px] px-6 pb-24 md:px-8">
+      <PageIntro eyebrow="TOP FUNDRAISERS" title="The most" accent="backed.">
+        Creators ranked by verified donations to their campaigns on Robinhood Chain.
+      </PageIntro>
+
+      {error ? (
+        <Notice tone="error">Couldn&rsquo;t load the leaderboard: {error}</Notice>
+      ) : rows === null ? (
+        <div className="h-64 animate-pulse rounded-2xl border border-border bg-card" />
+      ) : rows.length ? (
+        <Table rows={rows} />
+      ) : (
+        <div className="rounded-2xl border border-dashed border-border px-6 py-14 text-center">
+          <p className="mb-1 text-lg font-medium text-foreground">No donations on Robinhood Chain yet.</p>
+          <p className="mb-6 text-sm text-muted-foreground">The first campaign to raise lands at the top.</p>
+          <Link href="/fundraisers/new" className={primaryButtonClass}>
+            Start a fundraiser <ArrowUpRight size={16} />
+          </Link>
+        </div>
+      )}
+
+      {legacy.length ? (
+        <details className="mt-12">
+          <summary className="cursor-pointer text-sm font-medium text-muted-foreground hover:text-foreground">
+            Before the move — Solana, USDC ({legacy.length})
+          </summary>
+          <p className="mb-4 mt-3 text-xs text-muted-foreground">Ranked separately: USDC and ETH aren&rsquo;t added together.</p>
+          <Table rows={legacy} />
+        </details>
+      ) : null}
+    </div>
+  );
 }

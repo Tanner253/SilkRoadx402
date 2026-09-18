@@ -23,9 +23,6 @@ const LogSchema = new Schema<ILog>({
   ip: {
     type: String,
   },
-  metadata: {
-    type: Schema.Types.Mixed,
-  },
   createdAt: {
     type: Date,
     default: Date.now,

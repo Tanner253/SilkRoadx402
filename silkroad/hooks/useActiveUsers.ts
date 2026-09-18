@@ -1,90 +1,53 @@
-import { useState, useEffect } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { usePathname } from 'next/navigation';
-import axios from 'axios';
 
+/**
+ * Live "N online" count: heartbeats this browser's session every 2 minutes
+ * (and on navigation) and polls the total every 30 seconds while visible.
+ */
 export function useActiveUsers() {
-  const [activeUsers, setActiveUsers] = useState<number>(0);
-  const [sessionId, setSessionId] = useState<string | null>(null);
+  const [activeUsers, setActiveUsers] = useState(0);
+  const session = useRef<string | null>(null);
   const pathname = usePathname();
 
-  // Initialize sessionId from localStorage or generate new one
   useEffect(() => {
-    if (typeof window === 'undefined') return;
-
-    let id = localStorage.getItem('session_id');
-    if (!id) {
-      id = `sess_${Date.now()}_${Math.random().toString(36).substring(7)}`;
-      localStorage.setItem('session_id', id);
+    if (!session.current) {
+      try {
+        session.current = localStorage.getItem('session_id') ?? crypto.randomUUID();
+        localStorage.setItem('session_id', session.current);
+      } catch {
+        session.current = crypto.randomUUID();
+      }
     }
-    setSessionId(id);
-  }, []);
+    const sessionId = session.current;
+    const beat = () =>
+      fetch('/api/active-users', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ sessionId, page: pathname }),
+      }).catch(() => {});
+    beat();
+    const timer = setInterval(beat, 120_000);
+    return () => clearInterval(timer);
+  }, [pathname]);
 
-  // Update activity when page changes or on mount
   useEffect(() => {
-    if (!sessionId) return;
-
-    let isMounted = true;
-
-    const updateActivity = async () => {
-      if (!isMounted) return;
-      
-      try {
-        await axios.post('/api/active-users', {
-          sessionId,
-          page: pathname,
-        }, {
-          timeout: 5000, // 5 second timeout
-        });
-      } catch {
-        // Silently ignore — API unavailable (e.g. no DB locally)
-      }
+    let alive = true;
+    const poll = () => {
+      if (document.visibilityState !== 'visible') return;
+      fetch('/api/active-users', { cache: 'no-store' })
+        .then((r) => r.json())
+        .then((d) => alive && d.success && setActiveUsers(d.activeUsers || 0))
+        .catch(() => {});
     };
-
-    // Update immediately
-    updateActivity();
-
-    // Update every 2 minutes to keep session alive
-    const activityInterval = setInterval(updateActivity, 120000); // 2 minutes
-
+    const first = setTimeout(poll, 1000);
+    const timer = setInterval(poll, 30_000);
     return () => {
-      isMounted = false;
-      clearInterval(activityInterval);
-    };
-  }, [sessionId, pathname]);
-
-  // Poll for active users count
-  useEffect(() => {
-    let isMounted = true;
-
-    const fetchActiveUsers = async () => {
-      if (!isMounted) return;
-
-      try {
-        const response = await axios.get('/api/active-users', {
-          timeout: 5000, // 5 second timeout
-        });
-        
-        if (isMounted && response.data.success) {
-          setActiveUsers(response.data.activeUsers || 0);
-        }
-      } catch {
-        // Silently ignore — API unavailable (e.g. no DB locally)
-      }
-    };
-
-    // Fetch immediately after a short delay to let the POST complete
-    const initialTimeout = setTimeout(fetchActiveUsers, 1000);
-
-    // Poll every 30 seconds
-    const pollInterval = setInterval(fetchActiveUsers, 30000);
-
-    return () => {
-      isMounted = false;
-      clearTimeout(initialTimeout);
-      clearInterval(pollInterval);
+      alive = false;
+      clearTimeout(first);
+      clearInterval(timer);
     };
   }, []);
 
   return activeUsers;
 }
-

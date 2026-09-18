@@ -1,65 +1,56 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { CONFIG } from '@/config/constants';
 import { connectDB } from '@/lib/db';
 import { Transaction } from '@/models/Transaction';
 import { Fundraiser } from '@/models/Fundraiser';
+import type { Types } from 'mongoose';
+
+interface RankRow {
+  _id: string;
+  totalRaised: number;
+  donationCount: number;
+}
 
 export async function GET(req: NextRequest) {
   try {
     const { searchParams } = new URL(req.url);
-    const limit = parseInt(searchParams.get('limit') || '10');
+    const limit = Math.min(Math.max(parseInt(searchParams.get('limit') || '10') || 10, 1), 50);
 
-    // ============================================
-    // MOCK MODE
-    // ============================================
-    if (CONFIG.MOCK_MODE) {
-      // Mock data only contains old marketplace transactions — return empty leaderboard
-      return NextResponse.json({ success: true, leaderboard: [], _mock: true });
-    }
-
-    // ============================================
-    // REAL MODE
-    // ============================================
     await connectDB();
 
-    // Get all fundraiser IDs so we can filter to donations only (not old marketplace purchases)
-    // Transaction.listingId is stored as a plain string, Fundraiser._id is ObjectId — convert
-    const fundraiserDocs = await Fundraiser.find({}, { _id: 1 }).lean();
-    const fundraiserIds = fundraiserDocs.map((f: any) => f._id.toString());
+    // Only donations to fundraisers — not old marketplace purchases.
+    // Transaction.listingId is a string; Fundraiser._id is an ObjectId.
+    const fundraiserIds = (await Fundraiser.find({}, { _id: 1 }).lean<{ _id: Types.ObjectId }[]>()).map((f) => f._id.toString());
 
-    // Aggregate only transactions whose listingId belongs to a fundraiser
-    const creatorRevenue = await Transaction.aggregate([
-      { $match: { status: 'success', listingId: { $in: fundraiserIds } } },
-      {
-        $group: {
-          _id: '$sellerWallet',
-          totalRaised: { $sum: '$amount' },
-          donationCount: { $sum: 1 },
-        },
-      },
-      { $sort: { totalRaised: -1 } },
-      { $limit: limit },
+    // ETH (Robinhood Chain) and USDC (Solana, before the move) are different
+    // units, so they're ranked separately rather than summed together.
+    const rank = (currencyMatch: object) =>
+      Transaction.aggregate<RankRow>([
+        { $match: { status: 'success', listingId: { $in: fundraiserIds }, ...currencyMatch } },
+        { $group: { _id: '$sellerWallet', totalRaised: { $sum: '$amount' }, donationCount: { $sum: 1 } } },
+        { $sort: { totalRaised: -1 } },
+        { $limit: limit },
+      ]);
+
+    const [eth, usdc] = await Promise.all([
+      rank({ currency: 'ETH' }),
+      rank({ $or: [{ currency: 'USDC' }, { currency: { $exists: false } }] }),
     ]);
 
-    // Enrich with active campaign count from Fundraiser model
-    const leaderboard = await Promise.all(
-      creatorRevenue.map(async (creator) => {
-        const activeCampaigns = await Fundraiser.countDocuments({
-          wallet: creator._id,
-          state: 'on_market',
-          approved: true,
-        });
-        return {
-          wallet: creator._id,
-          totalRaised: creator.totalRaised,
-          donationCount: creator.donationCount,
-          activeCampaigns,
-        };
-      })
-    );
+    const enrich = (rows: RankRow[], currency: 'ETH' | 'USDC') =>
+      Promise.all(
+        rows.map(async (row) => ({
+          wallet: row._id,
+          totalRaised: row.totalRaised,
+          donationCount: row.donationCount,
+          currency,
+          activeCampaigns: await Fundraiser.countDocuments({ wallet: row._id, state: { $ne: 'pulled' } }),
+        })),
+      );
 
-    return NextResponse.json({ success: true, leaderboard });
-  } catch (error: any) {
+    const [leaderboard, legacy] = await Promise.all([enrich(eth, 'ETH'), enrich(usdc, 'USDC')]);
+
+    return NextResponse.json({ success: true, leaderboard, legacy });
+  } catch (error) {
     console.error('Leaderboard error:', error);
     return NextResponse.json({ error: 'Failed to fetch leaderboard' }, { status: 500 });
   }

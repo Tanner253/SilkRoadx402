@@ -47,22 +47,39 @@ export function FAQ() {
       ),
     },
     {
-      question: 'How will donating work?',
+      question: 'How does donating work?',
       answer: (
+        <>
         <ol className="list-decimal list-inside space-y-2">
-          <li>Open a campaign and choose how much to give</li>
-          <li>Send that amount of ETH from your own wallet to the address the campaign shows</li>
-          <li>OpenFund picks the payment up on-chain and adds it to the campaign&apos;s total and donation log</li>
+          <li>Open a campaign and enter the wallet address you&apos;ll give from</li>
+          <li>We show you the campaign&apos;s address — send ETH to it from that wallet, on Robinhood Chain</li>
+          <li>We spot the transfer on-chain and add it to the campaign&apos;s total and donation log, usually within seconds</li>
         </ol>
+        <p className="mt-3 text-sm text-primary bg-accent border border-border p-3 rounded">
+          A donation is only counted if it comes from the wallet you told us about. Send directly from that wallet —
+          transfers from an exchange or through a smart-contract wallet come from a different address and can&apos;t be matched.
+        </p>
+        </>
       ),
     },
     {
       question: 'How do I start a fundraiser?',
       answer: (
         <p>
-          Fundraisers open with our Robinhood Chain launch. You&apos;ll give your campaign a title,
-          tell people why it matters, set a goal, and enter the wallet address donations should go
-          to. Campaigns are reviewed before they appear publicly.
+          Click &ldquo;Start a fundraiser&rdquo;, give your campaign a title, tell people why it
+          matters, set a goal in ETH, and enter the Robinhood Chain wallet address donations should
+          go to. It goes live as soon as you publish — there&apos;s no review queue.
+        </p>
+      ),
+    },
+    {
+      question: 'What is a manage link?',
+      answer: (
+        <p>
+          There are no accounts, so when you publish a campaign you get a private manage link instead.
+          Anyone with it can edit, pause or delete the campaign — so keep it safe and don&apos;t share
+          it. It can&apos;t change where donations go. If you lose it, the campaign keeps running and
+          receiving donations, but you won&apos;t be able to edit it.
         </p>
       ),
     },
@@ -79,8 +96,9 @@ export function FAQ() {
             <li>Never share your seed phrase with anyone — OpenFund will never ask for it</li>
           </ul>
           <p className="text-sm text-primary bg-accent border border-border p-3 rounded">
-            OpenFund is permissionless. We review campaigns but can&apos;t guarantee outcomes.
-            Only give what you can afford to lose.
+            OpenFund is permissionless: campaigns go live without pre-screening, and our admins
+            review reports after the fact. We can&apos;t guarantee outcomes — only give what you
+            can afford to lose.
           </p>
         </>
       ),
@@ -90,7 +108,7 @@ export function FAQ() {
       answer: (
         <ol className="list-decimal list-inside space-y-2">
           <li>Open the campaign page</li>
-          <li>Use the report option at the top right</li>
+          <li>Click &ldquo;Report this campaign&rdquo; under the donation box</li>
           <li>Tell us what&apos;s wrong — our admins review every report</li>
         </ol>
       ),
@@ -118,33 +136,24 @@ export function FAQ() {
   ];
 
   return (
-    <div className="rounded-xl border border-border bg-muted backdrop-blur-sm p-8">
-      <h2 className="mb-8 text-3xl font-bold text-foreground">
-        Frequently asked questions
-      </h2>
-      <div className="space-y-3">
-        {faqs.map((faq, index) => (
-          <div
-            key={index}
-            className="rounded-lg border border-border overflow-hidden"
-          >
+    <div className="divide-y divide-border border-y border-border">
+      {faqs.map((faq, index) => {
+        const open = openIndex === index;
+        return (
+          <div key={faq.question}>
             <button
-              onClick={() => setOpenIndex(openIndex === index ? null : index)}
-              className="w-full flex items-center justify-between p-4 text-left hover:bg-muted transition-colors"
+              type="button"
+              onClick={() => setOpenIndex(open ? null : index)}
+              aria-expanded={open}
+              className="flex w-full items-center justify-between gap-6 py-5 text-left"
             >
-              <span className="font-semibold text-foreground pr-4">{faq.question}</span>
-              <span className="text-2xl text-muted-foreground flex-shrink-0">
-                {openIndex === index ? '−' : '+'}
-              </span>
+              <span className="text-[15px] font-medium text-foreground">{faq.question}</span>
+              <span className="text-xl leading-none text-muted-foreground" aria-hidden="true">{open ? '−' : '+'}</span>
             </button>
-            {openIndex === index && (
-              <div className="px-4 pb-4 text-sm text-muted-foreground leading-relaxed">
-                {faq.answer}
-              </div>
-            )}
+            {open ? <div className="pb-6 pr-8 text-sm leading-relaxed text-muted-foreground">{faq.answer}</div> : null}
           </div>
-        ))}
-      </div>
+        );
+      })}
     </div>
   );
 }

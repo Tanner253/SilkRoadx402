@@ -1,125 +1,63 @@
+/**
+ * POST /api/upload/image — upload a campaign cover to Cloudinary.
+ * multipart/form-data with an `image` field: JPEG, PNG or WebP, up to 5 MB.
+ */
+
 import { NextRequest, NextResponse } from 'next/server';
+import { v2 as cloudinary } from 'cloudinary';
 import { CONFIG } from '@/config/constants';
 import { checkRateLimit, RATE_LIMITS } from '@/lib/rateLimit';
+import { getIpFromRequest } from '@/lib/logger';
+
+const MAX_BYTES = 5 * 1024 * 1024;
+
+/** Check the file's actual signature — the browser-supplied type is only a claim. */
+function looksLikeImage(bytes: Buffer): boolean {
+  const jpeg = bytes[0] === 0xff && bytes[1] === 0xd8 && bytes[2] === 0xff;
+  const png = bytes.subarray(0, 8).equals(Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]));
+  const webp = bytes.subarray(0, 4).toString('ascii') === 'RIFF' && bytes.subarray(8, 12).toString('ascii') === 'WEBP';
+  return jpeg || png || webp;
+}
 
 export async function POST(req: NextRequest) {
   try {
-    // Get wallet from query params (frontend should pass this)
-    const { searchParams } = new URL(req.url);
-    const wallet = searchParams.get('wallet');
+    const rate = await checkRateLimit(getIpFromRequest(req) || 'unknown', RATE_LIMITS.IMAGE_UPLOAD);
+    if (!rate.allowed) return NextResponse.json({ error: rate.message }, { status: 429 });
 
-    if (wallet) {
-      // ANTI-SPAM: Rate limit uploads (5 per 10 minutes)
-      const rateLimit = await checkRateLimit(wallet, RATE_LIMITS.IMAGE_UPLOAD);
-      if (!rateLimit.allowed) {
-        return NextResponse.json(
-          { 
-            error: rateLimit.message,
-            resetAt: rateLimit.resetAt,
-            remaining: rateLimit.remaining
-          },
-          { status: 429 }
-        );
-      }
-    }
+    const form = await req.formData().catch(() => null);
+    const image = form?.get('image');
+    if (!(image instanceof File)) return NextResponse.json({ error: 'No image provided' }, { status: 400 });
+    if (image.size > MAX_BYTES) return NextResponse.json({ error: 'Image must be under 5 MB' }, { status: 400 });
 
-    // ============================================
-    // MOCK MODE (return placeholder image)
-    // ============================================
-    if (CONFIG.MOCK_MODE) {
-      
-      // Return a random unsplash image
-      const mockImages = [
-        'https://images.unsplash.com/photo-1639762681485-074b7f938ba0?w=800&h=600&fit=crop',
-        'https://images.unsplash.com/photo-1620321023374-d1a68fbc720d?w=800&h=600&fit=crop',
-        'https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=800&h=600&fit=crop',
-        'https://images.unsplash.com/photo-1642790106117-e829e14a795f?w=800&h=600&fit=crop',
-        'https://images.unsplash.com/photo-1563013544-824ae1b704d3?w=800&h=600&fit=crop',
-      ];
-      
-      const randomImage = mockImages[Math.floor(Math.random() * mockImages.length)];
+    const buffer = Buffer.from(await image.arrayBuffer());
+    if (!looksLikeImage(buffer)) return NextResponse.json({ error: 'Image must be JPEG, PNG or WebP' }, { status: 400 });
 
-      return NextResponse.json({
-        success: true,
-        imageUrl: randomImage,
-        _mock: true,
-      });
-    }
-
-    // ============================================
-    // REAL MODE (Cloudinary upload)
-    // ============================================
-    const formData = await req.formData();
-    const image = formData.get('image') as File;
-
-    if (!image) {
-      return NextResponse.json(
-        { error: 'No image provided' },
-        { status: 400 }
-      );
-    }
-
-    // Validate file size
-    if (image.size > 5 * 1024 * 1024) {
-      return NextResponse.json(
-        { error: 'Image must be less than 5MB' },
-        { status: 400 }
-      );
-    }
-
-    // Validate file type
-    if (!['image/jpeg', 'image/png', 'image/webp'].includes(image.type)) {
-      return NextResponse.json(
-        { error: 'Image must be JPEG, PNG, or WebP' },
-        { status: 400 }
-      );
-    }
-
-    // Upload to Cloudinary
-    const cloudinary = require('cloudinary').v2;
-    
-    // Use CLOUDINARY_URL if set, otherwise use individual variables
-    if (CONFIG.CLOUDINARY_URL) {
+    if (CONFIG.CLOUDINARY_URL) cloudinary.config({ cloudinary_url: CONFIG.CLOUDINARY_URL, secure: true });
+    else
       cloudinary.config({
-        cloudinary_url: CONFIG.CLOUDINARY_URL,
+        cloud_name: CONFIG.CLOUDINARY_CLOUD_NAME,
+        api_key: CONFIG.CLOUDINARY_API_KEY,
+        api_secret: CONFIG.CLOUDINARY_API_SECRET,
+        secure: true,
       });
-    } else {
-    cloudinary.config({
-      cloud_name: CONFIG.CLOUDINARY_CLOUD_NAME,
-      api_key: CONFIG.CLOUDINARY_API_KEY,
-      api_secret: CONFIG.CLOUDINARY_API_SECRET,
-    });
-    }
 
-    const bytes = await image.arrayBuffer();
-    const buffer = Buffer.from(bytes);
-
-    const result = await new Promise((resolve, reject) => {
-      cloudinary.uploader.upload_stream(
-        {
-          folder: 'silkroadx402',
-          transformation: [
-            { width: 800, height: 600, crop: 'fill' },
-            { quality: 'auto' },
-          ],
-        },
-        (error: any, result: any) => {
-          if (error) reject(error);
-          else resolve(result);
-        }
-      ).end(buffer);
+    const result = await new Promise<{ secure_url: string }>((resolve, reject) => {
+      cloudinary.uploader
+        .upload_stream(
+          {
+            folder: 'openfund',
+            resource_type: 'image',
+            // Covers display at 16:9, so crop to that once here.
+            transformation: [{ width: 1600, height: 900, crop: 'fill', gravity: 'auto' }, { quality: 'auto', fetch_format: 'auto' }],
+          },
+          (error, uploaded) => (error || !uploaded ? reject(error) : resolve(uploaded)),
+        )
+        .end(buffer);
     });
 
-    return NextResponse.json({
-      success: true,
-      imageUrl: (result as any).secure_url,
-    });
-  } catch (error: any) {
+    return NextResponse.json({ success: true, imageUrl: result.secure_url });
+  } catch (error) {
     console.error('Image upload error:', error);
-    return NextResponse.json(
-      { error: 'Failed to upload image' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to upload image' }, { status: 500 });
   }
 }
-

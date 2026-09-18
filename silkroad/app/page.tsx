@@ -81,7 +81,7 @@ export default function Home() {
       <details className="fund-token">
         <summary>${PLATFORM_TOKEN.ticker} <span>Details +</span></summary>
         <div>
-          <p>Moving to Robinhood Chain (4663), the network used by pons.</p>
+          <p>OpenFund runs on Robinhood Chain (chain ID 4663), the network pons is built on. The $OPEN contract address will be posted here at launch.</p>
           <p>Contract address <code>{PLATFORM_TOKEN.contractAddress}</code></p>
           <a href={PLATFORM_TOKEN.launchpadUrl} target="_blank" rel="noopener noreferrer">Explore pons <ArrowUpRight size={14} /></a>
         </div>

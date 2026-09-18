@@ -1,2 +1,0 @@
-import fs from 'node:fs';
-let p='components/home/PiggyScene.tsx',s=fs.readFileSync(p,'utf8');let a=s.indexOf('          {[-1, 0, 1].map'),b=s.indexOf('\n        </group>',a);s=s.slice(0,a)+`          <mesh scale={[.72,1,.14]} position={[0,0,.006]}><octahedronGeometry args={[.135,0]} /><meshStandardMaterial color="#e7bc65" metalness={.85} roughness={.25} /></mesh>`+s.slice(b);s=s.replace('setPaused(!paused); setReduced(false);','setPaused(playing); setReduced(false);');fs.writeFileSync(p,s);

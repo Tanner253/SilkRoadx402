@@ -30,8 +30,9 @@ yarn-debug.log*
 yarn-error.log*
 .pnpm-debug.log*
 
-# env files (can opt-in for committing if needed)
+# env files — the example template is committed, real values never are
 .env*
+!.env.example
 
 # vercel
 .vercel
@@ -40,7 +41,6 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
-# mock data persistence (for testing)
-.mock-data/
-
-.vercel
+# local keypairs from the old devnet test script — private keys, never commit
+.test-wallets/
+*keypair*.json

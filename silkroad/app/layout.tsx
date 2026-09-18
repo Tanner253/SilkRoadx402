@@ -1,14 +1,12 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-import { SolanaWalletProvider } from "@/components/providers/WalletProvider";
-import { AuthProvider } from "@/components/providers/AuthProvider";
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
-import { AppInitializer } from "@/components/providers/AppInitializer";
-import { UIProviders } from "@/components/providers/UIProviders";
 import { CoinCTAModal } from "@/components/modals/CoinCTAModal";
 import { SmoothScroll } from "@/components/providers/SmoothScroll";
+import { WatchProvider } from "@/components/donations/WatchProvider";
+import { WatchBanner } from "@/components/donations/WatchBanner";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -36,22 +34,16 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
         suppressHydrationWarning
       >
-        <AppInitializer />
         <SmoothScroll />
-        <SolanaWalletProvider>
-          <AuthProvider>
-            <UIProviders>
-              <CoinCTAModal />
-              <div className={`app-shell ${process.env.NEXT_PUBLIC_X_COMMUNITY_URL ? "has-community-banner" : ""}`}>
-                <Navbar />
-                <main className="app-main">
-                  {children}
-                </main>
-                <Footer />
-              </div>
-            </UIProviders>
-          </AuthProvider>
-        </SolanaWalletProvider>
+        <WatchProvider>
+          <CoinCTAModal />
+          <div className={`app-shell ${process.env.NEXT_PUBLIC_X_COMMUNITY_URL ? "has-community-banner" : ""}`}>
+            <Navbar />
+            <main className="app-main">{children}</main>
+            <Footer />
+            <WatchBanner />
+          </div>
+        </WatchProvider>
       </body>
     </html>
   );

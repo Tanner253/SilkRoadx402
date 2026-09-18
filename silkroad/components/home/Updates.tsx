@@ -7,235 +7,53 @@
 export function Updates() {
   const updates = [
     {
-      date: 'March 13, 2026',
-      version: 'v1.1.0',
-      title: 'Pump.fun Tokenized Agent Integration',
+      date: 'September 2026',
+      version: 'v2.0.0',
+      title: 'Wallet-less giving on Robinhood Chain',
       items: [
-        'NEW: Integrated Pump.fun Tokenized Agent payment system alongside existing x402 protocol',
-        'Donors can now choose "Donate via Agent Token" on any fundraiser campaign',
-        'A portion of every agent donation automatically triggers buybacks of the OpenFund token',
-        'Built on @pump-fun/agent-payments-sdk — the new Tokenized Agents standard from Pump.fun',
-        'Server-side transaction building with client-side wallet signing (no private keys exposed)',
-        'On-chain invoice verification with retry logic for reliable payment confirmation',
-        'Agent payments are recorded in the same database as x402 donations — unified transaction history',
-        'Buyback mechanism creates organic demand for the OpenFund token with every donation',
-        'Zero changes to the existing x402 P2P flow — both payment paths coexist',
-        'New "AGENT: PUMP.FUN" indicator in the homepage HUD',
-        'Full documentation added to FAQ and Updates pages',
+        'OpenFund now runs on Robinhood Chain (chain ID 4663); donations are in ETH',
+        'No wallet connection, ever: tell us which wallet you’re giving from and send from it — we spot the transfer on-chain and count it',
+        'A reminder follows you around the site until your donation is confirmed',
+        'Every donation is verified on-chain — right network, right address, confirmed — and counted exactly once',
+        'Campaigns go live the moment they’re published; no approval queue',
+        'Add as many links as you like to a campaign: YouTube videos play right on the page',
+        'Creators manage their campaign with a private manage link instead of an account',
+        'Only verified donors can leave words of support',
+        'A new home page, and Penny, the OpenFund piggy bank',
       ],
     },
     {
-      date: 'March 13, 2026',
-      version: 'v1.0.0',
-      title: 'x403 Anti-Bot Security & UI Overhaul',
+      date: 'February – March 2026',
+      version: 'v1',
+      title: 'OpenFund on Solana',
       items: [
-        'x403 wallet authentication - cryptographic proof of human verification',
-        'Automatic security check before wallet connection (30-min sessions)',
-        'Prevents bot spam, fake accounts, and automated marketplace abuse',
-        'Message signing only (no gas fees, no blockchain transactions)',
-        'Educational modal explains x403 benefits clearly to users',
-        'Session-based auth with localStorage cleanup on disconnect',
-        'Removed all gradient buttons - clean solid orange theme',
-        'Redesigned wallet connect button',
-        'Removed emojis from footer for cleaner look',
-        'Contract address display on homepage (copyable CA)',
-        'New 3D piggy bank scene on homepage',
-        '"NO KYC FUNDRAISING" hero subtitle',
-      ],
-    },
-    {
-      date: 'March 8, 2026',
-      version: 'v0.9.0',
-      title: 'Major UX Overhaul - Professional Polish & Enhanced Browsing',
-      items: [
-        'Professional toast notification system replacing all browser alerts',
-        'Beautiful confirmation dialogs with backdrop blur replacing confirm() popups',
-        'Breadcrumb navigation added to all major pages for better orientation',
-        'Content-aware loading skeletons replacing generic spinners (cards, tables, stats)',
-        'Advanced browse filters: Sort by Recent/Price/Views + Price range filtering',
-        'Price range options: Under $10, $10-$50, $50-$100, Over $100',
-        'External link icons added to transaction hashes with hover animations',
-        'Toast variants: success (green), error (red), warning (yellow), info (blue)',
-        'Real-time sorting and filtering without page reloads',
-        'Smooth zoom-in animations for confirmation dialogs',
-        'Auto-dismiss toasts after 5 seconds with manual close option',
-        'Consistent design language across all user interactions',
-        'Reusable component architecture for future enhancements',
-      ],
-    },
-    {
-      date: 'March 4, 2026',
-      version: 'v0.8.1',
-      title: 'Fundraiser Progress Tracking & UX Improvements',
-      items: [
-        'Fixed fundraiser progress bars now always visible on details page',
-        'Fixed goal amounts - now uses user input instead of hardcoded $500',
-        'Real-time donation tracking - raised amounts calculated from actual transactions (source of truth)',
-        'Added progress bars to fundraiser list view with multiple indicators',
-        'List view shows: bottom progress bar, amount display ($X/$Y), and percentage badge',
-        'Clickable organizer/seller wallets - filter fundraisers or listings by wallet',
-        'Seller wallets on market listings link to all items by that seller',
-        'Organizer wallets on fundraisers link to all fundraisers by that organizer',
-        'Fixed wallet text sizing - now smaller (6/4 chars) to fit properly in boxes',
-        'Removed manual database sync needs - API now calculates raised amounts dynamically',
-        'Fixed TypeScript interface to properly support goalAmount and raisedAmount fields',
-        'Enhanced catalog page to show accurate progress bars with transaction data',
-        'Responsive progress indicators - different info shown at mobile/tablet/desktop',
-      ],
-    },
-    {
-      date: 'March 1, 2026',
-      version: 'v0.8.0',
-      title: 'Fundraisers Platform, Chat Replies & Community Chat',
-      items: [
-        'NEW: Complete fundraiser platform alongside listings marketplace',
-        'Anonymous fundraising with same x402 payment flow as purchases',
-        'Fundraiser categories: Medical, Education, Community, Emergency, Creative, Other',
-        'Full seller management: Create, edit, deactivate fundraisers in "My Listings"',
-        'Admin support: Separate fundraiser tab with independent approval workflow',
-        'Fixed fundraiser x402 donation protocol (proper payment verification)',
-        'Full threaded reply system in community chat',
-        'Reply messages display quoted context with visual indicators',
-        'Click reply quotes to smoothly scroll to original message with highlight',
-        'Desktop: Click reply button | Mobile: Swipe right on messages',
-        'Backend enrichment system fetches original message data for replies',
-        'Owner protection: Hide purchase/donate buttons on own items',
-        'Fixed horizontal scrollbar in chat with overflow controls',
-      ],
-    },
-    {
-      date: 'February 27, 2026',
-      version: 'v0.7.0',
-      title: 'Marketplace Expansion & View Analytics',
-      items: [
-        'Rebranded from "Software Marketplace" to "Digital Marketplace"',
-        'Platform now supports any legal goods, not just software',
-        'View counter feature - track listing popularity',
-        'View analytics displayed on all listing cards',
-        'Total views prominently shown on listing detail pages',
-        'Animated pulse effect on featured listing badges',
-        'Fixed homepage spacing to account for navbar/footer offset',
-        'Improved page padding across all views',
-        'Enhanced empty state with "Be the first to list" CTA button',
-        'Updated all labels from "software" to generic "product" terminology',
-        'View counts persist across sessions and increment on each visit',
-      ],
-    },
-    {
-      date: 'February 25, 2026',
-      version: 'v0.6.0',
-      title: 'Edit Listings & New Category',
-      items: [
-        'Edit listing functionality - update title, description, price, category, and image',
-        'New "Jobs/Services" category for freelance and service listings',
-        'Critical USDC account warning added to listing creation',
-        'Delivery URL is now locked after creation (cannot be edited)',
-        'Edited listings require admin re-approval if previously live',
-        'Improved form validation and user feedback',
-        'Optional URLs (demo video, whitepaper, GitHub) remain editable',
-      ],
-    },
-    {
-      date: 'February 22, 2026',
-      version: 'v0.5.0',
-      title: 'UI Refresh & Featured Listings',
-      items: [
-        'Complete color refresh across the app',
-        'Grid and list view toggle for all listings pages',
-        'Compact list view for efficient browsing (more listings visible)',
-        'Admin pin feature - promote up to 3 featured listings',
-        'Pinned listings always appear first with "Featured" badge',
-        'External links kept blue for standard web UX',
-        'Chat message reactions',
-        'Improved mobile navigation with hamburger menu',
-      ],
-    },
-    {
-      date: 'February 20, 2026',
-      version: 'v0.4.0',
-      title: 'Public Chat & Community Features',
-      items: [
-        'Public chat for marketplace trading',
-        'Optional listing attachments - share your products in chat',
-        'Advanced content filtering (URLs blocked, profanity filtered)',
-        'Color-coded messages for selling, buying, and general chat',
-        '60-second rate limiting with cooldown timer',
-      ],
-    },
-    {
-      date: 'February 18, 2026',
-      version: 'v0.3.0',
-      title: 'Reviews, Reports & Activity Logging',
-      items: [
-        'Verified buyer reviews system on all listings',
-        'User reporting with flag icon',
-        'Comprehensive admin activity logging (all actions tracked)',
-        'Auto-refresh admin dashboard with isolated components',
-        'FAQ & Updates pages with footer navigation',
-      ],
-    },
-    {
-      date: 'February 16, 2026',
-      version: 'v0.2.0',
-      title: 'Anti-Spam & Enhanced Security',
-      items: [
-        'Maximum 3 active listings per wallet',
-        'Rate limiting on all API endpoints',
-        'Auto-pull listings after 3 failed purchases',
-        'Enhanced seller USDC account validation',
-        'Solflare wallet support added',
-      ],
-    },
-    {
-      date: 'February 14, 2026',
-      version: 'v0.1.0',
-      title: 'Initial Beta Launch',
-      items: [
-        'x402 micropayment protocol integration',
-        'Anonymous P2P fundraising platform',
-        'Solana USDC payments',
-        'Admin approval system',
-        'Leaderboard and Hall of Fame',
+        'OpenFund launched as no-KYC crowdfunding with USDC donations on Solana',
+        'Campaigns from this era stay visible, closed to new donations',
       ],
     },
   ];
 
   return (
-    <div className="rounded-lg border border-border bg-muted backdrop-blur-sm p-8">
-      <h2 className="mb-6 text-3xl font-bold text-foreground">
-        📋 Platform Updates
-      </h2>
-      <div className="space-y-6">
-        {updates.map((update, index) => (
-          <div
-            key={index}
-            className="border-l-4 border-border pl-6 pb-6 last:pb-0"
-          >
-            <div className="mb-2 flex items-center space-x-3">
-              <span className="rounded-full bg-primary px-3 py-1 text-xs font-bold text-primary-foreground">
-                {update.version}
-              </span>
-              <span className="text-sm text-muted-foreground">
-                {update.date}
-              </span>
-            </div>
-            <h3 className="mb-3 text-xl font-bold text-foreground">
-              {update.title}
-            </h3>
+    <ol className="space-y-10">
+      {updates.map((update) => (
+        <li key={update.version} className="grid gap-3 border-t border-border pt-8 md:grid-cols-[160px_minmax(0,1fr)] md:gap-10">
+          <div>
+            <p className="text-sm font-medium text-foreground">{update.version}</p>
+            <p className="text-xs text-muted-foreground">{update.date}</p>
+          </div>
+          <div>
+            <h2 className="mb-4 text-xl font-medium tracking-[-0.01em] text-foreground">{update.title}</h2>
             <ul className="space-y-2">
-              {update.items.map((item, itemIndex) => (
-                <li
-                  key={itemIndex}
-                  className="flex items-start space-x-2 text-sm text-muted-foreground"
-                >
-                  <span className="mt-1 text-primary">✓</span>
+              {update.items.map((item) => (
+                <li key={item} className="flex gap-3 text-sm leading-relaxed text-muted-foreground">
+                  <span className="mt-2 h-1 w-1 shrink-0 rounded-full bg-[#62754d]" aria-hidden="true" />
                   <span>{item}</span>
                 </li>
               ))}
             </ul>
           </div>
-        ))}
-      </div>
-    </div>
+        </li>
+      ))}
+    </ol>
   );
 }

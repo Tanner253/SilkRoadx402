@@ -24,7 +24,7 @@ export function CoinCTAModal() {
       <DialogContent className="max-w-sm border-border bg-card p-7">
         <p className="text-xs font-medium uppercase tracking-widest text-muted-foreground">OpenFund · Next chapter</p>
         <DialogTitle className="text-3xl font-medium tracking-tight text-primary">${PLATFORM_TOKEN.ticker}</DialogTitle>
-        <DialogDescription className="leading-relaxed">OpenFund is moving to Robinhood Chain, the Ethereum L2 used by pons.</DialogDescription>
+        <DialogDescription className="leading-relaxed">OpenFund now runs on Robinhood Chain, the network pons is built on. Give in ETH from any wallet — no connecting required.</DialogDescription>
         <div className="rounded-lg border border-border bg-background p-4">
           <p className="mb-2 text-xs text-muted-foreground">Contract address</p>
           <code className="text-sm text-primary">{PLATFORM_TOKEN.contractAddress}</code>

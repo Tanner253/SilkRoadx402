@@ -1,162 +1,140 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { useAuth } from '@/hooks/useAuth';
-import { useWallet } from '@solana/wallet-adapter-react';
-import axios from 'axios';
+import { useCallback, useEffect, useState } from 'react';
 import Link from 'next/link';
-import Image from 'next/image';
-import { ProtectedContent } from '@/components/auth/ProtectedContent';
-import { Breadcrumbs } from '@/components/ui/Breadcrumbs';
+import { ArrowUpRight, Plus } from 'lucide-react';
+import type { FundraiserView } from '@/types/fundraiser';
+import { goalOf } from '@/types/fundraiser';
+import { formatAmount, percentRaised } from '@/lib/format';
+import { allManaged, forgetManaged, parseManageLink, saveManaged } from '@/lib/manageLinks';
+import { CoverImage, Notice, PageIntro, Pill, ProgressBar, inputClass, primaryButtonClass, secondaryButtonClass } from '@/components/fundraisers/ui';
+import { errorMessage } from '@/lib/errors';
 
-interface Fundraiser {
-  _id: string;
-  title: string;
-  description: string;
-  imageUrl: string;
-  price: number;
-  goalAmount?: number;
-  raisedAmount?: number;
-  category: string;
-  status: string;
-  views?: number;
-  createdAt: string;
-}
+/**
+ * There are no accounts: "my" campaigns are the ones whose manage links this
+ * browser holds. On a new device, paste a manage link to add it here.
+ */
+export default function MyFundraisersPage() {
+  const [campaigns, setCampaigns] = useState<FundraiserView[] | null>(null);
+  const [missing, setMissing] = useState<string[]>([]);
+  const [link, setLink] = useState('');
+  const [linkError, setLinkError] = useState<string | null>(null);
+  const [adding, setAdding] = useState(false);
 
-function MyFundraisersContent() {
-  const { isConnected, mounted } = useAuth();
-  const { publicKey } = useWallet();
-  const [fundraisers, setFundraisers] = useState<Fundraiser[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const load = useCallback(async () => {
+    const managed = allManaged();
+    const ids = Object.keys(managed);
+    if (!ids.length) return setCampaigns([]);
+    try {
+      const res = await fetch(`/api/fundraisers?ids=${ids.join(',')}`, { cache: 'no-store' });
+      const data = await res.json();
+      const found: FundraiserView[] = data.fundraisers ?? [];
+      setCampaigns(found);
+      setMissing(ids.filter((id) => !found.some((f) => f._id === id)));
+    } catch {
+      setCampaigns([]);
+    }
+  }, []);
 
   useEffect(() => {
-    if (mounted && isConnected && publicKey) {
-      fetchMyFundraisers();
-    }
-  }, [mounted, isConnected, publicKey]);
+    load();
+  }, [load]);
 
-  const fetchMyFundraisers = async () => {
+  async function addLink(e: React.FormEvent) {
+    e.preventDefault();
+    setLinkError(null);
+    const parsed = parseManageLink(link);
+    if (!parsed) return setLinkError('That doesn’t look like a manage link. It ends in #manage=… .');
+    setAdding(true);
     try {
-      setLoading(true);
-      const response = await axios.get(`/api/fundraisers?wallet=${publicKey!.toBase58()}&mine=true`);
-      setFundraisers(response.data.fundraisers || []);
-    } catch (err: any) {
-      setError(err.response?.data?.error || 'Failed to load your fundraisers');
+      const res = await fetch(`/api/fundraisers/${parsed.id}`, { headers: { 'x-manage-token': parsed.token }, cache: 'no-store' });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data.error || 'Campaign not found');
+      if (!data.canManage) throw new Error('That manage link isn’t valid for this campaign.');
+      saveManaged(parsed.id, parsed.token, data.fundraiser.title);
+      setLink('');
+      load();
+    } catch (err) {
+      setLinkError(errorMessage(err));
     } finally {
-      setLoading(false);
+      setAdding(false);
     }
-  };
-
-  if (!mounted) return null;
-
-  const getFundedPct = (f: Fundraiser) =>
-    Math.min(((f.raisedAmount || 0) / (f.goalAmount || f.price)) * 100, 100);
+  }
 
   return (
-    <div className="min-h-screen bg-background py-12 px-4 pb-24">
-      <div className="mx-auto max-w-5xl">
-        <Breadcrumbs />
+    <div className="mx-auto max-w-[960px] px-6 pb-24 md:px-8">
+      <PageIntro eyebrow="MY FUNDRAISERS" title="Your" accent="campaigns.">
+        Campaigns you started in this browser. On another device, paste your manage link below to bring one over.
+      </PageIntro>
 
-        <div className="flex items-center justify-between mb-8">
-          <div>
-            <h1 className="text-3xl font-bold text-foreground">My Fundraisers</h1>
-            <p className="text-muted-foreground mt-1">Manage your campaigns</p>
-          </div>
-          <Link
-            href="/fundraisers/new"
-            className="rounded-lg bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground hover:bg-primary transition-colors"
-          >
-            + New Fundraiser
+      {campaigns === null ? (
+        <div className="h-40 animate-pulse rounded-2xl border border-border bg-card" />
+      ) : campaigns.length ? (
+        <ul className="space-y-4">
+          {campaigns.map((f) => {
+            const goal = goalOf(f);
+            const pct = percentRaised(f.raisedAmount, goal);
+            return (
+              <li key={f._id}>
+                <Link href={`/fundraisers/${f._id}`} className="flex gap-5 rounded-2xl border border-border bg-card p-4 transition-shadow hover:shadow-[0_12px_32px_#292d2512]">
+                  <CoverImage src={f.imageUrl} alt={f.title} className="hidden h-24 w-36 shrink-0 rounded-xl sm:block" />
+                  <div className="min-w-0 flex-1">
+                    <div className="mb-1.5 flex flex-wrap items-center gap-2">
+                      <h2 className="truncate font-medium text-foreground">{f.title}</h2>
+                      {f.state === 'pulled' ? <Pill className="bg-[#faf3e2] text-[#7a5a1c]">Paused</Pill> : <Pill>Live</Pill>}
+                    </div>
+                    <p className="mb-3 text-sm text-muted-foreground">
+                      {formatAmount(f.raisedAmount, f.currency)} of {formatAmount(goal, f.currency)} · {f.donationCount ?? 0} donation
+                      {f.donationCount === 1 ? '' : 's'}
+                    </p>
+                    <ProgressBar percent={pct} />
+                  </div>
+                  <ArrowUpRight size={18} className="shrink-0 self-center text-muted-foreground" />
+                </Link>
+              </li>
+            );
+          })}
+        </ul>
+      ) : (
+        <div className="rounded-2xl border border-dashed border-border px-6 py-14 text-center">
+          <p className="mb-1 text-lg font-medium text-foreground">No campaigns in this browser yet.</p>
+          <p className="mb-6 text-sm text-muted-foreground">Start one, or paste a manage link below.</p>
+          <Link href="/fundraisers/new" className={primaryButtonClass}>
+            <Plus size={16} /> Start a fundraiser
           </Link>
         </div>
+      )}
 
-        {loading ? (
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {[1, 2, 3].map((i) => (
-              <div key={i} className="animate-pulse rounded-lg border border-border bg-muted p-4 h-64" />
-            ))}
-          </div>
-        ) : error ? (
-          <div className="rounded-lg border border-red-200 bg-red-50 p-6 text-center">
-            <p className="text-red-700">{error}</p>
-            <button onClick={fetchMyFundraisers} className="mt-3 text-sm text-muted-foreground hover:text-foreground">
-              Try again
-            </button>
-          </div>
-        ) : fundraisers.length === 0 ? (
-          <div className="rounded-lg border border-border bg-muted p-12 text-center">
-            <p className="text-4xl mb-4">🚀</p>
-            <h2 className="text-xl font-bold text-foreground mb-2">No fundraisers yet</h2>
-            <p className="text-muted-foreground mb-6">Create your first campaign and start raising funds.</p>
-            <Link
-              href="/fundraisers/new"
-              className="inline-flex rounded-lg bg-primary px-6 py-3 text-sm font-semibold text-primary-foreground hover:bg-primary transition-colors"
-            >
-              Create Fundraiser
-            </Link>
-          </div>
-        ) : (
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {fundraisers.map((f) => (
-              <Link
-                key={f._id}
-                href={`/fundraisers/${f._id}`}
-                className="group rounded-lg border border-border bg-muted overflow-hidden hover:border-border transition-colors"
-              >
-                <div className="relative h-40 bg-muted">
-                  {f.imageUrl ? (
-                    <Image src={f.imageUrl} alt={f.title} fill className="object-cover" />
-                  ) : (
-                    <div className="flex items-center justify-center h-full text-muted-foreground text-3xl">📷</div>
-                  )}
-                  <span className={`absolute top-2 right-2 rounded-full px-2.5 py-0.5 text-[10px] font-bold ${
-                    f.status === 'approved' ? 'bg-green-600 text-foreground' :
-                    f.status === 'pending' ? 'bg-yellow-600 text-foreground' :
-                    'bg-red-600 text-foreground'
-                  }`}>
-                    {f.status?.toUpperCase() || 'PENDING'}
-                  </span>
-                </div>
-                <div className="p-4">
-                  <h3 className="font-semibold text-foreground text-sm truncate group-hover:text-primary transition-colors">
-                    {f.title}
-                  </h3>
-                  <p className="text-xs text-muted-foreground mt-1">{f.category}</p>
+      {missing.length ? (
+        <Notice className="mt-4 flex flex-wrap items-center justify-between gap-3">
+          <span>
+            {missing.length} saved campaign{missing.length === 1 ? ' no longer exists' : 's no longer exist'}.
+          </span>
+          <button
+            type="button"
+            className="text-xs font-medium underline"
+            onClick={() => {
+              missing.forEach(forgetManaged);
+              setMissing([]);
+            }}
+          >
+            Forget {missing.length === 1 ? 'it' : 'them'}
+          </button>
+        </Notice>
+      ) : null}
 
-                  <div className="mt-3">
-                    <div className="flex justify-between text-xs mb-1">
-                      <span className="text-muted-foreground">${(f.raisedAmount || 0).toFixed(2)} raised</span>
-                      <span className="text-primary">{getFundedPct(f).toFixed(0)}%</span>
-                    </div>
-                    <div className="h-1.5 rounded-full bg-muted overflow-hidden">
-                      <div
-                        className="h-full rounded-full bg-primary"
-                        style={{ width: `${getFundedPct(f)}%` }}
-                      />
-                    </div>
-                    <p className="text-[10px] text-muted-foreground mt-1">
-                      Goal: ${(f.goalAmount || f.price).toFixed(2)}
-                    </p>
-                  </div>
-
-                  {f.views !== undefined && (
-                    <p className="text-[10px] text-muted-foreground mt-2">{f.views} views</p>
-                  )}
-                </div>
-              </Link>
-            ))}
-          </div>
-        )}
-      </div>
+      <form onSubmit={addLink} className="mt-12 rounded-2xl border border-border bg-card p-5">
+        <label htmlFor="manage-link" className="mb-2 block text-sm font-medium text-foreground">
+          Add a campaign with its manage link
+        </label>
+        <div className="flex flex-col gap-2 sm:flex-row">
+          <input id="manage-link" value={link} onChange={(e) => setLink(e.target.value)} placeholder="https://…/fundraisers/…#manage=…" className={`${inputClass} font-mono text-[12.5px]`} />
+          <button type="submit" disabled={adding || !link.trim()} className={secondaryButtonClass}>
+            Add
+          </button>
+        </div>
+        {linkError ? <p className="mt-2 text-xs text-[#9b3b2c]">{linkError}</p> : null}
+      </form>
     </div>
-  );
-}
-
-export default function MyFundraisersPage() {
-  return (
-    <ProtectedContent>
-      <MyFundraisersContent />
-    </ProtectedContent>
   );
 }

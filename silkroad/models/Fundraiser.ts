@@ -1,137 +1,55 @@
 /**
- * Fundraiser Model
- * 
- * Mongoose schema for fundraiser listings
- * Similar to Listing model but tailored for fundraising campaigns
+ * A fundraising campaign. Collection and field names are kept from the
+ * original schema so existing documents keep working.
  */
 
 import mongoose, { Schema } from 'mongoose';
-import type { IListing } from '@/types/database';
+import type { IFundraiser } from '@/types/database';
+import { FUNDRAISER_CATEGORIES } from '@/config/constants';
+import { MAX_LINKS } from '@/lib/links';
 
-// Reusing IListing interface since fundraisers have the same structure
-const FundraiserSchema = new Schema<IListing>({
-  wallet: {
-    type: String,
-    required: true,
-    index: true,
+const LinkSchema = new Schema(
+  {
+    url: { type: String, required: true, maxlength: 2048 },
+    label: { type: String, maxlength: 60 },
   },
-  title: {
-    type: String,
-    required: true,
-    minlength: 5,
-    maxlength: 100,
-  },
-  description: {
-    type: String,
-    required: true,
-    minlength: 50,
-    maxlength: 2000,
-  },
-  imageUrl: {
-    type: String,
-    required: true,
-  },
-  demoVideoUrl: {
-    type: String,
-  },
-  whitepaperUrl: {
-    type: String,
-  },
-  githubUrl: {
-    type: String,
-  },
-  deliveryUrl: {
-    type: String,
-    required: true,
-  },
-  price: {
-    type: Number,
-    required: true,
-    min: 0.10,
-  },
-  goalAmount: {
-    type: Number,
-    required: true,
-    default: 500,
-    min: 1,
-  },
-  raisedAmount: {
-    type: Number,
-    required: true,
-    default: 0,
-    min: 0,
-  },
-  category: {
-    type: String,
-    required: true,
-    enum: [
-      'Medical',
-      'Education',
-      'Community',
-      'Emergency',
-      'Animal Welfare',
-      'Environmental',
-      'Arts & Culture',
-      'Technology',
-      'Sports',
-      'Religious',
-      'Memorial',
-      'Business',
-      'Personal',
-      'Other',
-    ],
-  },
-  riskLevel: {
-    type: String,
-    required: true,
-    enum: ['standard', 'high-risk'],
-    default: 'standard',
-  },
-  state: {
-    type: String,
-    required: true,
-    enum: ['in_review', 'on_market', 'pulled'],
-    default: 'in_review',
-    index: true,
-  },
-  approved: {
-    type: Boolean,
-    required: true,
-    default: false,
-  },
-  pinned: {
-    type: Boolean,
-    default: false,
-    index: true,
-  },
-  pinnedAt: {
-    type: Date,
-  },
-  reportsCount: {
-    type: Number,
-    default: 0,
-  },
-  failedPurchaseCount: {
-    type: Number,
-    default: 0,
-  },
-  lastFailureAt: {
-    type: Date,
-  },
-  views: {
-    type: Number,
-    default: 0,
-    index: true,
-  },
-}, {
-  timestamps: true,
-});
+  { _id: false },
+);
 
-// Compound indexes
-FundraiserSchema.index({ wallet: 1, state: 1 });
-FundraiserSchema.index({ state: 1, category: 1 });
+const FundraiserSchema = new Schema<IFundraiser>(
+  {
+    wallet: { type: String, required: true, index: true },
+    title: { type: String, required: true, minlength: 5, maxlength: 100 },
+    description: { type: String, required: true, minlength: 50, maxlength: 2000 },
+    imageUrl: { type: String, required: true },
+    category: { type: String, required: true, enum: FUNDRAISER_CATEGORIES },
+    goalAmount: { type: Number, required: true, min: 0 },
+    price: { type: Number, required: true, min: 0 },
+    raisedAmount: { type: Number, default: 0, min: 0 },
+    links: {
+      type: [LinkSchema],
+      default: [],
+      validate: { validator: (v: unknown[]) => v.length <= MAX_LINKS, message: `At most ${MAX_LINKS} links` },
+    },
+    demoVideoUrl: { type: String },
+    whitepaperUrl: { type: String },
+    githubUrl: { type: String },
+    network: { type: String, enum: ['solana', 'robinhood'], default: 'solana' },
+    currency: { type: String, enum: ['USDC', 'ETH'], default: 'USDC' },
+    manageTokenHash: { type: String, select: false },
+    riskLevel: { type: String, enum: ['standard', 'high-risk'], default: 'standard' },
+    state: { type: String, enum: ['in_review', 'on_market', 'pulled'], default: 'on_market', index: true },
+    approved: { type: Boolean, default: true },
+    pinned: { type: Boolean, default: false, index: true },
+    pinnedAt: { type: Date },
+    reportsCount: { type: Number, default: 0 },
+    views: { type: Number, default: 0 },
+  },
+  { timestamps: true },
+);
 
-// Export model
-export const Fundraiser = mongoose.models.Fundraiser || mongoose.model<IListing>('Fundraiser', FundraiserSchema);
+FundraiserSchema.index({ state: 1, createdAt: -1 });
+
+export const Fundraiser =
+  mongoose.models.Fundraiser || mongoose.model<IFundraiser>('Fundraiser', FundraiserSchema);
 export default Fundraiser;
-

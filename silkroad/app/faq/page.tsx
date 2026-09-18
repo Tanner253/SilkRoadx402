@@ -1,25 +1,11 @@
-'use client';
-
-import Link from 'next/link';
 import { FAQ } from '@/components/home/FAQ';
-import { Breadcrumbs } from '@/components/ui/Breadcrumbs';
+import { PageIntro } from '@/components/fundraisers/ui';
 
 export default function FAQPage() {
   return (
-    <div className="min-h-screen bg-background py-12 px-4">
-      <div className="mx-auto max-w-4xl">
-        <Breadcrumbs />
-
-        <Link
-          href="/"
-          className="mb-6 inline-flex items-center text-sm text-muted-foreground hover:text-foreground transition-colors"
-        >
-          ← Back to Home
-        </Link>
-
-        <FAQ />
-
-      </div>
+    <div className="mx-auto max-w-[820px] px-6 pb-24 md:px-8">
+      <PageIntro eyebrow="FAQ" title="Questions," accent="answered." />
+      <FAQ />
     </div>
   );
 }

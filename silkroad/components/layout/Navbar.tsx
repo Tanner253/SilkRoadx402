@@ -9,12 +9,16 @@ const X_COMMUNITY_URL = process.env.NEXT_PUBLIC_X_COMMUNITY_URL || null;
 
 export function Navbar() {
   const activeUsers = useActiveUsers();
-  const [mounted, setMounted] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const pathname = usePathname();
 
-  useEffect(() => { setMounted(true); }, []);
-  useEffect(() => { setMobileMenuOpen(false); }, [pathname]);
+  // Close the mobile menu on navigation (adjusting state during render, per
+  // React's guidance, instead of a setState-in-effect).
+  const [menuPath, setMenuPath] = useState(pathname);
+  if (menuPath !== pathname) {
+    setMenuPath(pathname);
+    setMobileMenuOpen(false);
+  }
   useEffect(() => {
     document.body.style.overflow = mobileMenuOpen ? 'hidden' : 'unset';
     return () => { document.body.style.overflow = 'unset'; };
@@ -40,7 +44,7 @@ export function Navbar() {
         <div className="mx-auto flex h-14 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
 
           {/* Mobile menu button */}
-          {mounted && (
+          {(
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
               className="md:hidden rounded-lg p-2 text-foreground hover:bg-accent transition-colors"
@@ -68,18 +72,21 @@ export function Navbar() {
 
           {/* Desktop nav */}
           <div className="hidden md:flex items-center space-x-6">
-            <Link href="/fundraisers" className={`text-sm font-medium transition-colors ${pathname === '/fundraisers' || pathname?.startsWith('/fundraisers/') ? 'text-primary' : 'text-foreground hover:text-foreground'}`}>
+            <Link href="/fundraisers" className={`text-sm font-medium transition-colors ${pathname === '/fundraisers' || (pathname?.startsWith('/fundraisers/') && !['/fundraisers/my', '/fundraisers/new'].includes(pathname)) ? 'text-primary' : 'text-foreground hover:text-foreground'}`}>
               Campaigns
             </Link>
             <Link href="/leaderboard" className={`text-sm font-medium transition-colors flex items-center gap-1 ${pathname === '/leaderboard' ? 'text-primary' : 'text-foreground hover:text-foreground'}`}>
-              Top Fundraisers
+              Top fundraisers
+            </Link>
+            <Link href="/fundraisers/my" className={`text-sm font-medium transition-colors ${pathname === '/fundraisers/my' ? 'text-primary' : 'text-foreground hover:text-foreground'}`}>
+              My fundraisers
             </Link>
           </div>
 
           {/* Right side */}
           <div className="flex items-center gap-2 sm:gap-3">
             {/* Active users — pulsing dot style */}
-            {mounted && (
+            {activeUsers > 0 && (
               <div className="hidden md:flex items-center gap-1.5 text-sm text-muted-foreground">
                 <span className="relative flex h-2 w-2">
                   <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
@@ -101,7 +108,7 @@ export function Navbar() {
       </nav>
 
       {/* Mobile overlay */}
-      {mounted && mobileMenuOpen && (
+      {mobileMenuOpen && (
         <>
           <div className="fixed inset-0 z-40 bg-black/60 backdrop-blur-sm md:hidden" onClick={() => setMobileMenuOpen(false)} />
           <div className={`fixed ${X_COMMUNITY_URL ? 'top-[6.5rem]' : 'top-[4.5rem]'} left-0 right-0 bottom-0 z-40 bg-background md:hidden overflow-y-auto`}>
@@ -121,10 +128,11 @@ export function Navbar() {
               {/* Nav links */}
               <nav className="flex flex-col space-y-1">
                 {[
-                  { href: '/fundraisers', label: 'Campaigns', icon: '💝' },
-                  { href: '/leaderboard', label: 'Top Fundraisers', icon: '🏆' },
-                  { href: '/fundraisers/new', label: 'Start a fundraiser', icon: '🌱' },
-                ].map(({ href, label, icon }) => (
+                  { href: '/fundraisers', label: 'Campaigns' },
+                  { href: '/leaderboard', label: 'Top fundraisers' },
+                  { href: '/fundraisers/new', label: 'Start a fundraiser' },
+                  { href: '/fundraisers/my', label: 'My fundraisers' },
+                ].map(({ href, label }) => (
                   <Link
                     key={href}
                     href={href}
@@ -134,7 +142,7 @@ export function Navbar() {
                         : 'text-foreground hover:bg-muted'
                     }`}
                   >
-                    <span>{icon}</span>{label}
+                    {label}
                   </Link>
                 ))}
               </nav>
@@ -142,17 +150,17 @@ export function Navbar() {
               {/* Footer links */}
               <div className="pt-4 border-t border-border flex flex-col space-y-1">
                 {[
-                  { href: '/faq', label: 'FAQ', icon: '❓', external: false },
-                  { href: '/updates', label: 'Updates', icon: '📋', external: false },
-                  ...(X_COMMUNITY_URL ? [{ href: X_COMMUNITY_URL, label: 'Community (X)', icon: '💬', external: true }] : []),
-                ].map(({ href, label, icon, external }) => (
+                  { href: '/faq', label: 'FAQ', external: false },
+                  { href: '/updates', label: 'Updates', external: false },
+                  ...(X_COMMUNITY_URL ? [{ href: X_COMMUNITY_URL, label: 'Community (X)', external: true }] : []),
+                ].map(({ href, label, external }) => (
                   external ? (
                     <a key={href} href={href} target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 rounded-lg px-4 py-3 text-sm font-medium text-muted-foreground hover:bg-muted transition-colors">
-                      <span>{icon}</span>{label}
+                      {label}
                     </a>
                   ) : (
                     <Link key={href} href={href} className="flex items-center gap-3 rounded-lg px-4 py-3 text-sm font-medium text-muted-foreground hover:bg-muted transition-colors">
-                      <span>{icon}</span>{label}
+                      {label}
                     </Link>
                   )
                 ))}

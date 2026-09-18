@@ -1,98 +1,239 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
-import axios from 'axios';
-import { CONFIG } from '@/config/constants';
+/**
+ * Moderation. There is no approval queue — campaigns go live on creation —
+ * so this is only for acting on reports: remove, restore, pin.
+ */
 
-export default function AdminLoginPage() {
-  const router = useRouter();
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import Link from 'next/link';
+import { ArrowUpRight, Flag, Loader2, LogOut, Pin } from 'lucide-react';
+import type { FundraiserView } from '@/types/fundraiser';
+import { goalOf } from '@/types/fundraiser';
+import { formatAmount, shortAddress, timeAgo } from '@/lib/format';
+import { Notice, PageIntro, Pill, inputClass, primaryButtonClass, secondaryButtonClass } from '@/components/fundraisers/ui';
+import { errorMessage } from '@/lib/errors';
+
+type AdminFundraiser = FundraiserView & { approved: boolean; reports: number };
+type Filter = 'reported' | 'live' | 'removed' | 'all';
+
+export default function AdminPage() {
+  const [session, setSession] = useState<{ admin: boolean; configured: boolean } | null>(null);
   const [code, setCode] = useState('');
-  const [loading, setLoading] = useState(false);
+  const [loginError, setLoginError] = useState<string | null>(null);
+  const [rows, setRows] = useState<AdminFundraiser[] | null>(null);
+  const [filter, setFilter] = useState<Filter>('reported');
+  const [busy, setBusy] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [openReports, setOpenReports] = useState<string | null>(null);
+  const [reports, setReports] = useState<{ _id: string; reason?: string; createdAt: string }[]>([]);
 
-  // Block if admin is disabled
+  const load = useCallback(async () => {
+    const res = await fetch('/api/admin/fundraisers', { cache: 'no-store' });
+    if (res.status === 401) return setSession((s) => (s ? { ...s, admin: false } : s));
+    const data = await res.json();
+    setRows(data.fundraisers ?? []);
+  }, []);
+
   useEffect(() => {
-    if (CONFIG.DISABLE_ADMIN) {
-      router.push('/');
-    }
-  }, [router]);
+    fetch('/api/admin/session', { cache: 'no-store' })
+      .then((r) => r.json())
+      .then((s) => {
+        setSession(s);
+        if (s.admin) load();
+      });
+  }, [load]);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const visible = useMemo(() => {
+    const list = rows ?? [];
+    if (filter === 'reported') return list.filter((f) => f.reports > 0).sort((a, b) => b.reports - a.reports);
+    if (filter === 'live') return list.filter((f) => f.state !== 'pulled');
+    if (filter === 'removed') return list.filter((f) => f.state === 'pulled');
+    return list;
+  }, [rows, filter]);
+
+  async function act(id: string, action: 'remove' | 'restore' | 'pin' | 'unpin') {
+    setBusy(id + action);
     setError(null);
-
-    if (!code.trim()) {
-      setError('Admin code is required');
-      return;
-    }
-
     try {
-      setLoading(true);
-      const response = await axios.post('/api/admin/login', { code });
-      
-      if (response.data.success) {
-        // Set localStorage flag (TEMPORARY MVP solution)
-        localStorage.setItem('admin_authenticated', 'true');
-        console.log('✅ Admin session started (localStorage)');
-        
-        // Redirect to dashboard
-        router.push('/admin/dashboard');
-      }
-    } catch (err: any) {
-      setError(err.response?.data?.error || 'Invalid admin code');
+      const res = await fetch(`/api/admin/fundraisers/${id}`, {
+        method: 'PATCH',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ action }),
+      });
+      if (!res.ok) throw new Error((await res.json().catch(() => ({}))).error || 'Action failed');
+      await load();
+    } catch (err) {
+      setError(errorMessage(err));
     } finally {
-      setLoading(false);
+      setBusy(null);
     }
+  }
+
+  if (!session) {
+    return (
+      <div className="flex min-h-[40vh] items-center justify-center text-muted-foreground">
+        <Loader2 className="animate-spin" size={20} />
+      </div>
+    );
+  }
+
+  if (!session.admin) {
+    return (
+      <div className="mx-auto max-w-sm px-6 pb-24">
+        <PageIntro eyebrow="ADMIN" title="Moderation" />
+        {!session.configured ? (
+          <Notice tone="warning">Admin login is disabled until ADMIN_CODE and JWT_SECRET are set.</Notice>
+        ) : (
+          <form
+            className="space-y-3"
+            onSubmit={async (e) => {
+              e.preventDefault();
+              setLoginError(null);
+              const res = await fetch('/api/admin/session', {
+                method: 'POST',
+                headers: { 'content-type': 'application/json' },
+                body: JSON.stringify({ code }),
+              });
+              if (res.ok) {
+                setSession({ admin: true, configured: true });
+                setCode('');
+                load();
+              } else setLoginError((await res.json().catch(() => ({}))).error || 'Login failed');
+            }}
+          >
+            <label htmlFor="code" className="block text-sm font-medium text-foreground">
+              Admin code
+            </label>
+            <input id="code" type="password" autoComplete="current-password" value={code} onChange={(e) => setCode(e.target.value)} className={inputClass} />
+            <button type="submit" disabled={!code} className={`${primaryButtonClass} w-full`}>
+              Log in
+            </button>
+            {loginError ? <Notice tone="error">{loginError}</Notice> : null}
+          </form>
+        )}
+      </div>
+    );
+  }
+
+  const counts = {
+    reported: rows?.filter((f) => f.reports > 0).length ?? 0,
+    live: rows?.filter((f) => f.state !== 'pulled').length ?? 0,
+    removed: rows?.filter((f) => f.state === 'pulled').length ?? 0,
+    all: rows?.length ?? 0,
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gradient-to-b from-background to-background   px-4">
-      <div className="w-full max-w-md">
-        <div className="mb-8 text-center">
-          <h1 className="text-3xl font-bold text-foreground  mb-2">
-            Admin Login
-          </h1>
-          <p className="text-muted-foreground ">
-            Enter your admin code to access the dashboard
-          </p>
-        </div>
-
-        <form onSubmit={handleSubmit} className="rounded-lg border border-border bg-card p-8 shadow-sm  ">
-          {error && (
-            <div className="mb-6 rounded-lg border border-red-200 bg-red-50 p-4  ">
-              <p className="text-sm text-red-600 ">⚠️ {error}</p>
-            </div>
-          )}
-
-          <div className="mb-6">
-            <label className="mb-2 block text-sm font-medium text-foreground ">
-              Admin Code
-            </label>
-            <input
-              type="password"
-              value={code}
-              onChange={(e) => setCode(e.target.value)}
-              placeholder="Enter admin code"
-              className="w-full rounded-lg border border-border bg-card px-4 py-3 text-foreground placeholder-zinc-400 focus:border-green-200 focus:outline-none focus:ring-2 focus:ring-green-600    "
-              required
-            />
-          </div>
-
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full rounded-lg bg-green-600 py-3 text-sm font-medium text-primary-foreground hover:bg-green-700 disabled:cursor-not-allowed disabled:opacity-50 transition-colors"
-          >
-            {loading ? 'Logging in...' : 'Login'}
-          </button>
-
-          <p className="mt-4 text-center text-xs text-muted-foreground">
-            🔒 Admin access only. Unauthorized access is logged.
-          </p>
-        </form>
+    <div className="mx-auto max-w-[1100px] px-6 pb-24 md:px-8">
+      <div className="flex items-start justify-between gap-4">
+        <PageIntro eyebrow="ADMIN" title="Moderation">
+          Campaigns go live without review. Act on reports here: removing a campaign hides it and stops donations, and its creator can&rsquo;t undo it.
+        </PageIntro>
+        <button
+          type="button"
+          className={secondaryButtonClass}
+          onClick={async () => {
+            await fetch('/api/admin/session', { method: 'DELETE' });
+            setSession({ admin: false, configured: true });
+            setRows(null);
+          }}
+        >
+          <LogOut size={14} /> Log out
+        </button>
       </div>
+
+      <div className="mb-6 flex flex-wrap gap-1.5">
+        {(['reported', 'live', 'removed', 'all'] as Filter[]).map((f) => (
+          <button
+            key={f}
+            type="button"
+            onClick={() => setFilter(f)}
+            className={`rounded-full border px-3.5 py-1.5 text-[13px] font-medium capitalize transition-colors ${
+              filter === f ? 'border-primary bg-primary text-primary-foreground' : 'border-border bg-card text-foreground hover:bg-accent'
+            }`}
+          >
+            {f} · {counts[f]}
+          </button>
+        ))}
+      </div>
+
+      {error ? <Notice tone="error" className="mb-4">{error}</Notice> : null}
+
+      {rows === null ? (
+        <div className="h-40 animate-pulse rounded-2xl border border-border bg-card" />
+      ) : visible.length === 0 ? (
+        <p className="rounded-2xl border border-dashed border-border px-6 py-12 text-center text-sm text-muted-foreground">Nothing here.</p>
+      ) : (
+        <ul className="divide-y divide-border overflow-hidden rounded-2xl border border-border bg-card">
+          {visible.map((f) => (
+            <li key={f._id} className="px-5 py-4">
+              <div className="flex flex-wrap items-start justify-between gap-3">
+                <div className="min-w-0">
+                  <div className="mb-1 flex flex-wrap items-center gap-2">
+                    <Link href={`/fundraisers/${f._id}`} target="_blank" className="font-medium text-foreground hover:underline">
+                      {f.title}
+                    </Link>
+                    <ArrowUpRight size={13} className="text-muted-foreground" />
+                    {f.state === 'pulled' ? (
+                      <Pill className="bg-[#fbeeeb] text-[#9b3b2c]">{f.approved === false ? 'Removed' : 'Paused by creator'}</Pill>
+                    ) : (
+                      <Pill>Live</Pill>
+                    )}
+                    {f.pinned ? <Pill className="bg-[#f3ead5] text-[#7a5a1c]">Pinned</Pill> : null}
+                    {f.network !== 'robinhood' ? <Pill className="bg-muted text-muted-foreground">Solana (legacy)</Pill> : null}
+                  </div>
+                  <p className="text-xs text-muted-foreground">
+                    {formatAmount(f.raisedAmount, f.currency)} of {formatAmount(goalOf(f), f.currency)} · {f.donationCount} donations ·{' '}
+                    <span className="font-mono">{shortAddress(f.wallet)}</span> · created {timeAgo(f.createdAt)}
+                  </p>
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  {f.reports > 0 ? (
+                    <button
+                      type="button"
+                      className={secondaryButtonClass}
+                      onClick={async () => {
+                        if (openReports === f._id) return setOpenReports(null);
+                        const data = await fetch(`/api/admin/reports?fundraiserId=${f._id}`, { cache: 'no-store' }).then((r) => r.json());
+                        setReports(data.reports ?? []);
+                        setOpenReports(f._id);
+                      }}
+                    >
+                      <Flag size={14} /> {f.reports} report{f.reports === 1 ? '' : 's'}
+                    </button>
+                  ) : null}
+                  <button type="button" disabled={busy === f._id + (f.pinned ? 'unpin' : 'pin')} onClick={() => act(f._id, f.pinned ? 'unpin' : 'pin')} className={secondaryButtonClass}>
+                    <Pin size={14} /> {f.pinned ? 'Unpin' : 'Pin'}
+                  </button>
+                  {f.state === 'pulled' && f.approved === false ? (
+                    <button type="button" disabled={!!busy} onClick={() => act(f._id, 'restore')} className={secondaryButtonClass}>
+                      Restore
+                    </button>
+                  ) : f.state !== 'pulled' ? (
+                    <button
+                      type="button"
+                      disabled={!!busy}
+                      onClick={() => window.confirm(`Remove “${f.title}”? It will be hidden and stop taking donations.`) && act(f._id, 'remove')}
+                      className="inline-flex items-center rounded-md bg-[#9b3b2c] px-4 py-2.5 text-sm font-medium text-white disabled:opacity-50"
+                    >
+                      Remove
+                    </button>
+                  ) : null}
+                </div>
+              </div>
+              {openReports === f._id ? (
+                <ul className="mt-3 space-y-1.5 rounded-lg bg-background p-3 text-xs text-muted-foreground">
+                  {reports.map((r) => (
+                    <li key={r._id}>
+                      <span className="text-foreground">{r.reason || 'No reason given'}</span> · {timeAgo(r.createdAt)}
+                    </li>
+                  ))}
+                </ul>
+              ) : null}
+            </li>
+          ))}
+        </ul>
+      )}
     </div>
   );
 }
-

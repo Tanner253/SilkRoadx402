@@ -6,10 +6,11 @@
  * mascot on the site. Palette comes from app/globals.css.
  *
  * Usage:
- *   npx tsx scripts/generate-brand-media.tsx            banner + avatar
+ *   npx tsx scripts/generate-brand-media.tsx            banner, avatar, site icons
  *   npx tsx scripts/generate-brand-media.tsx --poses    also a pose contact sheet
  *
- * Output: public/images/brand/
+ * Output: public/images/brand/ (social) and app/icon.png, app/apple-icon.png
+ * (Next.js serves these as the site favicon / home-screen icon).
  */
 
 import { createElement } from 'react';
@@ -20,6 +21,7 @@ import { resolve } from 'node:path';
 import { PiggyBank, type PiggyPose } from '../components/mascot/PiggyBank';
 
 const OUT = resolve(__dirname, '../public/images/brand');
+const APP = resolve(__dirname, '../app');
 
 /* Palette — hsl() tokens from app/globals.css, resolved to hex. */
 const C = {
@@ -73,6 +75,14 @@ function avatar() {
 </svg>`;
 }
 
+/** Square app icon: the pig filling a cream tile, legible down to 16px. */
+function siteIcon() {
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
+  <rect width="512" height="512" rx="112" fill="${C.bg}"/>
+  ${pig('idle', 4, 30, 504)}
+</svg>`;
+}
+
 function poseSheet() {
   const poses: PiggyPose[] = ['idle', 'sleep', 'happy', 'receiving'];
   const cells = poses
@@ -99,6 +109,10 @@ void (async () => {
   console.log('Rendering OpenFund brand media ->', OUT);
   await render('openfund-banner-600x200.png', banner(), 600, 200);
   await render('openfund-profile-500x500.png', avatar(), 500, 500);
+  for (const [name, size] of [['icon.png', 512], ['apple-icon.png', 180]] as const) {
+    await sharp(Buffer.from(siteIcon()), { density: 72 * 2 }).resize(size, size, { kernel: 'lanczos3' }).png({ compressionLevel: 9 }).toFile(`${APP}/${name}`);
+    console.log(`  app/${name}  ${size}x${size}`);
+  }
   if (process.argv.includes('--poses')) {
     const dest = process.argv[process.argv.indexOf('--poses') + 1];
     const file = dest && !dest.startsWith('--') ? dest : `${OUT}/_poses.png`;

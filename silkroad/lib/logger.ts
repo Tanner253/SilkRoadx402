@@ -1,70 +1,30 @@
 import { Log } from '@/models/Log';
-import { CONFIG } from '@/config/constants';
 import { connectDB } from './db';
 
-/**
- * Log types
- */
-export type LogType = 
-  | 'info'
+export type LogType =
   | 'error'
   | 'admin_action'
-  | 'txn_failure'
   | 'admin_fail'
-  | 'listing_created'
-  | 'listing_purchased'
-  | 'listing_approved'
-  | 'listing_rejected'
   | 'fundraiser_created'
+  | 'fundraiser_updated'
+  | 'fundraiser_deleted'
   | 'fundraiser_donated'
-  | 'fundraiser_approved'
-  | 'fundraiser_rejected'
-  | 'report_submitted'
-  | 'comment_posted';
+  | 'donation_watch'
+  | 'report_submitted';
 
-/**
- * Create a log entry
- */
-export async function createLog(
-  type: LogType,
-  message: string,
-  wallet?: string,
-  ip?: string
-): Promise<void> {
+/** Append an audit log entry. Never throws — logging must not break a request. */
+export async function createLog(type: LogType, message: string, wallet?: string, ip?: string): Promise<void> {
   try {
     await connectDB();
-    
-    await Log.create({
-      type,
-      message,
-      wallet: wallet || undefined,
-      ip: ip || undefined,
-    });
-
-    console.log(`📝 LOG [${type}]: ${message}`);
+    await Log.create({ type, message, wallet: wallet || undefined, ip: ip || undefined });
   } catch (error) {
-    // Don't throw - logging failures shouldn't break the app
-    console.error('❌ Failed to create log:', error);
+    console.error('Failed to write log:', error);
   }
 }
 
-/**
- * Extract IP from request headers
- */
+/** Client IP as reported by the platform's proxy (Vercel sets x-forwarded-for). */
 export function getIpFromRequest(req: Request): string | undefined {
-  const headers = req.headers;
-  
-  // Check various headers for IP
-  const forwarded = headers.get('x-forwarded-for');
-  if (forwarded) {
-    return forwarded.split(',')[0].trim();
-  }
-  
-  const realIp = headers.get('x-real-ip');
-  if (realIp) {
-    return realIp;
-  }
-  
-  return undefined;
+  const forwarded = req.headers.get('x-forwarded-for');
+  if (forwarded) return forwarded.split(',')[0].trim();
+  return req.headers.get('x-real-ip') ?? undefined;
 }
-

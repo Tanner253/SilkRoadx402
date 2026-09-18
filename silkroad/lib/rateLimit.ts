@@ -1,148 +1,98 @@
-import { connectDB } from './db';
+/**
+ * Fixed-window rate limiting in MongoDB.
+ *
+ * Each check is ONE atomic update (an aggregation-pipeline upsert that either
+ * starts a new window or increments the current one), so parallel requests
+ * can't all read the same count and slip past the limit. Expired windows are
+ * cleaned up by a TTL index.
+ */
+
 import mongoose from 'mongoose';
+import { connectDB } from './db';
 
 interface RateLimitEntry {
   key: string;
   count: number;
   resetAt: Date;
-  createdAt: Date;
 }
 
-// Simple rate limit schema (in-memory for now, can be moved to models if needed)
-const rateLimitSchema = new mongoose.Schema({
+const RateLimitSchema = new mongoose.Schema<RateLimitEntry>({
   key: { type: String, required: true, unique: true },
   count: { type: Number, required: true },
   resetAt: { type: Date, required: true },
-  createdAt: { type: Date, default: Date.now }
 });
+RateLimitSchema.index({ resetAt: 1 }, { expireAfterSeconds: 0 });
 
-// TTL index - auto-delete after resetAt
-rateLimitSchema.index({ resetAt: 1 }, { expireAfterSeconds: 0 });
-
-let RateLimit: mongoose.Model<RateLimitEntry>;
-try {
-  RateLimit = mongoose.model<RateLimitEntry>('RateLimit');
-} catch {
-  RateLimit = mongoose.model<RateLimitEntry>('RateLimit', rateLimitSchema);
-}
+const RateLimit =
+  (mongoose.models.RateLimit as mongoose.Model<RateLimitEntry>) ||
+  mongoose.model<RateLimitEntry>('RateLimit', RateLimitSchema);
 
 export interface RateLimitConfig {
-  maxRequests: number;      // Max requests allowed
-  windowMs: number;          // Time window in milliseconds
-  message?: string;          // Custom error message
-  keyPrefix: string;         // Prefix for the rate limit key (e.g., 'purchase', 'listing')
+  maxRequests: number;
+  windowMs: number;
+  /** Prefix that namespaces the key, e.g. 'create-fundraiser'. */
+  keyPrefix: string;
+  message?: string;
+  /**
+   * If the limiter itself fails (database down), deny instead of allow.
+   * Use for security-sensitive endpoints like admin login.
+   */
+  failClosed?: boolean;
 }
 
-/**
- * Check rate limit for a given key (usually wallet address)
- * Returns { allowed: boolean, remaining: number, resetAt: Date }
- */
-export async function checkRateLimit(
-  identifier: string,
-  config: RateLimitConfig
-): Promise<{ 
-  allowed: boolean; 
-  remaining: number; 
+export interface RateLimitResult {
+  allowed: boolean;
+  remaining: number;
   resetAt: Date;
   message?: string;
-}> {
-  await connectDB();
+}
 
-  const key = `${config.keyPrefix}:${identifier}`;
+export async function checkRateLimit(identifier: string, config: RateLimitConfig): Promise<RateLimitResult> {
   const now = new Date();
+  const freshReset = new Date(now.getTime() + config.windowMs);
+  const deny = (resetAt: Date): RateLimitResult => ({
+    allowed: false,
+    remaining: 0,
+    resetAt,
+    message: config.message || 'Too many requests. Please try again later.',
+  });
 
   try {
-    // Find existing rate limit entry
-    let entry = await RateLimit.findOne({ key });
-
-    // If no entry or expired, create new one
-    if (!entry || entry.resetAt < now) {
-      const resetAt = new Date(now.getTime() + config.windowMs);
-      
-      await RateLimit.findOneAndUpdate(
-        { key },
+    await connectDB();
+    const expired = { $lt: [{ $ifNull: ['$resetAt', new Date(0)] }, now] };
+    const entry = await RateLimit.findOneAndUpdate(
+      { key: `${config.keyPrefix}:${identifier}` },
+      [
         {
-          key,
-          count: 1,
-          resetAt,
-          createdAt: now
+          $set: {
+            count: { $cond: [expired, 1, { $add: [{ $ifNull: ['$count', 0] }, 1] }] },
+            resetAt: { $cond: [expired, freshReset, '$resetAt'] },
+          },
         },
-        { upsert: true, new: true }
-      );
+      ],
+      { upsert: true, new: true },
+    ).lean<RateLimitEntry>();
 
-      return {
-        allowed: true,
-        remaining: config.maxRequests - 1,
-        resetAt
-      };
-    }
-
-    // Entry exists and is active
-    if (entry.count >= config.maxRequests) {
-      // Rate limit exceeded
-      return {
-        allowed: false,
-        remaining: 0,
-        resetAt: entry.resetAt,
-        message: config.message || `Rate limit exceeded. Try again after ${entry.resetAt.toLocaleTimeString()}`
-      };
-    }
-
-    // Increment counter
-    entry.count += 1;
-    await entry.save();
-
-    return {
-      allowed: true,
-      remaining: config.maxRequests - entry.count,
-      resetAt: entry.resetAt
-    };
-
+    if (!entry) return { allowed: true, remaining: config.maxRequests - 1, resetAt: freshReset };
+    if (entry.count > config.maxRequests) return deny(entry.resetAt);
+    return { allowed: true, remaining: config.maxRequests - entry.count, resetAt: entry.resetAt };
   } catch (error) {
-    console.error('Rate limit check error:', error);
-    // On error, allow request (fail open)
-    return {
-      allowed: true,
-      remaining: config.maxRequests,
-      resetAt: new Date(now.getTime() + config.windowMs)
-    };
+    console.error('Rate limit check failed:', error);
+    return config.failClosed ? deny(freshReset) : { allowed: true, remaining: config.maxRequests, resetAt: freshReset };
   }
 }
 
-/**
- * Rate limit configurations for different endpoints
- */
 export const RATE_LIMITS = {
-  // Creating listings: 3 per hour
-  CREATE_LISTING: {
+  CREATE_FUNDRAISER: {
     maxRequests: 3,
-    windowMs: 60 * 60 * 1000, // 1 hour
-    keyPrefix: 'create-listing',
-    message: 'Too many listing attempts. Maximum 3 per hour. Please try again later.'
+    windowMs: 60 * 60 * 1000,
+    keyPrefix: 'create-fundraiser',
+    message: 'You can start up to 3 campaigns an hour. Please try again later.',
   },
-  
-  // Purchases: 10 per hour (prevent spam purchases)
-  PURCHASE: {
-    maxRequests: 10,
-    windowMs: 60 * 60 * 1000, // 1 hour
-    keyPrefix: 'purchase',
-    message: 'Too many purchase attempts. Maximum 10 per hour. Please try again later.'
-  },
-  
-  // Image uploads: 5 per 10 minutes
   IMAGE_UPLOAD: {
-    maxRequests: 5,
-    windowMs: 10 * 60 * 1000, // 10 minutes
+    maxRequests: 10,
+    windowMs: 10 * 60 * 1000,
     keyPrefix: 'image-upload',
-    message: 'Too many upload attempts. Maximum 5 per 10 minutes. Please try again later.'
+    message: 'Too many uploads. Please wait a few minutes and try again.',
   },
-  
-  // General API calls: 100 per minute (very generous, catches only extreme abuse)
-  GENERAL_API: {
-    maxRequests: 100,
-    windowMs: 60 * 1000, // 1 minute
-    keyPrefix: 'api',
-    message: 'Too many requests. Please slow down.'
-  }
-} as const;
-
+} satisfies Record<string, RateLimitConfig>;

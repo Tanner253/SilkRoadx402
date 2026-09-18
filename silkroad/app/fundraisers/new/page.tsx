@@ -1,228 +1,147 @@
 'use client';
 
-import { useState } from 'react';
-import { useAuth } from '@/hooks/useAuth';
-import { useWallet } from '@solana/wallet-adapter-react';
-import { useRouter } from 'next/navigation';
-import axios from 'axios';
+import { useRef, useState } from 'react';
 import Link from 'next/link';
-import { ProtectedContent } from '@/components/auth/ProtectedContent';
-import { Connection, PublicKey } from '@solana/web3.js';
-import { getAssociatedTokenAddress } from '@solana/spl-token';
+import { ArrowUpRight, ImagePlus, Loader2 } from 'lucide-react';
+import { FUNDRAISER_CATEGORIES } from '@/config/constants';
+import { normalizeAddress, ROBINHOOD_CHAIN_ID, ROBINHOOD_CHAIN_NAME } from '@/lib/chain/network';
+import { manageUrl, saveManaged } from '@/lib/manageLinks';
+import {
+  CopyButton,
+  Notice,
+  PageIntro,
+  inputClass,
+  primaryButtonClass,
+  secondaryButtonClass,
+} from '@/components/fundraisers/ui';
+import { PiggyBank } from '@/components/mascot/PiggyBank';
+import { LinksEditor, cleanLinks } from '@/components/fundraisers/links';
+import type { CampaignLink } from '@/lib/links';
+import { errorMessage } from '@/lib/errors';
 
-function NewFundraiserPageContent() {
-  const { isConnected, isTokenGated, mounted } = useAuth();
-  const { publicKey } = useWallet();
-  const router = useRouter();
+const MAX_IMAGE_BYTES = 5 * 1024 * 1024;
 
-  const [formData, setFormData] = useState({
-    title: '',
-    description: '',
-    price: '',
-    category: 'Medical',
-    imageUrl: '',
-    deliveryUrl: '',  // REQUIRED: Thank you message or reward link
-    demoVideoUrl: '',  // Optional
-    whitepaperUrl: '',  // Optional
-    githubUrl: '',  // Optional
-  });
+function Field({ label, hint, children, htmlFor }: { label: string; hint?: React.ReactNode; children: React.ReactNode; htmlFor: string }) {
+  return (
+    <div>
+      <label htmlFor={htmlFor} className="mb-2 block text-sm font-medium text-foreground">
+        {label}
+      </label>
+      {children}
+      {hint ? <p className="mt-1.5 text-xs leading-relaxed text-muted-foreground">{hint}</p> : null}
+    </div>
+  );
+}
 
-  const [imageFile, setImageFile] = useState<File | null>(null);
-  const [imagePreview, setImagePreview] = useState<string>('');
-  const [loading, setLoading] = useState(false);
+export default function NewFundraiserPage() {
+  const [title, setTitle] = useState('');
+  const [description, setDescription] = useState('');
+  const [category, setCategory] = useState('');
+  const [goal, setGoal] = useState('');
+  const [payoutAddress, setPayoutAddress] = useState('');
+  const [confirmedAddress, setConfirmedAddress] = useState(false);
+  const [links, setLinks] = useState<CampaignLink[]>([]);
+  const [imageUrl, setImageUrl] = useState('');
+  const [uploading, setUploading] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [uploadingImage, setUploadingImage] = useState(false);
+  const [created, setCreated] = useState<{ id: string; title: string; link: string } | null>(null);
+  const [savedLink, setSavedLink] = useState(false);
+  const fileInput = useRef<HTMLInputElement>(null);
 
-  const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
+  const address = normalizeAddress(payoutAddress);
+  const addressTouched = payoutAddress.trim().length > 0;
 
-    // Validate file size (5MB)
-    if (file.size > 5 * 1024 * 1024) {
-      setError('Image must be less than 5MB');
-      return;
-    }
-
-    // Validate file type
+  async function uploadImage(file: File) {
+    setError(null);
     if (!['image/jpeg', 'image/png', 'image/webp'].includes(file.type)) {
-      setError('Image must be JPEG, PNG, or WebP');
+      setError('Cover images must be JPG, PNG or WebP.');
       return;
     }
-
-    setImageFile(file);
-    setImagePreview(URL.createObjectURL(file));
-    setError(null);
-
-    // Auto-upload image
-    await uploadImage(file);
-  };
-
-  const uploadImage = async (file: File) => {
+    if (file.size > MAX_IMAGE_BYTES) {
+      setError('Cover images must be under 5 MB.');
+      return;
+    }
+    setUploading(true);
     try {
-      setUploadingImage(true);
-      const formData = new FormData();
-      formData.append('image', file);
-
-      // Include wallet for rate limiting
-      const wallet = publicKey?.toBase58() || '';
-      const uploadUrl = `/api/upload/image${wallet ? `?wallet=${wallet}` : ''}`;
-
-      const response = await axios.post(uploadUrl, formData, {
-        headers: { 'Content-Type': 'multipart/form-data' },
-      });
-
-      setFormData(prev => ({ ...prev, imageUrl: response.data.imageUrl }));
-    } catch (err: any) {
-      const errorMsg = err.response?.data?.error || 'Failed to upload image';
-      setError(errorMsg);
-
-      // Show rate limit info if available
-      if (err.response?.status === 429) {
-        const resetAt = err.response?.data?.resetAt;
-        if (resetAt) {
-          const resetTime = new Date(resetAt).toLocaleTimeString();
-          setError(`${errorMsg} Try again after ${resetTime}.`);
-        }
-      }
+      const body = new FormData();
+      body.append('image', file);
+      const res = await fetch('/api/upload/image', { method: 'POST', body });
+      const data = await res.json();
+      if (!res.ok || !data.imageUrl) throw new Error(data.error || 'Upload failed');
+      setImageUrl(data.imageUrl);
+    } catch (err) {
+      setError(errorMessage(err, 'Upload failed'));
     } finally {
-      setUploadingImage(false);
+      setUploading(false);
     }
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError(null);
-
-    // Validation
-    if (formData.title.length < 5 || formData.title.length > 100) {
-      setError('Title must be 5-100 characters');
-      return;
-    }
-
-    if (formData.description.length < 50 || formData.description.length > 2000) {
-      setError('Description must be 50-2000 characters');
-      return;
-    }
-
-    const price = parseFloat(formData.price);
-    if (isNaN(price) || price < 0.10) {
-      setError('Amount must be at least $0.10 USDC');
-      return;
-    }
-
-    if (!formData.imageUrl) {
-      setError('Please upload an image');
-      return;
-    }
-
-    if (!formData.deliveryUrl) {
-      setError('Delivery URL is required (thank you message or reward link donors will receive)');
-      return;
-    }
-
-    if (!publicKey) {
-      setError('Wallet not connected');
-      return;
-    }
-
-    try {
-      setLoading(true);
-
-      // ====================================
-      // VALIDATE: Check if organizer has USDC account
-      // ====================================
-      console.log('🔍 Validating organizer can receive USDC payments...');
-
-      const rpcUrl = process.env.NEXT_PUBLIC_SOLANA_MAINNET_RPC || 'https://api.mainnet-beta.solana.com';
-      const connection = new Connection(rpcUrl, 'confirmed');
-
-      // USDC mainnet mint
-      const usdcMint = new PublicKey('EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v');
-
-      // Get organizer's USDC token account
-      const organizerUsdcAccount = await getAssociatedTokenAddress(
-        usdcMint,
-        publicKey
-      );
-
-      console.log(`📤 Checking USDC account: ${organizerUsdcAccount.toBase58()}`);
-
-      // Check if account exists
-      const accountInfo = await connection.getAccountInfo(organizerUsdcAccount);
-
-      if (!accountInfo) {
-        console.error('❌ Organizer does not have a USDC token account');
-        setError(
-          '❌ Your wallet cannot receive USDC payments. You need to create a USDC token account first. ' +
-          'Solution: Open Phantom wallet → Add a small amount of USDC (even $0.01) to create your account, ' +
-          'or use a different wallet like Phantom that automatically creates token accounts. ' +
-          'This is a one-time setup to enable receiving payments.'
-        );
-        setLoading(false);
-        return;
-      }
-
-      console.log('✅ Organizer has a valid USDC account');
-
-      // ====================================
-      // CREATE FUNDRAISER
-      // ====================================
-      const response = await axios.post('/api/fundraisers', {
-        wallet: publicKey.toBase58(),
-        title: formData.title,
-        description: formData.description,
-        price,
-        category: formData.category,
-        imageUrl: formData.imageUrl,
-        deliveryUrl: formData.deliveryUrl,
-        demoVideoUrl: formData.demoVideoUrl || undefined,
-        whitepaperUrl: formData.whitepaperUrl || undefined,
-        githubUrl: formData.githubUrl || undefined,
-      });
-
-      // Redirect to my fundraisers
-      router.push('/fundraisers/my');
-    } catch (err: any) {
-      const errorMsg = err.response?.data?.error || 'Failed to create fundraiser';
-      setError(errorMsg);
-
-      // Show additional info for rate limits (429 status)
-      if (err.response?.status === 429) {
-        const resetAt = err.response?.data?.resetAt;
-        const currentCount = err.response?.data?.currentCount;
-        const limit = err.response?.data?.limit;
-
-        if (resetAt) {
-          const resetTime = new Date(resetAt).toLocaleTimeString();
-          setError(`${errorMsg} Try again after ${resetTime}.`);
-        } else if (currentCount !== undefined && limit !== undefined) {
-          setError(`${errorMsg} (${currentCount}/${limit} fundraisers)`);
-        }
-      }
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  if (!mounted) {
-    return null;
   }
 
-  if (!isConnected) {
+  async function submit(e: React.FormEvent) {
+    e.preventDefault();
+    setError(null);
+    if (!address) return setError('Enter the wallet address donations should go to.');
+    if (!confirmedAddress) return setError(`Confirm the address is yours and works on ${ROBINHOOD_CHAIN_NAME}.`);
+    if (!imageUrl) return setError('Add a cover image.');
+
+    setSubmitting(true);
+    try {
+      const res = await fetch('/api/fundraisers', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ title, description, category, goal, payoutAddress: address, imageUrl, links: cleanLinks(links) }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Could not create the campaign');
+
+      const id = data.fundraiser._id as string;
+      saveManaged(id, data.manageToken, data.fundraiser.title);
+      setCreated({ id, title: data.fundraiser.title, link: manageUrl(id, data.manageToken) });
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    } catch (err) {
+      setError(errorMessage(err));
+    } finally {
+      setSubmitting(false);
+    }
+  }
+
+  if (created) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-background">
-        <div className="text-center">
-          <h1 className="text-2xl font-bold text-foreground mb-4">
-            Connect Your Wallet
-          </h1>
-          <p className="text-muted-foreground mb-6">
-            You need to connect your wallet to create fundraisers
+      <div className="mx-auto max-w-2xl px-6 pb-24 md:px-8">
+        <div className="mb-6 w-44">
+          <PiggyBank pose="happy" size={176} />
+        </div>
+        <PageIntro eyebrow="YOU'RE LIVE" title="Your campaign" accent="is up.">
+          &ldquo;{created.title}&rdquo; is live now. Share it and donations go straight to your wallet.
+        </PageIntro>
+
+        <div className="rounded-2xl border border-[#e6d3a8] bg-[#faf3e2] p-6">
+          <p className="mb-1 text-sm font-semibold text-[#7a5a1c]">Save your manage link — it&rsquo;s the only way to edit this campaign.</p>
+          <p className="mb-4 text-sm leading-relaxed text-[#7a5a1c]">
+            There are no accounts, so this private link is your key. Anyone who has it can edit, pause or delete the
+            campaign — it can&rsquo;t change where donations go. Keep it somewhere safe and don&rsquo;t share it.
           </p>
+          <div className="flex items-center gap-2 rounded-lg border border-[#e6d3a8] bg-card p-2 pl-3">
+            <code className="min-w-0 flex-1 truncate text-xs text-foreground">{created.link}</code>
+            <CopyButton value={created.link} label="Copy link" />
+          </div>
+          <label className="mt-4 flex cursor-pointer items-start gap-2.5 text-sm text-[#7a5a1c]">
+            <input type="checkbox" checked={savedLink} onChange={(e) => setSavedLink(e.target.checked)} className="mt-0.5 accent-[#3d5136]" />
+            I&rsquo;ve saved my manage link somewhere safe.
+          </label>
+        </div>
+
+        <div className="mt-8 flex flex-wrap gap-3">
           <Link
-            href="/"
-            className="inline-flex items-center justify-center rounded-lg bg-primary px-6 py-3 text-sm font-medium text-primary-foreground hover:bg-primary transition-colors"
+            href={`/fundraisers/${created.id}`}
+            aria-disabled={!savedLink}
+            onClick={(e) => !savedLink && e.preventDefault()}
+            className={`${primaryButtonClass} ${savedLink ? '' : 'pointer-events-none opacity-50'}`}
           >
-            Go to Homepage
+            View your campaign <ArrowUpRight size={16} />
+          </Link>
+          <Link href="/fundraisers/my" className={secondaryButtonClass}>
+            My fundraisers
           </Link>
         </div>
       </div>
@@ -230,325 +149,124 @@ function NewFundraiserPageContent() {
   }
 
   return (
-    <div className="min-h-screen bg-background py-12 px-4 pb-24">
-      <div className="mx-auto max-w-3xl">
-        {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-4xl font-bold text-foreground mb-2">
-            Create a Fundraiser
-          </h1>
-          <p className="text-lg text-muted-foreground">
-            Start an anonymous fundraising campaign using crypto
-          </p>
-        </div>
+    <div className="mx-auto max-w-2xl px-6 pb-24 md:px-8">
+      <PageIntro eyebrow="START A FUNDRAISER" title="Tell people" accent="what it's for.">
+        It goes live the moment you publish. No account, no review queue, no wallet connection — just the address you
+        want donations sent to.
+      </PageIntro>
 
-        {/* Token Gating Warning */}
-        {!isTokenGated && (
-          <div className="mb-6 rounded-lg border border-yellow-200 bg-yellow-50 p-4">
-            <p className="text-sm text-yellow-700">
-              ⚠️ You don't have enough $OPEN tokens. Fundraiser creation may be restricted.
-            </p>
-          </div>
-        )}
+      <form onSubmit={submit} className="space-y-7" noValidate>
+        <Field label="Title" htmlFor="title" hint={`${title.trim().length}/100 · at least 5 characters`}>
+          <input id="title" value={title} maxLength={100} onChange={(e) => setTitle(e.target.value)} className={inputClass} placeholder="Help Maya get her surgery" required />
+        </Field>
 
-        {/* Critical USDC Account Warning */}
-        <div className="mb-6 rounded-lg border-2 border-red-200 bg-red-50 p-4">
-          <div className="flex items-start gap-3">
-            <span className="text-2xl flex-shrink-0">🚨</span>
-            <div>
-              <h3 className="text-sm font-bold text-red-700 mb-2">
-                CRITICAL: USDC Account Required
-              </h3>
-              <p className="text-sm text-red-700">
-                <strong>YOU MUST HAVE A USDC ACCOUNT ON YOUR WALLET TO RECEIVE USDC FROM DONATIONS.</strong> If you don't do this, it will error for donors in Phantom when they try to donate.
-              </p>
-              <p className="text-sm text-red-700 mt-2">
-                ✅ <strong>Ensure you have a USDC account by transferring at least $0.10 USDC to your wallet before creating your fundraiser.</strong>
-              </p>
-            </div>
-          </div>
-        </div>
+        <Field label="Your story" htmlFor="description" hint={`${description.trim().length}/2000 · at least 50 characters. Say what the money is for and why it matters.`}>
+          <textarea id="description" value={description} maxLength={2000} rows={7} onChange={(e) => setDescription(e.target.value)} className={`${inputClass} resize-y leading-relaxed`} required />
+        </Field>
 
-        {/* Delivery URL Info */}
-        <div className="mb-6 rounded-lg border border-border bg-accent p-4">
-          <div className="flex items-start gap-3">
-            <span className="text-xl flex-shrink-0">ℹ️</span>
-            <div>
-              <h3 className="text-sm font-semibold text-primary mb-1">
-                Important: Delivery URL Cannot Be Changed
-              </h3>
-              <p className="text-sm text-primary">
-                Once your fundraiser is created, the <strong>delivery URL cannot be edited</strong>. This is the thank you message or reward link donors receive after donating. Make sure it's correct before submitting! You can edit all other fields later.
-              </p>
-            </div>
-          </div>
-        </div>
-
-        {/* Form */}
-        <form onSubmit={handleSubmit} className="rounded-lg border border-border bg-muted backdrop-blur-sm p-6">
-          {/* Error Message */}
-          {error && (
-            <div className="mb-6 rounded-lg border border-red-200 bg-red-50 p-4">
-              <p className="text-sm text-red-700">⚠️ {error}</p>
-            </div>
-          )}
-
-          {/* Title */}
-          <div className="mb-6">
-            <label className="mb-2 block text-sm font-medium text-muted-foreground">
-              Fundraiser Title <span className="text-red-700">*</span>
-            </label>
-            <input
-              type="text"
-              value={formData.title}
-              onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-              placeholder="e.g. Help Fund Medical Treatment for My Family Member"
-              className="w-full rounded-lg border border-border bg-muted px-4 py-2 text-foreground placeholder-white/30 focus:border-border focus:outline-none focus:ring-2 focus:ring-ring"
-              maxLength={100}
-              required
-            />
-            <p className="mt-1 text-xs text-muted-foreground">{formData.title.length}/100 characters</p>
-          </div>
-
-          {/* Description */}
-          <div className="mb-6">
-            <label className="mb-2 block text-sm font-medium text-muted-foreground">
-              Fundraiser Description <span className="text-red-700">*</span>
-            </label>
-            <textarea
-              value={formData.description}
-              onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-              placeholder="Describe your fundraiser in detail. What is the cause? How will the funds be used? Why is this important?"
-              rows={6}
-              className="w-full rounded-lg border border-border bg-muted px-4 py-2 text-foreground placeholder-white/30 focus:border-border focus:outline-none focus:ring-2 focus:ring-ring"
-              maxLength={2000}
-              required
-            />
-            <p className="mt-1 text-xs text-muted-foreground">{formData.description.length}/2000 characters (min 50)</p>
-          </div>
-
-          {/* Amount */}
-          <div className="mb-6">
-            <label className="mb-2 block text-sm font-medium text-muted-foreground">
-              Donation Amount (USDC) <span className="text-red-700">*</span>
-            </label>
-            <div className="relative">
-              <span className="absolute left-4 top-2 text-muted-foreground">$</span>
-              <input
-                type="number"
-                step="0.01"
-                min="0.10"
-                value={formData.price}
-                onChange={(e) => setFormData({ ...formData, price: e.target.value })}
-                placeholder="0.00"
-                className="w-full rounded-lg border border-border bg-muted px-4 py-2 pl-8 text-foreground placeholder-white/30 focus:border-border focus:outline-none focus:ring-2 focus:ring-ring"
-                required
-              />
-            </div>
-            <p className="mt-1 text-xs text-muted-foreground">Minimum $0.10 USDC per donation</p>
-          </div>
-
-          {/* Category */}
-          <div className="mb-6">
-            <label className="mb-2 block text-sm font-medium text-muted-foreground">
-              Category <span className="text-red-700">*</span>
-            </label>
-            <select
-              value={formData.category}
-              onChange={(e) => setFormData({ ...formData, category: e.target.value })}
-              className="w-full rounded-lg border border-border bg-muted px-4 py-2 text-foreground focus:border-border focus:outline-none focus:ring-2 focus:ring-ring"
-              required
-            >
-              <option value="">Select a category...</option>
-              <optgroup label="🏥 Health & Wellness">
-                <option value="Medical">Medical</option>
-                <option value="Emergency">Emergency</option>
-                <option value="Memorial">Memorial</option>
-              </optgroup>
-              <optgroup label="📚 Education & Community">
-                <option value="Education">Education</option>
-                <option value="Community">Community</option>
-                <option value="Religious">Religious</option>
-              </optgroup>
-              <optgroup label="🌍 Environment & Animals">
-                <option value="Environmental">Environmental</option>
-                <option value="Animal Welfare">Animal Welfare</option>
-              </optgroup>
-              <optgroup label="🎭 Arts, Culture & Sports">
-                <option value="Arts & Culture">Arts & Culture</option>
-                <option value="Sports">Sports</option>
-              </optgroup>
-              <optgroup label="💼 Business & Technology">
-                <option value="Business">Business</option>
-                <option value="Technology">Technology</option>
-              </optgroup>
-              <optgroup label="👤 Personal">
-                <option value="Personal">Personal</option>
-                <option value="Other">Other</option>
-              </optgroup>
+        <div className="grid gap-7 sm:grid-cols-2">
+          <Field label="Category" htmlFor="category">
+            <select id="category" value={category} onChange={(e) => setCategory(e.target.value)} className={inputClass} required>
+              <option value="" disabled>
+                Choose one
+              </option>
+              {FUNDRAISER_CATEGORIES.map((c) => (
+                <option key={c} value={c}>
+                  {c}
+                </option>
+              ))}
             </select>
-          </div>
+          </Field>
+          <Field label="Goal (ETH)" htmlFor="goal" hint="A target, not a threshold — you keep whatever is given.">
+            <input id="goal" type="number" inputMode="decimal" min="0" step="any" value={goal} onChange={(e) => setGoal(e.target.value)} className={inputClass} placeholder="1.5" required />
+          </Field>
+        </div>
 
-          {/* Image Upload */}
-          <div className="mb-6">
-            <label className="mb-2 block text-sm font-medium text-muted-foreground">
-              Fundraiser Image <span className="text-red-700">*</span>
-            </label>
-            <div className="flex items-start space-x-4">
-              {imagePreview && (
-                <div className="relative h-32 w-32 overflow-hidden rounded-lg border border-border">
-                  <img src={imagePreview} alt="Preview" className="h-full w-full object-cover" />
-                </div>
-              )}
-              <div className="flex-1">
-                <input
-                  type="file"
-                  accept="image/jpeg,image/png,image/webp"
-                  onChange={handleImageChange}
-                  className="block w-full text-sm text-muted-foreground file:mr-4 file:rounded-lg file:border-0 file:bg-primary file:px-4 file:py-2 file:text-sm file:font-medium file:text-primary-foreground hover:file:bg-primary"
-                />
-                <p className="mt-2 text-xs text-muted-foreground">
-                  JPEG, PNG, or WebP. Max 5MB. Recommended 800x600px
-                </p>
-                {uploadingImage && (
-                  <p className="mt-2 text-sm text-primary">Uploading...</p>
-                )}
-              </div>
-            </div>
-          </div>
+        <Field label="Cover image" htmlFor="cover" hint="JPG, PNG or WebP, up to 5 MB.">
+          <input
+            ref={fileInput}
+            id="cover"
+            type="file"
+            accept="image/jpeg,image/png,image/webp"
+            className="sr-only"
+            onChange={(e) => e.target.files?.[0] && uploadImage(e.target.files[0])}
+          />
+          <button
+            type="button"
+            onClick={() => fileInput.current?.click()}
+            className="relative flex aspect-[16/9] w-full items-center justify-center overflow-hidden rounded-xl border border-dashed border-input bg-card text-sm text-muted-foreground transition-colors hover:bg-accent"
+          >
+            {imageUrl ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img src={imageUrl} alt="Cover preview" className="absolute inset-0 h-full w-full object-cover" />
+            ) : uploading ? (
+              <span className="flex items-center gap-2">
+                <Loader2 size={16} className="animate-spin" /> Uploading…
+              </span>
+            ) : (
+              <span className="flex items-center gap-2">
+                <ImagePlus size={17} /> Choose an image
+              </span>
+            )}
+          </button>
+        </Field>
 
-          {/* Private Delivery URL Section */}
-          <div className="mb-6 rounded-lg border-2 border-red-200 bg-red-50 p-4">
-            <div className="flex items-start space-x-3 mb-4">
-              <div className="flex h-8 w-8 items-center justify-center rounded-full bg-red-600 text-primary-foreground font-bold flex-shrink-0">
-                🔒
-              </div>
-              <div>
-                <h3 className="text-sm font-bold text-red-700 mb-1">
-                  Private Thank You / Reward URL <span className="text-red-700">*</span>
-                </h3>
-                <p className="text-xs text-red-700">
-                  ⚠️ <strong>ENCRYPTED & PRIVATE:</strong> Only shown to donors after successful donation. Never displayed publicly.
-                </p>
-              </div>
-            </div>
-
+        <div className="rounded-2xl border border-border bg-card p-5">
+          <Field
+            label="Where should donations go?"
+            htmlFor="payout"
+            hint={
+              <>
+                Your wallet address on <strong className="text-foreground">{ROBINHOOD_CHAIN_NAME}</strong> (chain ID {ROBINHOOD_CHAIN_ID}).
+                It starts with 0x and is shown publicly so donors can send to it. It can&rsquo;t be changed later.
+              </>
+            }
+          >
             <input
-              type="url"
-              value={formData.deliveryUrl}
-              onChange={(e) => setFormData({ ...formData, deliveryUrl: e.target.value })}
-              placeholder="https://docs.google.com/document/... (Thank you message, reward link, etc.)"
-              className="w-full rounded-lg border border-red-200 bg-muted px-4 py-2 text-foreground placeholder-white/30 focus:border-red-200 focus:outline-none focus:ring-2 focus:ring-red-600/30"
+              id="payout"
+              value={payoutAddress}
+              onChange={(e) => setPayoutAddress(e.target.value)}
+              className={`${inputClass} font-mono text-[13px] ${addressTouched && !address ? 'border-[#e8c4bd] focus:border-[#e8c4bd]' : ''}`}
+              placeholder="0x…"
+              spellCheck={false}
+              autoComplete="off"
               required
             />
-            <p className="mt-2 text-xs text-red-700">
-              The thank you message or reward link donors receive after donating (Google Doc, Discord invite, etc.)
-            </p>
-          </div>
+          </Field>
+          {addressTouched && !address ? <p className="mt-2 text-xs text-[#9b3b2c]">That isn&rsquo;t a valid 0x address.</p> : null}
+          <Notice tone="warning" className="mt-4 text-xs">
+            Use a wallet you control, like MetaMask or Rabby. <strong>Don&rsquo;t use an exchange deposit address</strong> — exchanges
+            may not credit transfers from Robinhood Chain.
+          </Notice>
+          <label className="mt-4 flex cursor-pointer items-start gap-2.5 text-sm text-foreground">
+            <input type="checkbox" checked={confirmedAddress} onChange={(e) => setConfirmedAddress(e.target.checked)} className="mt-0.5 accent-[#3d5136]" />
+            This is my own wallet and it can receive ETH on {ROBINHOOD_CHAIN_NAME}.
+          </label>
+        </div>
 
-          {/* Public Information Section */}
-          <div className="mb-6 rounded-lg border-2 border-border bg-accent p-4">
-            <div className="flex items-start space-x-3 mb-4">
-              <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary text-primary-foreground font-bold flex-shrink-0">
-                👁️
-              </div>
-              <div>
-                <h3 className="text-sm font-bold text-primary mb-1">
-                  Public Resources (Optional)
-                </h3>
-                <p className="text-xs text-primary">
-                  ✅ <strong>PUBLICLY VISIBLE:</strong> Shown on your fundraiser page to help donors make informed decisions.
-                </p>
-              </div>
-            </div>
+        <div className="rounded-2xl border border-border bg-card p-5">
+          <p className="mb-1 text-sm font-medium text-foreground">Links</p>
+          <p className="mb-4 text-xs leading-relaxed text-muted-foreground">
+            Add as many as you like — a YouTube video (it plays right on your page), your X or Telegram, a website, GitHub, anything that helps
+            people trust and understand your cause.
+          </p>
+          <LinksEditor value={links} onChange={setLinks} />
+        </div>
 
-            {/* Demo Video URL */}
-            <div className="mb-4">
-              <label className="mb-2 block text-sm font-medium text-muted-foreground">
-                🎥 Demo/Story Video URL (YouTube)
-              </label>
-              <input
-                type="url"
-                value={formData.demoVideoUrl}
-                onChange={(e) => setFormData({ ...formData, demoVideoUrl: e.target.value })}
-                placeholder="https://youtube.com/watch?v=dQw4w9WgXcQ or https://youtu.be/dQw4w9WgXcQ"
-                className="w-full rounded-lg border border-border bg-muted px-4 py-2 text-foreground placeholder-white/30 focus:border-border focus:outline-none focus:ring-2 focus:ring-ring"
-              />
-              <p className="mt-1 text-xs text-primary">
-                YouTube video that will auto-play (muted) on your fundraiser page
-              </p>
-            </div>
+        {error ? <Notice tone="error">{error}</Notice> : null}
 
-            {/* Whitepaper URL */}
-            <div className="mb-4">
-              <label className="mb-2 block text-sm font-medium text-muted-foreground">
-                📄 Details Document URL
-              </label>
-              <input
-                type="url"
-                value={formData.whitepaperUrl}
-                onChange={(e) => setFormData({ ...formData, whitepaperUrl: e.target.value })}
-                placeholder="https://docs.google.com/document/..."
-                className="w-full rounded-lg border border-border bg-muted px-4 py-2 text-foreground placeholder-white/30 focus:border-border focus:outline-none focus:ring-2 focus:ring-ring"
-              />
-              <p className="mt-1 text-xs text-primary">
-                Public document with more details about your fundraiser shown on your page
-              </p>
-            </div>
-
-            {/* GitHub URL */}
-            <div>
-              <label className="mb-2 block text-sm font-medium text-muted-foreground">
-                💻 Project Link (GitHub, Website, etc.)
-              </label>
-              <input
-                type="url"
-                value={formData.githubUrl}
-                onChange={(e) => setFormData({ ...formData, githubUrl: e.target.value })}
-                placeholder="https://github.com/username/project"
-                className="w-full rounded-lg border border-border bg-muted px-4 py-2 text-foreground placeholder-white/30 focus:border-border focus:outline-none focus:ring-2 focus:ring-ring"
-              />
-              <p className="mt-1 text-xs text-primary">
-                Public project link shown on your fundraiser page
-              </p>
-            </div>
-          </div>
-
-          {/* Submit Buttons */}
-          <div className="flex items-center justify-between pt-6 border-t border-border">
-            <Link
-              href="/fundraisers/my"
-              className="text-sm text-muted-foreground hover:text-foreground transition-colors"
-            >
-              Cancel
-            </Link>
-            <button
-              type="submit"
-              disabled={loading || uploadingImage}
-              className="rounded-lg bg-primary px-6 py-2 text-sm font-medium text-primary-foreground hover:bg-primary disabled:cursor-not-allowed disabled:opacity-50 transition-colors"
-            >
-              {loading ? 'Creating...' : 'Create Fundraiser'}
-            </button>
-          </div>
-
-          {/* Info Box */}
-          <div className="mt-6 rounded-lg border border-border bg-accent p-4">
-            <p className="text-sm text-primary">
-              ℹ️ Your fundraiser will be reviewed by admins before going live.
-              This usually takes 24-48 hours.
-            </p>
-          </div>
-        </form>
-      </div>
+        <button type="submit" disabled={submitting || uploading} className={`${primaryButtonClass} w-full sm:w-auto`}>
+          {submitting ? (
+            <>
+              <Loader2 size={16} className="animate-spin" /> Publishing…
+            </>
+          ) : (
+            <>
+              Publish campaign <ArrowUpRight size={16} />
+            </>
+          )}
+        </button>
+      </form>
     </div>
   );
 }
-
-export default function NewFundraiserPage() {
-  return (
-    <ProtectedContent>
-      <NewFundraiserPageContent />
-    </ProtectedContent>
-  );
-}
-

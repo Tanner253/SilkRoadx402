@@ -1,1111 +1,320 @@
 'use client';
 
-import { use, useState, useEffect } from 'react';
-import { LaunchNotice } from '@/components/ui/LaunchNotice';
-import { useAuth } from '@/hooks/useAuth';
-import { useWallet, useConnection } from '@solana/wallet-adapter-react';
-import { useRouter } from 'next/navigation';
-import axios from 'axios';
+import { use, useCallback, useEffect, useState } from 'react';
 import Link from 'next/link';
-import Image from 'next/image';
-import { useToast } from '@/components/ui/Toast';
-import { useConfirm } from '@/components/ui/ConfirmDialog';
-import { Breadcrumbs } from '@/components/ui/Breadcrumbs';
-import { CommentSkeleton } from '@/components/ui/LoadingSkeleton';
-import {
-  Connection,
-  PublicKey,
-  Transaction,
-  SystemProgram,
-} from '@solana/web3.js';
-import {
-  getAssociatedTokenAddress,
-  createTransferInstruction,
-  TOKEN_PROGRAM_ID,
-} from '@solana/spl-token';
+import { ArrowLeft, ArrowUpRight, Flag, Loader2 } from 'lucide-react';
+import type { CommentView, DonationView, FundraiserView } from '@/types/fundraiser';
+import { goalOf } from '@/types/fundraiser';
+import { donationExplorerUrl, explorerAddressUrl } from '@/lib/chain/network';
+import { formatAmount, percentRaised, shortAddress, timeAgo } from '@/lib/format';
+import { getManageToken, saveManaged, takeManageTokenFromUrl } from '@/lib/manageLinks';
+import { DonatePanel } from '@/components/fundraisers/DonatePanel';
+import { ManagePanel } from '@/components/fundraisers/ManagePanel';
+import { CopyButton, CoverImage, Notice, Pill, ProgressBar, inputClass, primaryButtonClass } from '@/components/fundraisers/ui';
+import { CampaignLinks } from '@/components/fundraisers/links';
+import { useWatches } from '@/components/donations/WatchProvider';
+import { PiggyBank } from '@/components/mascot/PiggyBank';
+import { errorMessage } from '@/lib/errors';
 
-interface Fundraiser {
-  _id: string;
-  wallet: string;
-  title: string;
-  description: string;
-  imageUrl: string;
-  price: number;
-  category: string;
-  riskLevel: 'standard' | 'high-risk';
-  state: string;
-  approved: boolean;
-  createdAt: Date;
-  demoVideoUrl?: string;
-  whitepaperUrl?: string;
-  githubUrl?: string;
-  views?: number;
-  raisedAmount?: number;
-  goalAmount?: number;
-}
-
-function FundraiserDetail({ params }: { params: Promise<{ id: string }> }) {
-  // Unwrap params Promise
+export default function FundraiserPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
+  const [fundraiser, setFundraiser] = useState<FundraiserView | null>(null);
+  const [donations, setDonations] = useState<DonationView[]>([]);
+  const [comments, setComments] = useState<CommentView[]>([]);
+  const [status, setStatus] = useState<'loading' | 'ready' | 'missing' | 'error'>('loading');
+  const [token, setToken] = useState<string | null>(null);
+  const [canManage, setCanManage] = useState(false);
+  const [pageUrl, setPageUrl] = useState('');
 
-  const { isConnected, mounted } = useAuth();
-  const { publicKey, signTransaction } = useWallet();
-  const { connection } = useConnection();
-  const router = useRouter();
-  const toast = useToast();
-  const { confirm } = useConfirm();
-  const [fundraiser, setFundraiser] = useState<Fundraiser | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [donating, setDonating] = useState(false);
-  const [agentDonating, setAgentDonating] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [showWarning, setShowWarning] = useState(false);
-  const [reporting, setReporting] = useState(false);
-  const [reportReason, setReportReason] = useState('');
-  const [showReportForm, setShowReportForm] = useState(false);
-  const [comments, setComments] = useState<any[]>([]);
-  const [newComment, setNewComment] = useState('');
-  const [submittingComment, setSubmittingComment] = useState(false);
-  const [hasDonated, setHasDonated] = useState(false);
-  const [hasCommented, setHasCommented] = useState(false);
-  const [customDonationAmount, setCustomDonationAmount] = useState<string>('');
-  const [transactions, setTransactions] = useState<any[]>([]);
-  const [totalRaised, setTotalRaised] = useState(0);
-  const [donationCount, setDonationCount] = useState(0);
+  const load = useCallback(async () => {
+    // A manage link carries its token in the fragment; move it into storage.
+    const fromUrl = takeManageTokenFromUrl();
+    const manageToken = fromUrl ?? getManageToken(id);
+    setToken(manageToken);
+    setPageUrl(`${window.location.origin}/fundraisers/${id}`);
 
-  // Track navigation context from URL params
-  const [backUrl, setBackUrl] = useState('/fundraisers');
+    try {
+      const res = await fetch(`/api/fundraisers/${id}`, {
+        headers: manageToken ? { 'x-manage-token': manageToken } : undefined,
+        cache: 'no-store',
+      });
+      if (res.status === 404) return setStatus('missing');
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error);
+      setFundraiser(data.fundraiser);
+      setCanManage(!!data.canManage);
+      if (fromUrl && data.canManage) saveManaged(id, fromUrl, data.fundraiser.title);
+      setStatus('ready');
+    } catch {
+      setStatus('error');
+    }
+
+    const [tx, cm] = await Promise.all([
+      fetch(`/api/fundraisers/${id}/transactions`, { cache: 'no-store' }).then((r) => r.json()).catch(() => null),
+      fetch(`/api/fundraisers/${id}/comments`, { cache: 'no-store' }).then((r) => r.json()).catch(() => null),
+    ]);
+    setDonations(tx?.transactions ?? []);
+    setComments(cm?.comments ?? []);
+  }, [id]);
 
   useEffect(() => {
-    // Check if we have a 'from' query parameter
-    const urlParams = new URLSearchParams(window.location.search);
-    const from = urlParams.get('from');
+    load();
+    fetch(`/api/fundraisers/${id}/view`, { method: 'POST' }).catch(() => {});
+  }, [id, load]);
 
-    if (from === 'my-listings') {
-      setBackUrl('/listings/my');
-    } else {
-      setBackUrl('/fundraisers');
-    }
-  }, []);
-
-  const fetchFundraiser = async () => {
-    try {
-      setLoading(true);
-      const response = await axios.get(`/api/fundraisers/${id}`);
-      setFundraiser(response.data.fundraiser || response.data.listing);
-    } catch (err: any) {
-      setError(err.response?.data?.error || 'Failed to load fundraiser');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const fetchComments = async () => {
-    try {
-      const response = await axios.get(`/api/fundraisers/${id}/comments`);
-      setComments(response.data.comments || []);
-    } catch (err: any) {
-      console.error('Failed to fetch comments:', err);
-    }
-  };
-
-  const fetchTransactions = async () => {
-    try {
-      const response = await axios.get(`/api/fundraisers/${id}/transactions`);
-      setTransactions(response.data.transactions || []);
-      setTotalRaised(response.data.totalRaised || 0);
-      setDonationCount(response.data.donationCount || 0);
-    } catch (err: any) {
-      console.error('Failed to fetch transactions:', err);
-    }
-  };
-
-  const incrementViews = async () => {
-    try {
-      await axios.post(`/api/fundraisers/${id}/view`);
-      console.log('✅ View tracked for fundraiser:', id);
-    } catch (err) {
-      // Silently fail - view tracking is not critical
-      console.debug('Failed to track view:', err);
-    }
-  };
-
+  // When this browser's watch finds a donation, refresh totals and the log.
+  const { watches } = useWatches();
+  const foundHere = watches.filter((w) => w.fundraiserId === id).reduce((n, w) => n + w.found.length, 0);
   useEffect(() => {
-    if (mounted && id) {
-      fetchFundraiser();
-      fetchComments();
-      fetchTransactions();
-      incrementViews();
-    }
-  }, [mounted, id]);
+    if (foundHere) load();
+  }, [foundHere, load]);
 
-  useEffect(() => {
-    if (mounted && id && publicKey) {
-      checkDonationStatus();
-    }
-  }, [mounted, id, publicKey, comments]);
-
-  useEffect(() => {
-    if (fundraiser && fundraiser.riskLevel === 'high-risk') {
-      setShowWarning(true);
-    }
-  }, [fundraiser]);
-
-  const checkDonationStatus = async () => {
-    if (!publicKey) return;
-
-    try {
-      const response = await axios.get('/api/transactions', {
-        params: {
-          wallet: publicKey.toBase58(),
-          type: 'purchases',
-        },
-      });
-
-      const purchases = response.data.transactions || [];
-      const donated = purchases.some((tx: any) => tx.listingId === id && tx.status === 'success');
-      setHasDonated(donated);
-
-      // Check if already commented
-      const commented = comments.some((c: any) => c.buyerWallet === publicKey.toBase58());
-      setHasCommented(commented);
-    } catch (err: any) {
-      console.error('Failed to check donation status:', err);
-    }
-  };
-
-  const handleDonate = async () => {
-    if (!publicKey || !fundraiser) return;
-
-    if (!isConnected) {
-      toast.warning('Please connect your wallet first');
-      router.push('/');
-      return;
-    }
-
-    if (!signTransaction) {
-      toast.error('Wallet does not support transaction signing');
-      return;
-    }
-
-    // Validate custom donation amount
-    const donationAmount = parseFloat(customDonationAmount);
-    if (isNaN(donationAmount) || donationAmount < 0.10) {
-      setError('Please enter a valid donation amount (minimum $0.10 USDC)');
-      return;
-    }
-
-    const confirmed = await confirm({
-      title: 'Confirm Donation',
-      message: `Support "${fundraiser.title}" with $${donationAmount.toFixed(2)} USDC donation?`,
-      confirmLabel: 'Donate Now',
-      variant: 'info',
-    });
-
-    if (confirmed) {
-      try {
-        setDonating(true);
-        setError(null);
-
-        console.log('💝 Starting x402 donation flow...');
-
-        // ====================================
-        // STEP 1: Get 402 Payment Required
-        // ====================================
-        console.log('📋 Step 1: Requesting payment requirements...');
-        let paymentRequired;
-
-        try {
-          await axios.post('/api/fundraise', {
-            fundraiserId: fundraiser._id,
-            customAmount: donationAmount, // Send custom amount to backend
-          });
-          // If we get here, payment wasn't required (shouldn't happen)
-          throw new Error('Expected 402 Payment Required response');
-        } catch (err: any) {
-          if (err.response?.status === 402) {
-            paymentRequired = err.response.data;
-            console.log('✅ Got payment requirements:', paymentRequired);
-          } else {
-            throw err;
-          }
-        }
-
-        // Extract payment requirements
-        const requirements = paymentRequired.accepts[0];
-        // Use custom donation amount instead of the default
-        const amountLamports = Math.floor(donationAmount * 1_000_000);
-        const sellerWallet = new PublicKey(requirements.payTo);
-        const usdcMint = new PublicKey(requirements.asset);
-
-        console.log(`💰 Amount: ${amountLamports / 1_000_000} USDC`);
-        console.log(`👤 Fundraiser Creator: ${sellerWallet.toBase58()}`);
-        console.log(`🪙 Mint: ${usdcMint.toBase58()}`);
-
-        // ====================================
-        // STEP 2: Construct SPL Transfer
-        // ====================================
-        console.log('🔨 Step 2: Constructing USDC transfer transaction...');
-
-        // Get RPC connection (devnet or mainnet based on requirements)
-        const rpcUrl = requirements.network === 'solana-devnet'
-          ? process.env.NEXT_PUBLIC_SOLANA_DEVNET_RPC || 'https://api.devnet.solana.com'
-          : process.env.NEXT_PUBLIC_SOLANA_MAINNET_RPC || 'https://api.mainnet-beta.solana.com';
-
-        const connection = new Connection(rpcUrl, 'confirmed');
-
-        // Get associated token accounts
-        const donorTokenAccount = await getAssociatedTokenAddress(
-          usdcMint,
-          publicKey
-        );
-
-        const creatorTokenAccount = await getAssociatedTokenAddress(
-          usdcMint,
-          sellerWallet
-        );
-
-        console.log(`📥 Donor token account: ${donorTokenAccount.toBase58()}`);
-        console.log(`📤 Creator token account: ${creatorTokenAccount.toBase58()}`);
-
-        // Create transfer instruction
-        const transferInstruction = createTransferInstruction(
-          donorTokenAccount,
-          creatorTokenAccount,
-          publicKey,
-          amountLamports,
-          [],
-          TOKEN_PROGRAM_ID
-        );
-
-        // Create transaction
-        const transaction = new Transaction().add(transferInstruction);
-        transaction.feePayer = publicKey;
-
-        // Get recent blockhash
-        const { blockhash, lastValidBlockHeight } = await connection.getLatestBlockhash();
-        transaction.recentBlockhash = blockhash;
-        transaction.lastValidBlockHeight = lastValidBlockHeight;
-
-        console.log('✅ Transaction constructed');
-
-        // ====================================
-        // STEP 3: Sign & Broadcast
-        // ====================================
-        console.log('✍️  Step 3: Signing transaction with wallet...');
-
-        const signed = await signTransaction(transaction);
-
-        console.log('📡 Broadcasting transaction...');
-        const signature = await connection.sendRawTransaction(signed.serialize());
-
-        console.log(`✅ Transaction sent! Signature: ${signature}`);
-        console.log(`🔗 View: https://explorer.solana.com/tx/${signature}?cluster=${requirements.network === 'solana-devnet' ? 'devnet' : 'mainnet'}`);
-
-        // Wait for confirmation using polling (avoid WebSocket issues)
-        console.log('⏳ Waiting for confirmation...');
-
-        let confirmed = false;
-        const maxAttempts = 30; // 30 attempts = ~30 seconds
-
-        for (let i = 0; i < maxAttempts; i++) {
-          try {
-            const status = await connection.getSignatureStatus(signature);
-
-            if (status?.value?.confirmationStatus === 'confirmed' ||
-                status?.value?.confirmationStatus === 'finalized') {
-              confirmed = true;
-              console.log(`✅ Transaction confirmed! (${status.value.confirmationStatus})`);
-              break;
-            }
-
-            if (status?.value?.err) {
-              throw new Error(`Transaction failed: ${JSON.stringify(status.value.err)}`);
-            }
-
-            // Wait 1 second before next poll
-            await new Promise(resolve => setTimeout(resolve, 1000));
-          } catch (err) {
-            console.warn(`Attempt ${i + 1}/${maxAttempts} - checking status...`);
-          }
-        }
-
-        if (!confirmed) {
-          console.warn('⚠️ Could not confirm transaction in time, proceeding anyway...');
-          console.warn('   Backend will verify on-chain');
-        }
-
-        // ====================================
-        // STEP 4: Send Payment to Backend
-        // ====================================
-        console.log('📨 Step 4: Sending payment proof to backend...');
-
-        // Construct payment payload
-        const paymentPayload = {
-          x402Version: 1,
-          scheme: 'exact',
-          network: requirements.network,
-          payload: {
-            signature,
-            from: publicKey.toBase58(),
-            to: sellerWallet.toBase58(),
-            amount: amountLamports.toString(),
-            mint: usdcMint.toBase58(),
-          },
-        };
-
-        // Encode to Base64
-        const paymentHeader = Buffer.from(JSON.stringify(paymentPayload)).toString('base64');
-
-          // Send to backend with X-PAYMENT header
-          const finalResponse = await axios.post(
-            '/api/fundraise',
-            {
-              fundraiserId: fundraiser._id,
-              customAmount: donationAmount, // Include custom amount
-            },
-            {
-              headers: {
-                'X-PAYMENT': paymentHeader,
-              },
-            }
-          );
-
-          console.log('✅ Backend response received:', finalResponse.data);
-
-          if (finalResponse.data.success && finalResponse.data.transactionId) {
-            console.log('🎉 Donation successful! Transaction ID:', finalResponse.data.transactionId);
-
-            // Refresh transactions and fundraiser data before redirecting
-            await fetchTransactions();
-            await fetchFundraiser();
-
-            // Redirect to delivery page with transaction ID
-            router.push(`/delivery/${finalResponse.data.transactionId}`);
-          } else {
-            console.error('❌ No transaction ID in response:', finalResponse.data);
-            throw new Error('Donation succeeded but no transaction record received');
-          }
-
-      } catch (err: any) {
-        console.error('❌ Donation error:', err);
-
-        // Handle user rejection gracefully
-        if (err.code === 4001 || err.name === 'WalletSignTransactionError' || err.message?.includes('rejected')) {
-          console.log('ℹ️ User cancelled transaction');
-          setError('Transaction cancelled');
-          return; // Don't show alert, user knows they cancelled
-        } else if (err.response?.status === 402) {
-          setError('Payment verification failed: ' + (err.response.data.error || 'Unknown error'));
-          toast.error('Payment verification failed. Please try again.');
-        } else {
-          const errorMsg = err.response?.data?.error || err.message || 'Donation failed';
-          setError(errorMsg);
-          toast.error(errorMsg);
-        }
-      } finally {
-        setDonating(false);
-      }
-    }
-  };
-
-  const handleAgentDonate = async () => {
-    if (!publicKey || !fundraiser || !signTransaction) return;
-
-    if (!isConnected) {
-      toast.warning('Please connect your wallet first');
-      return;
-    }
-
-    const donationAmount = parseFloat(customDonationAmount);
-    if (isNaN(donationAmount) || donationAmount < 0.10) {
-      setError('Please enter a valid donation amount (minimum $0.10 USDC)');
-      return;
-    }
-
-    const confirmed = await confirm({
-      title: 'Donate via Pump.fun Agent Token',
-      message: (
-        <div className="space-y-3 text-left">
-          <p>
-            You are about to donate <strong className="text-foreground">${donationAmount.toFixed(2)} USDC</strong> to
-            &ldquo;{fundraiser.title}&rdquo; using the <strong className="text-primary">Pump.fun Tokenized Agent</strong> payment path.
-          </p>
-
-          <div className="rounded-lg border border-border bg-accent p-3 text-xs space-y-2">
-            <p className="font-semibold text-primary">How Agent Payments Work</p>
-            <p>
-              Unlike a standard x402 direct transfer, this route processes your USDC through the
-              OpenFund <strong className="text-foreground">Tokenized Agent smart contract</strong> built on Pump.fun&apos;s bonding curve.
-            </p>
-            <p>
-              A configurable portion of the payment is automatically reserved for <strong className="text-foreground">buybacks
-              of the $OPEN token</strong> on-chain. The rest goes directly to the campaign creator.
-              Buybacks happen automatically over time via the smart contract — no human intervention.
-            </p>
-          </div>
-
-          <div className="rounded-lg border border-border bg-accent p-3 text-xs space-y-1.5">
-            <p className="font-semibold text-primary">What happens when you confirm</p>
-            <ol className="list-decimal ml-4 space-y-1 text-muted-foreground">
-              <li>OpenFund&apos;s server builds a Solana transaction using the Pump Agent SDK</li>
-              <li>Your wallet will prompt you to <strong className="text-foreground">review and sign</strong> the transaction</li>
-              <li>The signed transaction is sent to Solana (~400ms settlement)</li>
-              <li>The server verifies the invoice was paid on-chain</li>
-              <li>Your donation is recorded and campaign progress updates</li>
-              <li>You&apos;re redirected to the thank-you page</li>
-            </ol>
-          </div>
-
-          <div className="rounded-lg border border-border bg-muted p-3 text-xs space-y-1.5">
-            <p className="font-semibold text-foreground">Agent vs Normal Donation</p>
-            <div className="grid grid-cols-2 gap-2 text-muted-foreground">
-              <div>
-                <p className="text-[10px] text-muted-foreground mb-0.5">NORMAL (x402)</p>
-                <p>100% of USDC goes directly to the creator via P2P transfer</p>
-              </div>
-              <div>
-                <p className="text-[10px] text-primary mb-0.5">AGENT (Pump.fun)</p>
-                <p>USDC routed through agent contract — a portion triggers $OPEN buybacks, rest goes to creator</p>
-              </div>
-            </div>
-          </div>
-
-          <p className="text-[10px] text-muted-foreground">
-            Your private keys are never exposed. You sign the transaction in your wallet.
-            This is NOT a token swap — you are paying in USDC.
-          </p>
-        </div>
-      ),
-      confirmLabel: 'Pay with Agent',
-      variant: 'info',
-    });
-
-    if (!confirmed) return;
-
-    try {
-      setAgentDonating(true);
-      setError(null);
-
-      // Step 1: Build the transaction on the server
-      const buildRes = await axios.post('/api/agent-payment?action=build', {
-        fundraiserId: fundraiser._id,
-        userWallet: publicKey.toBase58(),
-        donationAmount,
-      });
-
-      const { transaction: txBase64, invoiceParams } = buildRes.data;
-
-      // Step 2: Deserialize, sign, and send
-      const tx = Transaction.from(Buffer.from(txBase64, 'base64'));
-      const signedTx = await signTransaction(tx);
-
-      const signature = await connection.sendRawTransaction(signedTx.serialize(), {
-        skipPreflight: false,
-        preflightCommitment: 'confirmed',
-      });
-
-      const latestBlockhash = await connection.getLatestBlockhash('confirmed');
-      await connection.confirmTransaction(
-        { signature, ...latestBlockhash },
-        'confirmed',
-      );
-
-      // Step 3: Verify on the server
-      const verifyRes = await axios.post('/api/agent-payment?action=verify', {
-        fundraiserId: fundraiser._id,
-        userWallet: publicKey.toBase58(),
-        donationAmount,
-        invoiceParams,
-        txSignature: signature,
-      });
-
-      if (verifyRes.data.success && verifyRes.data.transactionId) {
-        await fetchTransactions();
-        await fetchFundraiser();
-        router.push(`/delivery/${verifyRes.data.transactionId}`);
-      } else {
-        throw new Error('Donation succeeded but no transaction record received');
-      }
-    } catch (err: any) {
-      if (err.code === 4001 || err.name === 'WalletSignTransactionError' || err.message?.includes('rejected')) {
-        setError('Transaction cancelled');
-        return;
-      }
-      const errorMsg = err.response?.data?.error || err.message || 'Agent donation failed';
-      setError(errorMsg);
-      toast.error(errorMsg);
-    } finally {
-      setAgentDonating(false);
-    }
-  };
-
-  const handleReport = async () => {
-    if (!isConnected || !publicKey || !fundraiser) {
-      toast.warning('Please connect your wallet to report');
-      return;
-    }
-
-    const confirmed = await confirm({
-      title: 'Report Fundraiser',
-      message: 'Report this fundraiser? This will be reviewed by administrators.',
-      confirmLabel: 'Submit Report',
-      variant: 'danger',
-    });
-
-    if (confirmed) {
-      try {
-        setReporting(true);
-        await axios.post('/api/reports', {
-          listingId: fundraiser._id,
-          wallet: publicKey.toBase58(),
-          reason: reportReason.trim() || undefined,
-        });
-        toast.success('Report submitted successfully. Thank you for helping keep the community safe!');
-        setShowReportForm(false);
-        setReportReason('');
-      } catch (err: any) {
-        const errorMsg = err.response?.data?.error || 'Failed to submit report';
-        toast.error(errorMsg);
-      } finally {
-        setReporting(false);
-      }
-    }
-  };
-
-  const handleSubmitComment = async (e: React.FormEvent) => {
-    e.preventDefault();
-
-    if (!isConnected || !publicKey || !fundraiser) {
-      toast.warning('Please connect your wallet to leave a review');
-      return;
-    }
-
-    if (!hasDonated) {
-      toast.warning('You must donate to this fundraiser before leaving a review');
-      return;
-    }
-
-    if (hasCommented) {
-      toast.info('You have already left a review for this fundraiser');
-      return;
-    }
-
-    if (!newComment.trim()) {
-      toast.warning('Please enter a comment');
-      return;
-    }
-
-    try {
-      setSubmittingComment(true);
-      await axios.post(`/api/fundraisers/${fundraiser._id}/comments`, {
-        wallet: publicKey.toBase58(),
-        comment: newComment.trim(),
-      });
-      toast.success('Review submitted successfully!');
-      setNewComment('');
-      setHasCommented(true);
-      fetchComments();
-    } catch (err: any) {
-      toast.error(err.response?.data?.error || 'Failed to submit review');
-    } finally {
-      setSubmittingComment(false);
-    }
-  };
-
-  const getYouTubeVideoId = (url: string): string | null => {
-    const regex = /(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/;
-    const match = url.match(regex);
-    return match ? match[1] : null;
-  };
-
-  if (!mounted) {
+  if (status === 'loading') {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-background">
-        <div className="text-center">
-          <div className="h-8 w-8 animate-spin rounded-full border-4 border-border border-t-transparent mx-auto mb-4"></div>
-          <p className="text-muted-foreground">Loading...</p>
-        </div>
+      <div className="flex min-h-[50vh] items-center justify-center text-muted-foreground">
+        <Loader2 className="animate-spin" size={20} />
+      </div>
+    );
+  }
+  if (status !== 'ready' || !fundraiser) {
+    return (
+      <div className="mx-auto flex max-w-md flex-col items-center px-6 pb-24 pt-10 text-center">
+        <PiggyBank pose="sleep" size={200} />
+        <h1 className="mb-2 mt-4 text-2xl font-medium text-foreground">
+          {status === 'missing' ? 'This campaign doesn’t exist.' : 'Couldn’t load this campaign.'}
+        </h1>
+        <p className="mb-6 text-sm text-muted-foreground">
+          {status === 'missing' ? 'It may have been deleted by its creator.' : 'Please try again in a moment.'}
+        </p>
+        <Link href="/fundraisers" className={primaryButtonClass}>
+          Browse campaigns
+        </Link>
       </div>
     );
   }
 
-  if (loading) {
-    return (
-      <div className="flex min-h-screen items-center justify-center bg-background">
-        <div className="text-center">
-          <div className="h-8 w-8 animate-spin rounded-full border-4 border-border border-t-transparent mx-auto mb-4"></div>
-          <p className="text-muted-foreground">Loading fundraiser...</p>
-        </div>
-      </div>
-    );
-  }
-
-  if (error || !fundraiser) {
-    return (
-      <div className="flex min-h-screen items-center justify-center bg-background px-4">
-        <div className="text-center">
-          <h1 className="text-2xl font-bold text-foreground mb-4">
-            {error || 'Fundraiser Not Found'}
-          </h1>
-          <Link
-            href={backUrl}
-            className="inline-flex items-center justify-center rounded-lg bg-primary px-6 py-3 text-sm font-medium text-primary-foreground hover:bg-primary transition-colors"
-          >
-            {backUrl === '/listings/my' ? 'Back to My Listings' : 'Back to Fundraisers'}
-          </Link>
-        </div>
-      </div>
-    );
-  }
+  const f = fundraiser;
+  const goal = goalOf(f);
+  const pct = percentRaised(f.raisedAmount, goal);
 
   return (
-    <div className="min-h-screen bg-background py-12 px-4">
-      <div className="mx-auto max-w-5xl">
-        {/* Back Button */}
-        <Link
-          href={backUrl}
-          className="mb-6 inline-flex items-center text-sm text-muted-foreground hover:text-foreground transition-colors"
-        >
-          {backUrl === '/listings/my' ? '← Back to My Listings' : '← Back to Fundraisers'}
-        </Link>
+    <div className="mx-auto max-w-[1180px] px-6 pb-24 md:px-8">
+      <Link href="/fundraisers" className="mb-8 inline-flex items-center gap-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground">
+        <ArrowLeft size={15} /> All campaigns
+      </Link>
 
-        {/* Critical Warning Banner (Toggleable) */}
-        {showWarning && (
-          <div className="mb-8 rounded-lg border-2 border-red-200 bg-red-50 p-6">
-            <div className="flex items-start space-x-4">
-              <div className="flex h-12 w-12 items-center justify-center rounded-full bg-red-600 text-primary-foreground text-2xl font-bold flex-shrink-0">
-                ⚠️
-              </div>
-              <div>
-                <h2 className="text-lg font-bold text-red-700 mb-2">
-                  CRITICAL WARNING
-                </h2>
-                <p className="text-red-700 mb-3">
-                  This fundraiser has been flagged as <strong>HIGH RISK</strong>. Exercise extreme caution before donating.
-                </p>
-                <ul className="list-disc list-inside text-sm text-red-700 space-y-1 mb-4">
-                  <li>Only donate what you can afford to lose</li>
-                  <li>Be aware that this may be a scam or fraudulent fundraiser</li>
-                  <li>There are NO refunds or chargebacks in crypto</li>
-                  <li>Report suspicious fundraisers to help protect others</li>
-                </ul>
-                <button
-                  onClick={() => setShowWarning(false)}
-                  className="text-sm text-red-700 hover:text-red-700 underline transition-colors"
-                >
-                  I understand the risks, dismiss warning
-                </button>
-              </div>
-            </div>
+      {canManage && token ? (
+        <div className="mb-8">
+          <ManagePanel key={`${f.state}:${f.updatedAt ?? ''}`} fundraiser={f} token={token} onChanged={load} />
+        </div>
+      ) : null}
+
+      <div className="grid gap-10 lg:grid-cols-[minmax(0,1fr)_380px] lg:gap-x-14 lg:gap-y-0">
+        <article className="min-w-0 lg:col-start-1 lg:row-start-1">
+          <CoverImage src={f.imageUrl} alt={f.title} priority className="mb-8 aspect-[16/9] w-full rounded-2xl" />
+
+          <div className="mb-4 flex flex-wrap items-center gap-2">
+            <Pill>{f.category}</Pill>
+            {f.state === 'pulled' ? <Pill className="bg-[#faf3e2] text-[#7a5a1c]">Paused</Pill> : null}
+            <span className="text-xs text-muted-foreground">Started {timeAgo(f.createdAt)}</span>
           </div>
-        )}
+          <h1 className="mb-6 text-[clamp(30px,4vw,46px)] font-[450] leading-[1.08] tracking-[-0.035em] text-foreground">{f.title}</h1>
+          <p className="whitespace-pre-wrap text-[15px] leading-[1.9] text-muted-foreground">{f.description}</p>
 
-        <div className="grid grid-cols-1 gap-8 lg:grid-cols-2">
-          {/* Image */}
-          <div className="relative aspect-[4/3] w-full overflow-hidden rounded-lg border border-border bg-muted">
-            <Image
-              src={fundraiser.imageUrl}
-              alt={fundraiser.title}
-              fill
-              className="object-cover"
-            />
-            {fundraiser.riskLevel === 'high-risk' && (
-              <div className="absolute top-4 right-4 rounded-full bg-red-600 px-4 py-2 text-sm font-medium text-primary-foreground shadow-lg">
-                ⚠️ High Risk
-              </div>
-            )}
-            {/* Fundraiser Badge */}
-            <div className="absolute top-4 left-4 rounded-full bg-primary px-4 py-2 text-sm font-medium text-primary-foreground shadow-lg flex items-center gap-2">
-              💝 Fundraiser
-            </div>
-          </div>
+          <CampaignLinks links={f.links ?? []} />
+        </article>
 
-          {/* Details */}
-          <div>
-            <div className="mb-6 relative">
-              <span className="inline-flex items-center rounded-full bg-muted px-3 py-1 text-xs font-medium text-muted-foreground mb-3">
-                {fundraiser.category}
+        <aside className="lg:sticky lg:top-24 lg:col-start-2 lg:row-span-2 lg:row-start-1 lg:self-start">
+          <div className="rounded-2xl border border-border bg-card p-6 shadow-[0_1px_2px_#292d2508]">
+            <p className="text-3xl font-medium tracking-[-0.02em] text-foreground">{formatAmount(f.raisedAmount, f.currency)}</p>
+            <p className="mb-4 mt-1 text-sm text-muted-foreground">raised of {formatAmount(goal, f.currency)} goal</p>
+            <ProgressBar percent={pct} className="mb-3" />
+            <div className="mb-6 flex justify-between text-xs text-muted-foreground">
+              <span>{Math.round(pct)}% funded</span>
+              <span>
+                {f.donationCount ?? donations.length} donation{(f.donationCount ?? donations.length) === 1 ? '' : 's'}
               </span>
-
-              {/* Icon Buttons - Top Right */}
-              <div className="absolute top-0 right-0 flex items-center space-x-2">
-                {/* Warning Icon */}
-                {fundraiser.riskLevel === 'high-risk' && (
-                  <button
-                    onClick={() => setShowWarning(!showWarning)}
-                    className="rounded-full bg-red-50 p-2 text-red-700 hover:bg-red-50 transition-colors"
-                    title="Show risk warning"
-                  >
-                    <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 20 20">
-                      <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
-                    </svg>
-                  </button>
-                )}
-
-                {/* Report Button */}
-                <button
-                  onClick={() => setShowReportForm(!showReportForm)}
-                  className="rounded-full bg-muted p-2 text-muted-foreground hover:bg-muted transition-colors"
-                  title="Report fundraiser"
-                >
-                  <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 21v-4m0 0V5a2 2 0 012-2h6.5l1 1H21l-3 6 3 6h-8.5l-1-1H5a2 2 0 00-2 2zm9-13.5V9" />
-                  </svg>
-                </button>
-              </div>
-
-              <h1 className="text-3xl font-bold text-foreground mb-2">
-                {fundraiser.title}
-              </h1>
-
-              {/* Donation Progress */}
-              <div className="mb-6 rounded-lg border border-border bg-muted p-4">
-                <div className="flex justify-between text-sm mb-2">
-                  <span className="font-semibold text-primary">
-                    ${totalRaised.toFixed(2)} raised
-                  </span>
-                  <span className="text-muted-foreground">
-                    of ${(fundraiser.goalAmount || fundraiser.price).toFixed(2)} goal
-                  </span>
-                </div>
-                <div className="w-full bg-muted rounded-full h-3 overflow-hidden">
-                  <div
-                    className="bg-primary h-3 rounded-full transition-all duration-500"
-                    style={{ width: `${Math.min((totalRaised / (fundraiser.goalAmount || fundraiser.price)) * 100, 100)}%` }}
-                  />
-                </div>
-                <div className="text-sm text-muted-foreground mt-2 font-medium">
-                  {Math.round((totalRaised / (fundraiser.goalAmount || fundraiser.price)) * 100)}% funded
-                </div>
-              </div>
             </div>
 
-            <p className="text-muted-foreground mb-6 whitespace-pre-wrap">
-              {fundraiser.description}
-            </p>
-
-            {/* CTA Button - Hide if viewing own fundraiser */}
-            {publicKey && fundraiser.wallet === publicKey.toBase58() ? (
-              <div className="w-full rounded-lg border border-border bg-muted px-6 py-3 text-sm font-medium text-muted-foreground text-center mb-3">
-                👤 This is your fundraiser
-              </div>
-            ) : (
-              // Donating ran on a connected Solana wallet (handleDonate /
-              // handleAgentDonate below). It returns wallet-less with the
-              // Robinhood Chain migration; until then, say so.
-              <div className="mb-3">
-                <LaunchNotice subject="Donations" />
-              </div>
-            )}
-            {/* Error */}
-            {error && (
-              <div className="mt-3 rounded-lg border border-red-200 bg-red-50 p-3">
-                <p className="text-sm text-red-700">⚠️ {error}</p>
-              </div>
-            )}
-
-            {/* Stats */}
-            <div className="mt-6 grid grid-cols-2 sm:grid-cols-3 gap-4">
-              <div className="rounded-lg border border-border bg-muted p-4">
-                <div className="text-xs text-muted-foreground mb-1">Views</div>
-                <span className="text-lg font-bold text-foreground">
-                  {fundraiser.views?.toLocaleString() || 0}
-                </span>
-              </div>
-
-              <div className="rounded-lg border border-border bg-muted p-4">
-                <div className="text-xs text-muted-foreground mb-1">Donations</div>
-                <span className="text-lg font-bold text-primary">
-                  {donationCount.toLocaleString()}
-                </span>
-              </div>
-
-              {/* Organizer Info */}
-              <div className="rounded-lg border border-border bg-muted p-4 col-span-2 sm:col-span-1">
-                <div className="text-xs text-muted-foreground mb-1">Organizer</div>
-                <Link
-                  href={`/fundraisers?wallet=${fundraiser.wallet}`}
-                  className="text-xs font-mono text-primary hover:text-primary transition-colors block truncate"
-                  title={fundraiser.wallet}
-                >
-                  {fundraiser.wallet.slice(0, 6)}...{fundraiser.wallet.slice(-4)}
-                </Link>
-              </div>
-            </div>
+            <DonatePanel fundraiser={f} />
           </div>
-        </div>
 
-        {/* Demo Video Section */}
-        {fundraiser.demoVideoUrl && getYouTubeVideoId(fundraiser.demoVideoUrl) && (
-          <div className="mt-8">
-            <h2 className="text-2xl font-bold text-foreground mb-4">
-              🎥 Campaign Video
-            </h2>
-            <div className="relative w-full overflow-hidden rounded-lg border border-border bg-muted" style={{ paddingBottom: '56.25%' }}>
-              <iframe
-                className="absolute top-0 left-0 h-full w-full"
-                src={`https://www.youtube.com/embed/${getYouTubeVideoId(fundraiser.demoVideoUrl)}?autoplay=1&mute=1&rel=0`}
-                title="Campaign Video"
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                allowFullScreen
-              />
+          <div className="mt-4 space-y-3 px-1 text-xs text-muted-foreground">
+            <div className="flex items-center justify-between gap-3">
+              <span>Share this campaign</span>
+              <CopyButton value={pageUrl} label="Copy link" />
             </div>
-          </div>
-        )}
-
-        {/* Additional Resources Section */}
-        {(fundraiser.whitepaperUrl || fundraiser.githubUrl) && (
-          <div className="mt-8">
-            <h2 className="text-2xl font-bold text-foreground mb-4">
-              📚 Additional Information
-            </h2>
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-              {fundraiser.whitepaperUrl && (
-                <a
-                  href={fundraiser.whitepaperUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center justify-between rounded-lg border border-border bg-muted p-4 hover:border-border hover:bg-muted transition-colors"
-                >
-                  <span className="text-sm font-medium text-foreground">📄 Documentation</span>
-                  <svg className="h-4 w-4 text-muted-foreground" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-                  </svg>
+            {f.network === 'robinhood' ? (
+              <p>
+                Receiving address on the explorer:{' '}
+                <a href={explorerAddressUrl(f.wallet)} target="_blank" rel="noopener noreferrer" className="font-mono text-primary underline-offset-2 hover:underline">
+                  {shortAddress(f.wallet)}
                 </a>
-              )}
-
-              {fundraiser.githubUrl && (
-                <a
-                  href={fundraiser.githubUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center justify-between rounded-lg border border-border bg-muted p-4 hover:border-border hover:bg-muted transition-colors"
-                >
-                  <span className="text-sm font-medium text-foreground">💻 GitHub</span>
-                  <svg className="h-4 w-4 text-muted-foreground" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-                  </svg>
-                </a>
-              )}
-            </div>
+              </p>
+            ) : null}
+            <Report campaignId={id} />
           </div>
-        )}
+        </aside>
 
-        {/* Report Form */}
-        {showReportForm && (
-          <div className="mt-8 rounded-lg border-2 border-red-200 bg-red-50 p-6">
-            <h3 className="text-lg font-bold text-red-700 mb-3">
-              🚨 Report This Fundraiser
-            </h3>
-            <p className="text-sm text-red-700 mb-4">
-              Help us keep the community safe. If you believe this fundraiser violates our terms or is fraudulent, please report it.
-            </p>
-            <textarea
-              value={reportReason}
-              onChange={(e) => setReportReason(e.target.value)}
-              placeholder="Optional: Describe the issue (max 100 characters)"
-              maxLength={100}
-              rows={2}
-              className="w-full rounded-lg border border-red-200 bg-muted px-4 py-2 text-sm text-foreground placeholder-white/30 focus:border-red-200 focus:outline-none focus:ring-2 focus:ring-red-600/30 mb-3"
-            />
-            <div className="flex items-center space-x-3">
-              <button
-                onClick={handleReport}
-                disabled={reporting || !isConnected}
-                className="rounded-lg bg-red-600 px-6 py-2 text-sm font-medium text-primary-foreground hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-50 transition-colors"
-              >
-                {reporting ? 'Submitting...' : '🚨 Submit Report'}
-              </button>
-              {!isConnected && (
-                <p className="text-xs text-muted-foreground">
-                  Reporting opens with our Robinhood Chain launch.
-                </p>
-              )}
-            </div>
-          </div>
-        )}
-
-        {/* Recent Donations */}
-        {transactions.length > 0 && (
-          <div className="mt-8">
-            <h2 className="text-2xl font-bold text-foreground mb-4">
-              💝 Recent Donations ({donationCount})
+        <div className="min-w-0 lg:col-start-1 lg:row-start-2">
+          <section className="lg:mt-14" aria-labelledby="donations-title">
+            <h2 id="donations-title" className="mb-4 text-lg font-medium text-foreground">
+              Donations <span className="text-muted-foreground">· {donations.length}</span>
             </h2>
-            <div className="rounded-lg border border-border bg-muted backdrop-blur-sm">
-              <div className="max-h-96 overflow-y-auto">
-                {transactions.map((txn, index) => (
-                  <div
-                    key={txn._id}
-                    className={`flex items-center justify-between p-4 ${
-                      index !== transactions.length - 1 ? 'border-b border-border' : ''
-                    } hover:bg-muted transition-colors`}
-                  >
-                    <div className="flex items-center gap-3 flex-1 min-w-0">
-                      <div className="flex h-10 w-10 items-center justify-center rounded-full bg-accent flex-shrink-0">
-                        <span className="text-lg">💝</span>
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2 mb-1">
-                          <span className="text-sm font-mono text-foreground truncate">
-                            {txn.wallet.slice(0, 8)}...{txn.wallet.slice(-6)}
-                          </span>
-                          <span className="text-xs text-muted-foreground">
-                            {new Date(txn.createdAt).toLocaleDateString()}
-                          </span>
-                        </div>
-                        <div className="text-xs text-muted-foreground flex items-center gap-1">
-                          <span>Tx:</span>
-                          <a
-                            href={`https://solscan.io/tx/${txn.txnHash}?cluster=${process.env.NEXT_PUBLIC_SOLANA_NETWORK === 'devnet' ? 'devnet' : 'mainnet'}`}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="font-mono hover:text-primary transition-colors truncate max-w-[150px]"
-                            title={txn.txnHash}
-                          >
-                            {txn.txnHash.slice(0, 8)}...
-                          </a>
-                        </div>
-                      </div>
+            {donations.length ? (
+              <ul className="divide-y divide-border overflow-hidden rounded-2xl border border-border bg-card">
+                {donations.map((d) => (
+                  <li key={d._id} className="flex items-center justify-between gap-4 px-5 py-3.5 text-sm">
+                    <div className="min-w-0">
+                      <p className="font-medium text-foreground">{formatAmount(d.amount, d.currency)}</p>
+                      <p className="truncate font-mono text-xs text-muted-foreground">from {shortAddress(d.wallet)}</p>
                     </div>
-                    <div className="text-right flex-shrink-0 ml-4">
-                      <div className="text-lg font-bold text-primary">
-                        ${txn.amount.toFixed(2)}
-                      </div>
-                      <div className="text-xs text-muted-foreground">
-                        USDC
-                      </div>
+                    <div className="shrink-0 text-right">
+                      <p className="text-xs text-muted-foreground">{timeAgo(d.createdAt)}</p>
+                      <a href={donationExplorerUrl(d.txnHash, d.network)} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-0.5 text-xs text-primary underline-offset-2 hover:underline">
+                        Transaction <ArrowUpRight size={11} />
+                      </a>
                     </div>
-                  </div>
+                  </li>
                 ))}
-              </div>
-
-              {/* Summary Footer */}
-              <div className="border-t border-border bg-muted p-4">
-                <div className="flex items-center justify-between">
-                  <span className="text-sm font-medium text-muted-foreground">
-                    Total Raised
-                  </span>
-                  <div className="text-right">
-                    <div className="text-2xl font-bold text-primary">
-                      ${totalRaised.toFixed(2)}
-                    </div>
-                    <div className="text-xs text-muted-foreground">
-                      of ${fundraiser.goalAmount?.toFixed(2) || fundraiser.price.toFixed(2)} goal
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Reviews/Comments Section */}
-        <div className="mt-8">
-          <h2 className="text-2xl font-bold text-foreground mb-4">
-            📝 Reviews ({comments.length})
-          </h2>
-
-          {/* Comments List */}
-          {comments.length === 0 ? (
-            <div className="rounded-lg border border-border bg-muted p-8 text-center">
-              <p className="text-muted-foreground">
-                No reviews yet. Be the first to review after donating!
+              </ul>
+            ) : (
+              <p className="rounded-2xl border border-dashed border-border px-5 py-8 text-center text-sm text-muted-foreground">
+                No donations yet. Be the first — every little bit counts.
               </p>
-            </div>
-          ) : (
-            <div className="space-y-4 mb-6">
-              {comments.map((comment: any) => {
-                const wallet = comment.buyerWallet;
-                const truncatedWallet = `${wallet.slice(0, 4)}...${wallet.slice(-4)}`;
+            )}
+          </section>
 
-                // Calculate time ago
-                const timeAgo = () => {
-                  const now = new Date();
-                  const created = new Date(comment.createdAt);
-                  const diffMs = now.getTime() - created.getTime();
-                  const diffSecs = Math.floor(diffMs / 1000);
-                  const diffMins = Math.floor(diffSecs / 60);
-                  const diffHours = Math.floor(diffMins / 60);
-                  const diffDays = Math.floor(diffHours / 24);
-
-                  if (diffDays > 0) return `${diffDays}d ago`;
-                  if (diffHours > 0) return `${diffHours}h ago`;
-                  if (diffMins > 0) return `${diffMins}m ago`;
-                  return 'Just now';
-                };
-
-                return (
-                  <div
-                    key={comment._id}
-                    className="rounded-lg border border-border bg-muted p-4"
-                  >
-                    <div className="flex items-center justify-between mb-2">
-                      <div className="flex items-center gap-2">
-                        <div className="h-8 w-8 rounded-full bg-primary flex items-center justify-center text-primary-foreground text-xs font-bold">
-                          {wallet.slice(0, 2).toUpperCase()}
-                        </div>
-                        <div>
-                          <p className="text-sm font-medium text-foreground">
-                            {truncatedWallet}
-                          </p>
-                          <p className="text-xs text-muted-foreground">
-                            Verified Donor
-                          </p>
-                        </div>
-                      </div>
-                      <span className="text-xs text-muted-foreground">
-                        {timeAgo()}
-                      </span>
-                    </div>
-                    <p className="text-sm text-muted-foreground">
-                      {comment.comment}
-                    </p>
-                  </div>
-                );
-              })}
-            </div>
-          )}
-
-          {/* Comment Form */}
-          {hasDonated && !hasCommented && (
-            <div className="mt-6 rounded-lg border border-border bg-accent p-6">
-              <h3 className="text-lg font-bold text-primary mb-3">
-                Leave a Review
-              </h3>
-              <form onSubmit={handleSubmitComment}>
-                <textarea
-                  value={newComment}
-                  onChange={(e) => setNewComment(e.target.value)}
-                  placeholder="Share your thoughts about this fundraiser... (max 200 characters)"
-                  maxLength={200}
-                  rows={3}
-                  className="w-full rounded-lg border border-border bg-muted px-4 py-3 text-sm text-foreground placeholder-white/30 focus:border-border focus:outline-none focus:ring-2 focus:ring-ring mb-3"
-                />
-                <button
-                  type="submit"
-                  disabled={submittingComment || !newComment.trim()}
-                  className="rounded-lg bg-primary px-6 py-2 text-sm font-medium text-primary-foreground hover:bg-primary disabled:cursor-not-allowed disabled:opacity-50 transition-colors"
-                >
-                  {submittingComment ? 'Submitting...' : 'Post Review'}
-                </button>
-              </form>
-            </div>
-          )}
-
-          {!hasDonated && isConnected && (
-            <div className="mt-6 rounded-lg border border-border bg-muted p-4 text-center">
-              <p className="text-sm text-muted-foreground">
-                💝 Donate to this fundraiser to leave a review
-              </p>
-            </div>
-          )}
+          <Comments campaignId={id} comments={comments} onPosted={load} />
         </div>
+
       </div>
     </div>
   );
 }
 
-export default function FundraiserPage({ params }: { params: Promise<{ id: string }> }) {
-  return <FundraiserDetail params={params} />;
+function Comments({ campaignId, comments, onPosted }: { campaignId: string; comments: CommentView[]; onPosted: () => void }) {
+  const { watches } = useWatches();
+  const donor = watches.find((w) => w.fundraiserId === campaignId && w.status === 'found')?.donor ?? null;
+  const alreadyCommented = !!donor && comments.some((c) => c.buyerWallet.toLowerCase() === donor.toLowerCase());
+  const [text, setText] = useState('');
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  return (
+    <section className="mt-14" aria-labelledby="comments-title">
+      <h2 id="comments-title" className="mb-4 text-lg font-medium text-foreground">
+        Words of support <span className="text-muted-foreground">· {comments.length}</span>
+      </h2>
+
+      {donor && !alreadyCommented ? (
+        <form
+          className="mb-6 rounded-2xl border border-border bg-card p-5"
+          onSubmit={async (e) => {
+            e.preventDefault();
+            setBusy(true);
+            setError(null);
+            try {
+              const res = await fetch(`/api/fundraisers/${campaignId}/comments`, {
+                method: 'POST',
+                headers: { 'content-type': 'application/json' },
+                body: JSON.stringify({ comment: text }),
+              });
+              const data = await res.json().catch(() => ({}));
+              if (!res.ok) throw new Error(data.error || 'Couldn’t post your comment');
+              setText('');
+              onPosted();
+            } catch (err) {
+              setError(errorMessage(err));
+            } finally {
+              setBusy(false);
+            }
+          }}
+        >
+          <label htmlFor="comment" className="mb-2 block text-sm font-medium text-foreground">
+            Thanks for giving — leave a note?
+          </label>
+          <textarea id="comment" value={text} onChange={(e) => setText(e.target.value)} maxLength={500} rows={3} className={`${inputClass} resize-y`} placeholder="Rooting for you!" />
+          <div className="mt-3 flex items-center justify-between gap-3">
+            <span className="text-xs text-muted-foreground">
+              Posting as <span className="font-mono">{shortAddress(donor)}</span> · {text.trim().length}/500
+            </span>
+            <button type="submit" disabled={busy || text.trim().length < 2} className={primaryButtonClass}>
+              {busy ? <Loader2 size={15} className="animate-spin" /> : null} Post
+            </button>
+          </div>
+          {error ? (
+            <Notice tone="error" className="mt-3">
+              {error}
+            </Notice>
+          ) : null}
+        </form>
+      ) : null}
+
+      {comments.length ? (
+        <ul className="space-y-3">
+          {comments.map((c) => (
+            <li key={c._id} className="rounded-2xl border border-border bg-card px-5 py-4">
+              <p className="mb-2 whitespace-pre-wrap text-sm leading-relaxed text-foreground">{c.comment}</p>
+              <p className="font-mono text-[11px] text-muted-foreground">
+                {shortAddress(c.buyerWallet)} · {timeAgo(c.createdAt)}
+              </p>
+            </li>
+          ))}
+        </ul>
+      ) : (
+        <p className="text-sm text-muted-foreground">Donors can leave a note here once their gift is counted.</p>
+      )}
+    </section>
+  );
+}
+
+function Report({ campaignId }: { campaignId: string }) {
+  const [open, setOpen] = useState(false);
+  const [reason, setReason] = useState('');
+  const [state, setState] = useState<'idle' | 'sending' | 'sent' | 'error'>('idle');
+  const [message, setMessage] = useState('');
+
+  if (state === 'sent') return <p className="text-[#3d5136]">Thanks — our admins will review this campaign.</p>;
+  if (!open) {
+    return (
+      <button type="button" onClick={() => setOpen(true)} className="inline-flex items-center gap-1.5 hover:text-foreground">
+        <Flag size={12} /> Report this campaign
+      </button>
+    );
+  }
+  return (
+    <form
+      className="space-y-2"
+      onSubmit={async (e) => {
+        e.preventDefault();
+        setState('sending');
+        const res = await fetch('/api/reports', {
+          method: 'POST',
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify({ listingId: campaignId, reason }),
+        }).catch(() => null);
+        const data = await res?.json().catch(() => ({}));
+        if (res?.ok) setState('sent');
+        else {
+          setState('error');
+          setMessage(data?.error || 'Couldn’t send the report.');
+        }
+      }}
+    >
+      <label htmlFor="report-reason" className="block">
+        What&rsquo;s wrong with this campaign?
+      </label>
+      <textarea id="report-reason" value={reason} onChange={(e) => setReason(e.target.value)} maxLength={100} rows={2} className={`${inputClass} text-xs`} />
+      <div className="flex gap-2">
+        <button type="submit" disabled={state === 'sending'} className="rounded-md bg-[#9b3b2c] px-3 py-1.5 text-xs font-medium text-white disabled:opacity-50">
+          Send report
+        </button>
+        <button type="button" onClick={() => setOpen(false)} className="px-2 text-xs hover:text-foreground">
+          Cancel
+        </button>
+      </div>
+      {state === 'error' ? <p className="text-[#9b3b2c]">{message}</p> : null}
+    </form>
+  );
 }

@@ -33,14 +33,24 @@ const TransactionSchema = new Schema<ITransaction>({
     unique: true,
     index: true,
   },
-  deliveryUrl: {
-    type: String,
-    required: true,
-  },
   status: {
     type: String,
     required: true,
     enum: ['success', 'failed'],
+  },
+  network: {
+    type: String,
+    enum: ['solana', 'robinhood'],
+  },
+  currency: {
+    type: String,
+    enum: ['USDC', 'ETH'],
+  },
+  amountWei: {
+    type: String,
+  },
+  blockNumber: {
+    type: Number,
   },
   createdAt: {
     type: Date,
