@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { useActiveUsers } from '@/hooks/useActiveUsers';
 import { usePathname } from 'next/navigation';
 
-const X_COMMUNITY_URL = process.env.NEXT_PUBLIC_X_COMMUNITY_URL || null;
+const X_COMMUNITY_URL = process.env.NEXT_PUBLIC_X_COMMUNITY_URL || 'https://x.com/OpenFundPons';
 
 export function Navbar() {
   const activeUsers = useActiveUsers();

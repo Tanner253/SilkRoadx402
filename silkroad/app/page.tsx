@@ -6,6 +6,7 @@ import { Piggy } from '@/components/mascot/Piggy';
 import { Reveal } from '@/components/motion/Reveal';
 import { Parallax } from '@/components/motion/Parallax';
 import { PLATFORM_TOKEN } from '@/config/platform';
+import { ContractAddress } from '@/components/ContractAddress';
 import './home.css';
 
 export default function Home() {
@@ -81,8 +82,9 @@ export default function Home() {
       <details className="fund-token">
         <summary>${PLATFORM_TOKEN.ticker} <span>Details +</span></summary>
         <div>
-          <p>OpenFund runs on Robinhood Chain (chain ID 4663), the network pons is built on. The $OPEN contract address will be posted here at launch.</p>
-          <p>Contract address <code>{PLATFORM_TOKEN.contractAddress}</code></p>
+          <p>OpenFund runs on Robinhood Chain (chain ID 4663), the network pons is built on. ${PLATFORM_TOKEN.ticker} is live on pons.</p>
+          <p>Contract address</p>
+          <ContractAddress className="max-w-[560px]" />
           <a href={PLATFORM_TOKEN.launchpadUrl} target="_blank" rel="noopener noreferrer">Explore pons <ArrowUpRight size={14} /></a>
         </div>
       </details>

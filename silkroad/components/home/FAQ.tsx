@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { ContractAddress } from '@/components/ContractAddress';
 
 export function FAQ() {
   const [openIndex, setOpenIndex] = useState<number | null>(0);
@@ -12,7 +13,7 @@ export function FAQ() {
         <p>
           OpenFund is no-KYC crowdfunding. Anyone can start a fundraiser for what matters to them,
           and anyone can chip in — no identity checks, no bank account, no gatekeepers.
-          Contributions go straight to the fundraiser&apos;s own wallet. OpenFund is moving to
+          Contributions go straight to the fundraiser&apos;s own wallet. OpenFund runs on
           Robinhood Chain, where donations are made in ETH.
         </p>
       ),
@@ -127,11 +128,13 @@ export function FAQ() {
     {
       question: 'What is $OPEN?',
       answer: (
-        <p>
-          $OPEN is the OpenFund community token, launching on pons on Robinhood Chain. The contract
-          address will be posted here at launch — until then, treat any address claiming to be
-          $OPEN as fake.
-        </p>
+        <div className="space-y-3">
+          <p>
+            $OPEN is the OpenFund community token, live on pons on Robinhood Chain. This is the only
+            official contract address — treat any other address claiming to be $OPEN as fake.
+          </p>
+          <ContractAddress />
+        </div>
       ),
     },
   ];

@@ -69,8 +69,8 @@
 .fund-token { border-top: 1px solid #292d251c; margin: 0 24px; color: #696b60; font-size: 11px; }
 .fund-token summary { cursor: pointer; padding: 22px 0; display: flex; justify-content: space-between; gap: 20px; }
 .fund-token > div { padding-bottom: 24px; line-height: 1.8; }
-.fund-token code { display: inline-block; margin-left: 8px; overflow-wrap: anywhere; color: #3d5136; }
-.fund-token a { display: inline-flex; align-items: center; gap: 5px; text-decoration: underline; margin-top: 10px; }
+.fund-token code { overflow-wrap: anywhere; color: #3d5136; }
+.fund-token > div > a { display: inline-flex; align-items: center; gap: 5px; text-decoration: underline; margin-top: 10px; }
 
 /* --------------------------------------------------------- entry reveal -- */
 .fund-reveal { animation: fund-arrive 800ms cubic-bezier(.2,.65,.25,1) both; }
