@@ -126,12 +126,12 @@ export function FAQ() {
       ),
     },
     {
-      question: 'What is $OPEN?',
+      question: 'What is $OPENFUND?',
       answer: (
         <div className="space-y-3">
           <p>
-            $OPEN is the OpenFund community token, live on pons on Robinhood Chain. This is the only
-            official contract address — treat any other address claiming to be $OPEN as fake.
+            $OPENFUND is the OpenFund community token, live on pons on Robinhood Chain. This is the only
+            official contract address — treat any other address claiming to be $OPENFUND as fake.
           </p>
           <ContractAddress />
         </div>

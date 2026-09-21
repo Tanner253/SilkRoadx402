@@ -81,8 +81,8 @@ npm run dev
 | Explorer | `https://robinhoodchain.blockscout.com` |
 | Docs | [Robinhood Chain](https://docs.robinhood.com/chain/connecting/) · [pons](https://docs.ponsfamily.com/) |
 
-The `$OPEN` token will launch on [pons](https://www.ponsfamily.com/launchpad); its contract
-address is `PLACEHOLDER` in `silkroad/config/platform.ts` until then.
+The `$OPENFUND` token is live on [pons](https://www.ponsfamily.com/launchpad) at
+`0xFB4eD31b0c895eee1C4778680d972c5695056902` (Robinhood Chain), set in `silkroad/config/platform.ts`.
 
 ## Legacy data
 

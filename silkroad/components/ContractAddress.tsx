@@ -1,6 +1,6 @@
 'use client';
 
-/** The $OPEN contract address with copy and explorer buttons. */
+/** The $OPENFUND contract address with copy and explorer buttons. */
 
 import { useState } from 'react';
 import { ArrowUpRight, Check, Copy } from 'lucide-react';

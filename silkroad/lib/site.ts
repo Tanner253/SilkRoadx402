@@ -22,4 +22,4 @@ export function siteUrl(): string {
 export const SITE_TITLE = 'OpenFund — No-KYC charity on Robinhood Chain';
 export const SITE_TAGLINE = 'Good things start with a little.';
 export const SITE_DESCRIPTION =
-  'No KYC. No wallet connection. Raise or give ETH on Robinhood Chain — every donation goes straight from the donor’s wallet to the cause. Powered by $OPEN on pons.';
+  'No KYC. No wallet connection. Raise or give ETH on Robinhood Chain — every donation goes straight from the donor’s wallet to the cause. Powered by $OPENFUND on pons.';

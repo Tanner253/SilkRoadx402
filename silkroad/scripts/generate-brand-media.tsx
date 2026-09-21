@@ -59,7 +59,7 @@ function banner() {
     <tspan font-family="Georgia" font-style="italic" font-size="18" fill="${C.sage}"> a little.</tspan></text>
   <line x1="45" y1="146" x2="300" y2="146" stroke="${C.rule}" stroke-width="1"/>
   <text x="45" y="167" font-family="Segoe UI, Arial" font-size="11" letter-spacing=".35"
-        fill="${C.muted}">Wallet to wallet · No KYC · <tspan fill="${C.forest}" font-weight="600">$OPEN</tspan></text>
+        fill="${C.muted}">Wallet to wallet · No KYC · <tspan fill="${C.forest}" font-weight="600">$OPENFUND</tspan></text>
 
   ${pig('receiving', 348, -4, 224)}
 </svg>`;
@@ -87,7 +87,7 @@ function ogImage() {
     <tspan font-family="Georgia" font-style="italic" font-size="38" fill="${C.sage}"> a little.</tspan></text>
   <line x1="90" y1="410" x2="560" y2="410" stroke="${C.rule}" stroke-width="2"/>
   <text x="90" y="458" font-family="Segoe UI, Arial" font-size="22" fill="${C.muted}">No KYC · No wallet connection · ETH on Robinhood Chain</text>
-  <text x="90" y="496" font-family="Segoe UI, Arial" font-size="20" fill="${C.muted}">Charity, wallet to wallet · <tspan fill="${C.forest}" font-weight="600">$OPEN on pons</tspan></text>
+  <text x="90" y="496" font-family="Segoe UI, Arial" font-size="20" fill="${C.muted}">Charity, wallet to wallet · <tspan fill="${C.forest}" font-weight="600">$OPENFUND on pons</tspan></text>
   ${pig('receiving', 600, 120, 540)}
 </svg>`;
 }
