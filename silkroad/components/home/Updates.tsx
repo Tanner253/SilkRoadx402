@@ -8,6 +8,15 @@ export function Updates() {
   const updates = [
     {
       date: 'September 2026',
+      version: 'v2.1',
+      title: '$OPENFUND is live',
+      items: [
+        '$OPENFUND launched on pons, on Robinhood Chain',
+        'Official contract address: 0xFB4eD31b0c895eee1C4778680d972c5695056902 — treat any other address claiming to be $OPENFUND as fake',
+      ],
+    },
+    {
+      date: 'September 2026',
       version: 'v2.0.0',
       title: 'Wallet-less giving on Robinhood Chain',
       items: [
@@ -28,7 +37,7 @@ export function Updates() {
       title: 'OpenFund on Solana',
       items: [
         'OpenFund launched as no-KYC crowdfunding with USDC donations on Solana',
-        'Campaigns from this era stay visible, closed to new donations',
+        'Campaigns from this era have been retired',
       ],
     },
   ];
@@ -47,7 +56,7 @@ export function Updates() {
               {update.items.map((item) => (
                 <li key={item} className="flex gap-3 text-sm leading-relaxed text-muted-foreground">
                   <span className="mt-2 h-1 w-1 shrink-0 rounded-full bg-[#62754d]" aria-hidden="true" />
-                  <span>{item}</span>
+                  <span className="min-w-0 [overflow-wrap:anywhere]">{item}</span>
                 </li>
               ))}
             </ul>
