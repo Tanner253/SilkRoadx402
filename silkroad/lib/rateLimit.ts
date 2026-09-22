@@ -95,4 +95,10 @@ export const RATE_LIMITS = {
     keyPrefix: 'image-upload',
     message: 'Too many uploads. Please wait a few minutes and try again.',
   },
+  COIN_IMPORT: {
+    maxRequests: 10,
+    windowMs: 10 * 60 * 1000,
+    keyPrefix: 'coin-import',
+    message: 'Too many coin lookups. Please wait a few minutes and try again.',
+  },
 } satisfies Record<string, RateLimitConfig>;

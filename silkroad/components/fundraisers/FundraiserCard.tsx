@@ -4,13 +4,14 @@ import Link from 'next/link';
 import { Pin } from 'lucide-react';
 import type { FundraiserView } from '@/types/fundraiser';
 import { goalOf } from '@/types/fundraiser';
-import { formatAmount, percentRaised } from '@/lib/format';
+import { formatAmount, goalNudge, percentRaised } from '@/lib/format';
 import { CoverImage, Pill, ProgressBar } from './ui';
 
 export function FundraiserCard({ fundraiser: f }: { fundraiser: FundraiserView }) {
   const goal = goalOf(f);
   const pct = percentRaised(f.raisedAmount, goal);
   const legacy = f.network !== 'robinhood';
+  const nudge = legacy ? null : goalNudge(f.raisedAmount, goal, f.currency);
 
   return (
     <Link
@@ -39,6 +40,7 @@ export function FundraiserCard({ fundraiser: f }: { fundraiser: FundraiserView }
               of {formatAmount(goal, f.currency)} · {Math.round(pct)}%
             </span>
           </div>
+          {nudge ? <p className="mt-2 text-xs font-medium text-[#7a5a1c]">{nudge}</p> : null}
         </div>
       </div>
     </Link>

@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useActiveUsers } from '@/hooks/useActiveUsers';
 import { usePathname } from 'next/navigation';
+import { DonationTicker } from '@/components/donations/DonationTicker';
 
 const X_COMMUNITY_URL = process.env.NEXT_PUBLIC_X_COMMUNITY_URL || 'https://x.com/OpenFundPons';
 
@@ -26,21 +27,23 @@ export function Navbar() {
 
   return (
     <>
-      {/* Top banner — only renders if X community URL is configured */}
-      {X_COMMUNITY_URL && (
+      {/* One fixed header stack: community bar, live donation tape, then the
+          nav. Its total height is --app-header (globals.css), which the page
+          and the mobile menu offset from. */}
+      <header className="fixed inset-x-0 top-0 z-50">
         <a
           href={X_COMMUNITY_URL}
           target="_blank"
           rel="noopener noreferrer"
-          className="fixed top-0 left-0 right-0 z-[60] flex items-center justify-center gap-2 bg-background border-b border-border py-1.5 text-xs font-medium text-muted-foreground hover:text-foreground hover:bg-accent transition-colors"
+          className="flex h-8 items-center justify-center gap-2 border-b border-border bg-background text-xs font-medium text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
         >
           <span>💬</span>
           <span>Join the community on X</span>
           <span className="text-muted-foreground">→</span>
         </a>
-      )}
+        <DonationTicker />
 
-      <nav className={`fixed ${X_COMMUNITY_URL ? 'top-8' : 'top-0'} app-navbar z-50 w-full border-b border-border bg-background/95 backdrop-blur-md shadow-lg shadow-none`}>
+      <nav className="app-navbar w-full border-b border-border bg-background/95 backdrop-blur-md">
         <div className="mx-auto flex h-14 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
 
           {/* Mobile menu button */}
@@ -76,7 +79,7 @@ export function Navbar() {
               Campaigns
             </Link>
             <Link href="/leaderboard" className={`text-sm font-medium transition-colors flex items-center gap-1 ${pathname === '/leaderboard' ? 'text-primary' : 'text-foreground hover:text-foreground'}`}>
-              Top fundraisers
+              Leaderboard
             </Link>
             <Link href="/fundraisers/my" className={`text-sm font-medium transition-colors ${pathname === '/fundraisers/my' ? 'text-primary' : 'text-foreground hover:text-foreground'}`}>
               My fundraisers
@@ -106,12 +109,13 @@ export function Navbar() {
           </div>
         </div>
       </nav>
+      </header>
 
       {/* Mobile overlay */}
       {mobileMenuOpen && (
         <>
           <div className="fixed inset-0 z-40 bg-black/60 backdrop-blur-sm md:hidden" onClick={() => setMobileMenuOpen(false)} />
-          <div className={`fixed ${X_COMMUNITY_URL ? 'top-[6.5rem]' : 'top-[4.5rem]'} left-0 right-0 bottom-0 z-40 bg-background md:hidden overflow-y-auto`}>
+          <div className="fixed inset-x-0 bottom-0 top-[var(--app-header)] z-40 overflow-y-auto bg-background md:hidden">
             <div className="flex flex-col p-6 space-y-6">
 
               {/* Active users */}
@@ -129,7 +133,7 @@ export function Navbar() {
               <nav className="flex flex-col space-y-1">
                 {[
                   { href: '/fundraisers', label: 'Campaigns' },
-                  { href: '/leaderboard', label: 'Top fundraisers' },
+                  { href: '/leaderboard', label: 'Leaderboard' },
                   { href: '/fundraisers/new', label: 'Start a fundraiser' },
                   { href: '/fundraisers/my', label: 'My fundraisers' },
                 ].map(({ href, label }) => (
@@ -137,7 +141,7 @@ export function Navbar() {
                     key={href}
                     href={href}
                     className={`flex items-center gap-3 rounded-lg px-4 py-3 text-base font-medium transition-colors ${
-                      pathname === href || (href !== '/' && pathname?.startsWith(href))
+                      pathname === href || (href === '/fundraisers' && !!pathname?.startsWith('/fundraisers/') && !['/fundraisers/my', '/fundraisers/new'].includes(pathname))
                         ? 'bg-accent text-primary'
                         : 'text-foreground hover:bg-muted'
                     }`}

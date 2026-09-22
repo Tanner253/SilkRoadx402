@@ -4,8 +4,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { v2 as cloudinary } from 'cloudinary';
-import { CONFIG } from '@/config/constants';
+import { uploadCover } from '@/lib/cloudinary';
 import { checkRateLimit, RATE_LIMITS } from '@/lib/rateLimit';
 import { getIpFromRequest } from '@/lib/logger';
 
@@ -32,30 +31,7 @@ export async function POST(req: NextRequest) {
     const buffer = Buffer.from(await image.arrayBuffer());
     if (!looksLikeImage(buffer)) return NextResponse.json({ error: 'Image must be JPEG, PNG or WebP' }, { status: 400 });
 
-    if (CONFIG.CLOUDINARY_URL) cloudinary.config({ cloudinary_url: CONFIG.CLOUDINARY_URL, secure: true });
-    else
-      cloudinary.config({
-        cloud_name: CONFIG.CLOUDINARY_CLOUD_NAME,
-        api_key: CONFIG.CLOUDINARY_API_KEY,
-        api_secret: CONFIG.CLOUDINARY_API_SECRET,
-        secure: true,
-      });
-
-    const result = await new Promise<{ secure_url: string }>((resolve, reject) => {
-      cloudinary.uploader
-        .upload_stream(
-          {
-            folder: 'openfund',
-            resource_type: 'image',
-            // Covers display at 16:9, so crop to that once here.
-            transformation: [{ width: 1600, height: 900, crop: 'fill', gravity: 'auto' }, { quality: 'auto', fetch_format: 'auto' }],
-          },
-          (error, uploaded) => (error || !uploaded ? reject(error) : resolve(uploaded)),
-        )
-        .end(buffer);
-    });
-
-    return NextResponse.json({ success: true, imageUrl: result.secure_url });
+    return NextResponse.json({ success: true, imageUrl: await uploadCover(buffer) });
   } catch (error) {
     console.error('Image upload error:', error);
     return NextResponse.json({ error: 'Failed to upload image' }, { status: 500 });

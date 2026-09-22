@@ -47,9 +47,37 @@ export async function GET(req: NextRequest) {
         })),
       );
 
-    const [leaderboard, legacy] = await Promise.all([enrich(eth, 'ETH'), enrich(usdc, 'USDC')]);
+    // Donors: the wallets that gave the most, across every campaign.
+    const donorRows = Transaction.aggregate<{ _id: string; totalGiven: number; donationCount: number; campaignCount: number; lastAt: Date }>([
+      { $match: { status: 'success', currency: 'ETH', listingId: { $in: fundraiserIds } } },
+      {
+        $group: {
+          _id: '$buyerWallet',
+          totalGiven: { $sum: '$amount' },
+          donationCount: { $sum: 1 },
+          campaigns: { $addToSet: '$listingId' },
+          lastAt: { $max: '$createdAt' },
+        },
+      },
+      { $project: { totalGiven: 1, donationCount: 1, lastAt: 1, campaignCount: { $size: '$campaigns' } } },
+      { $sort: { totalGiven: -1, lastAt: 1 } },
+      { $limit: limit },
+    ]);
 
-    return NextResponse.json({ success: true, leaderboard, legacy });
+    const [leaderboard, legacy, donors] = await Promise.all([enrich(eth, 'ETH'), enrich(usdc, 'USDC'), donorRows]);
+
+    return NextResponse.json({
+      success: true,
+      leaderboard,
+      legacy,
+      donors: donors.map((d) => ({
+        wallet: d._id,
+        totalGiven: d.totalGiven,
+        donationCount: d.donationCount,
+        campaignCount: d.campaignCount,
+        lastAt: d.lastAt,
+      })),
+    });
   } catch (error) {
     console.error('Leaderboard error:', error);
     return NextResponse.json({ error: 'Failed to fetch leaderboard' }, { status: 500 });

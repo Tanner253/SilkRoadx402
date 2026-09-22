@@ -40,3 +40,27 @@ export function timeAgo(date: string | Date | undefined): string {
   }
   return '';
 }
+
+/**
+ * A nudge for campaigns close to their goal — people are likelier to give
+ * when their gift visibly finishes the job. Null when there's nothing to say.
+ */
+export function goalNudge(raised: number | undefined, goal: number | undefined, currency: Currency = 'ETH'): string | null {
+  if (!goal || goal <= 0) return null;
+  const have = raised || 0;
+  if (have >= goal) return 'Goal reached — still open for gifts';
+  if (have / goal >= 0.75) return `Only ${formatAmount(goal - have, currency)} to go`;
+  return null;
+}
+
+/** Compact age for tight spaces: "now", "4m", "3h", "2d", "5mo", "1y". */
+export function shortAgo(date: string | Date | undefined): string {
+  if (!date) return '';
+  const minutes = Math.max(0, (Date.now() - new Date(date).getTime()) / 60_000);
+  if (minutes < 1) return 'now';
+  if (minutes < 60) return `${Math.floor(minutes)}m`;
+  if (minutes < 60 * 24) return `${Math.floor(minutes / 60)}h`;
+  if (minutes < 60 * 24 * 30) return `${Math.floor(minutes / (60 * 24))}d`;
+  if (minutes < 60 * 24 * 365) return `${Math.floor(minutes / (60 * 24 * 30))}mo`;
+  return `${Math.floor(minutes / (60 * 24 * 365))}y`;
+}

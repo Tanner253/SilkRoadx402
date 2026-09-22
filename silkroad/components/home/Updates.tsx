@@ -8,6 +8,17 @@ export function Updates() {
   const updates = [
     {
       date: 'September 2026',
+      version: 'v2.2',
+      title: 'Live gifts, top donors and coin campaigns',
+      items: [
+        'A live tape of the latest gifts runs across the top of every page — every entry is a verified on-chain donation',
+        'New Top donors leaderboard: the most generous wallets, ranked by verified ETH given. Give to climb',
+        'Raising for a coin community? Paste its contract address and the campaign fills itself in from the chain — name, logo, story and socials',
+        'Campaigns close to their goal now say exactly how little is left to go',
+      ],
+    },
+    {
+      date: 'September 2026',
       version: 'v2.1',
       title: '$OPENFUND is live',
       items: [

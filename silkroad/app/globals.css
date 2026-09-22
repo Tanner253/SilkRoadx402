@@ -43,8 +43,8 @@
 ::-webkit-scrollbar-thumb { background: #a5ad98; border-radius: 8px; }
 .gradient-text { color: hsl(var(--primary)); }
 .app-shell { min-height: 100svh; display: flex; flex-direction: column; }
-.app-main { flex: 1; padding-top: 72px; }
-.app-shell.has-community-banner .app-main { padding-top: 104px; }
+:root { --app-header: 136px; } /* community bar 32 + donation tape 32 + nav 72 */
+.app-main { flex: 1; padding-top: var(--app-header); }
 .app-navbar { height: 72px; background: hsl(var(--background) / .96); }
 .app-navbar > div { height: 72px; max-width: 1456px; }
 .app-footer { position: relative; background: hsl(var(--background)); }
@@ -59,3 +59,14 @@ html.lenis, html.lenis body { height: auto; }
 .lenis.lenis-smooth [data-lenis-prevent] { overscroll-behavior: contain; }
 .lenis.lenis-stopped { overflow: hidden; }
 .lenis.lenis-smooth iframe { pointer-events: none; }
+
+/* Donation ticker: two copies of the list slide left by one copy's width, so
+   the loop is seamless. Pauses on hover/focus; still for reduced motion. */
+@keyframes of-marquee { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+.of-marquee { animation: of-marquee var(--of-marquee-duration, 40s) linear infinite; }
+.of-marquee:hover, .of-marquee:focus-within { animation-play-state: paused; }
+.of-marquee-mask { mask-image: linear-gradient(90deg, transparent, #000 24px, #000 calc(100% - 24px), transparent); }
+@media (prefers-reduced-motion: reduce) {
+  .of-marquee { animation: none; }
+  .of-marquee-mask { overflow-x: auto; }
+}

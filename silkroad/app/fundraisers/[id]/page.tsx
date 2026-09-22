@@ -6,7 +6,7 @@ import { ArrowLeft, ArrowUpRight, Flag, Loader2 } from 'lucide-react';
 import type { CommentView, DonationView, FundraiserView } from '@/types/fundraiser';
 import { goalOf } from '@/types/fundraiser';
 import { donationExplorerUrl, explorerAddressUrl } from '@/lib/chain/network';
-import { formatAmount, percentRaised, shortAddress, timeAgo } from '@/lib/format';
+import { formatAmount, goalNudge, percentRaised, shortAddress, timeAgo } from '@/lib/format';
 import { getManageToken, saveManaged, takeManageTokenFromUrl } from '@/lib/manageLinks';
 import { DonatePanel } from '@/components/fundraisers/DonatePanel';
 import { ManagePanel } from '@/components/fundraisers/ManagePanel';
@@ -96,6 +96,7 @@ export default function FundraiserPage({ params }: { params: Promise<{ id: strin
   const f = fundraiser;
   const goal = goalOf(f);
   const pct = percentRaised(f.raisedAmount, goal);
+  const nudge = f.network === 'robinhood' && f.state !== 'pulled' ? goalNudge(f.raisedAmount, goal, f.currency) : null;
 
   return (
     <div className="mx-auto max-w-[1180px] px-6 pb-24 md:px-8">
@@ -124,11 +125,12 @@ export default function FundraiserPage({ params }: { params: Promise<{ id: strin
           <CampaignLinks links={f.links ?? []} />
         </article>
 
-        <aside className="lg:sticky lg:top-24 lg:col-start-2 lg:row-span-2 lg:row-start-1 lg:self-start">
+        <aside className="lg:sticky lg:top-[calc(var(--app-header)_+_24px)] lg:col-start-2 lg:row-span-2 lg:row-start-1 lg:self-start">
           <div className="rounded-2xl border border-border bg-card p-6 shadow-[0_1px_2px_#292d2508]">
             <p className="text-3xl font-medium tracking-[-0.02em] text-foreground">{formatAmount(f.raisedAmount, f.currency)}</p>
             <p className="mb-4 mt-1 text-sm text-muted-foreground">raised of {formatAmount(goal, f.currency)} goal</p>
             <ProgressBar percent={pct} className="mb-3" />
+            {nudge ? <p className="mb-2 rounded-lg bg-[#faf3e2] px-3 py-2 text-xs font-medium text-[#7a5a1c]">{nudge}</p> : null}
             <div className="mb-6 flex justify-between text-xs text-muted-foreground">
               <span>{Math.round(pct)}% funded</span>
               <span>

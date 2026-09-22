@@ -56,7 +56,7 @@ export default function RootLayout({
         <WatchProvider>
           <CoinCTAModal />
           <ExternalLinkGuard />
-          <div className={`app-shell ${process.env.NEXT_PUBLIC_X_COMMUNITY_URL ? "has-community-banner" : ""}`}>
+          <div className="app-shell">
             <Navbar />
             <main className="app-main">{children}</main>
             <Footer />

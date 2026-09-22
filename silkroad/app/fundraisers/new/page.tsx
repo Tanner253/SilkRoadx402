@@ -2,7 +2,7 @@
 
 import { useRef, useState } from 'react';
 import Link from 'next/link';
-import { ArrowUpRight, ImagePlus, Loader2 } from 'lucide-react';
+import { ArrowUpRight, Coins, ImagePlus, Loader2 } from 'lucide-react';
 import { FUNDRAISER_CATEGORIES } from '@/config/constants';
 import { normalizeAddress, ROBINHOOD_CHAIN_ID, ROBINHOOD_CHAIN_NAME } from '@/lib/chain/network';
 import { manageUrl, saveManaged } from '@/lib/manageLinks';
@@ -48,9 +48,57 @@ export default function NewFundraiserPage() {
   const [created, setCreated] = useState<{ id: string; title: string; link: string } | null>(null);
   const [savedLink, setSavedLink] = useState(false);
   const fileInput = useRef<HTMLInputElement>(null);
+  const [coinAddress, setCoinAddress] = useState('');
+  const [importing, setImporting] = useState(false);
+  const [coinError, setCoinError] = useState<string | null>(null);
+  const [imported, setImported] = useState<{ symbol: string; name: string; filled: string[] } | null>(null);
 
   const address = normalizeAddress(payoutAddress);
   const addressTouched = payoutAddress.trim().length > 0;
+
+  /** Fill empty fields from a coin's on-chain profile; never overwrite what the creator typed. */
+  async function importCoin() {
+    setCoinError(null);
+    setImported(null);
+    const ca = normalizeAddress(coinAddress);
+    if (!ca) return setCoinError('That isn’t a valid 0x contract address.');
+    setImporting(true);
+    try {
+      const res = await fetch('/api/coin', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ address: ca }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Couldn’t read that coin');
+      const coin = data.coin as { name: string; symbol: string; description: string; imageUrl: string | null; links: CampaignLink[] };
+
+      const filled: string[] = [];
+      if (!title.trim() && coin.name) {
+        setTitle(coin.name.slice(0, 100));
+        filled.push('title');
+      }
+      if (!description.trim() && coin.description) {
+        setDescription(coin.description.slice(0, 2000));
+        filled.push('story');
+      }
+      if (!imageUrl && coin.imageUrl) {
+        setImageUrl(coin.imageUrl);
+        filled.push('cover');
+      }
+      const existing = new Set(links.map((l) => l.url.trim()));
+      const newLinks = coin.links.filter((l) => !existing.has(l.url));
+      if (newLinks.length) {
+        setLinks([...links.filter((l) => l.url.trim()), ...newLinks]);
+        filled.push(`${newLinks.length} link${newLinks.length === 1 ? '' : 's'}`);
+      }
+      setImported({ symbol: coin.symbol, name: coin.name, filled });
+    } catch (err) {
+      setCoinError(errorMessage(err, 'Couldn’t read that coin'));
+    } finally {
+      setImporting(false);
+    }
+  }
 
   async function uploadImage(file: File) {
     setError(null);
@@ -155,6 +203,51 @@ export default function NewFundraiserPage() {
         It goes live the moment you publish. No account, no review queue, no wallet connection — just the address you
         want donations sent to.
       </PageIntro>
+
+      <div className="mb-10 rounded-2xl border border-border bg-card p-5">
+        <p className="mb-1 flex items-center gap-2 text-sm font-medium text-foreground">
+          <Coins size={15} className="text-primary" /> Raising for a coin community?
+        </p>
+        <p className="mb-4 text-xs leading-relaxed text-muted-foreground">
+          Paste its contract address on {ROBINHOOD_CHAIN_NAME} and we&rsquo;ll fill in the name, logo, story and socials straight from the
+          chain. Works with coins launched on pons. You can change anything before publishing.
+        </p>
+        <div className="flex flex-col gap-2 sm:flex-row">
+          <input
+            aria-label="Coin contract address"
+            value={coinAddress}
+            onChange={(e) => setCoinAddress(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') {
+                e.preventDefault();
+                importCoin();
+              }
+            }}
+            placeholder="0x… coin contract address"
+            spellCheck={false}
+            autoComplete="off"
+            className={`${inputClass} min-w-0 flex-1 font-mono text-[13px]`}
+          />
+          <button type="button" onClick={importCoin} disabled={importing || !coinAddress.trim()} className={secondaryButtonClass}>
+            {importing ? (
+              <>
+                <Loader2 size={15} className="animate-spin" /> Reading the chain…
+              </>
+            ) : (
+              'Fill in from coin'
+            )}
+          </button>
+        </div>
+        {coinError ? <p className="mt-2 text-xs text-[#9b3b2c]">{coinError}</p> : null}
+        {imported ? (
+          <p className="mt-3 text-xs leading-relaxed text-primary">
+            {imported.filled.length
+              ? `Filled in the ${imported.filled.join(', ')} from ${imported.symbol ? `$${imported.symbol}` : imported.name}. Check it over — `
+              : `Found ${imported.symbol ? `$${imported.symbol}` : imported.name}, but your fields already have content so nothing was replaced. `}
+            the payout wallet is still yours to enter below.
+          </p>
+        ) : null}
+      </div>
 
       <form onSubmit={submit} className="space-y-7" noValidate>
         <Field label="Title" htmlFor="title" hint={`${title.trim().length}/100 · at least 5 characters`}>
