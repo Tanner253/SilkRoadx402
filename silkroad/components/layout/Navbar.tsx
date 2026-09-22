@@ -128,6 +128,9 @@ export function Navbar() {
             <Link href="/fundraisers/my" className={`text-sm font-medium transition-colors ${pathname === '/fundraisers/my' ? 'text-primary' : 'text-foreground hover:text-foreground'}`}>
               My fundraisers
             </Link>
+            <Link href="/faq" className={`text-sm font-medium transition-colors ${pathname === '/faq' ? 'text-primary' : 'text-foreground hover:text-foreground'}`}>
+              FAQ
+            </Link>
             <Link href="/updates" className={`relative text-sm font-medium transition-colors ${pathname === '/updates' ? 'text-primary' : 'text-foreground hover:text-foreground'}`}>
               Updates
               {hasNewUpdate ? <NewDot /> : null}
@@ -184,6 +187,7 @@ export function Navbar() {
                   { href: '/leaderboard', label: 'Leaderboard' },
                   { href: '/fundraisers/new', label: 'Start a fundraiser' },
                   { href: '/fundraisers/my', label: 'My fundraisers' },
+                  { href: '/faq', label: 'FAQ' },
                   { href: '/updates', label: 'Updates' },
                 ].map(({ href, label }) => (
                   <Link
@@ -204,7 +208,6 @@ export function Navbar() {
               {/* Footer links */}
               <div className="pt-4 border-t border-border flex flex-col space-y-1">
                 {[
-                  { href: '/faq', label: 'FAQ', external: false },
                   ...(X_COMMUNITY_URL ? [{ href: X_COMMUNITY_URL, label: 'Community (X)', external: true }] : []),
                 ].map(({ href, label, external }) => (
                   external ? (
