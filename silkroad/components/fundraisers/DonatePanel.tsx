@@ -134,7 +134,7 @@ export function DonatePanel({ fundraiser }: { fundraiser: FundraiserView }) {
             <CheckCircle2 size={16} className="mt-0.5 shrink-0" />
             <span>You&rsquo;ve given {formatAmount(givenTotal, 'ETH')} to this campaign — thank you! You can give again below.</span>
           </span>
-          {latestGiftId ? <ShareGift giftId={latestGiftId} amount={givenTotal} title={fundraiser.title} className="pl-6" /> : null}
+          {latestGiftId ? <div className="pl-6"><ShareGift giftId={latestGiftId} fundraiserId={fundraiser._id} amount={givenTotal} title={fundraiser.title} /></div> : null}
         </Notice>
       ) : null}
 

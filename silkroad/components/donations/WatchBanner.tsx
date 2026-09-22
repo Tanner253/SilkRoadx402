@@ -38,7 +38,7 @@ function Row({ watch }: { watch: Watch }) {
           Thank you — your {formatAmount(total, 'ETH')} donation to {campaign} is verified and counted.
         </p>
         <div className="flex shrink-0 flex-wrap items-center justify-end gap-1.5">
-          {latestGift?.giftId ? <ShareGift giftId={latestGift.giftId} amount={total} title={watch.fundraiserTitle} tone="dark" /> : null}
+          {latestGift?.giftId ? <ShareGift giftId={latestGift.giftId} fundraiserId={watch.fundraiserId} amount={total} title={watch.fundraiserTitle} /> : null}
           <button type="button" onClick={() => acknowledge(watch.id)} className="rounded-md px-2 py-1 text-xs font-medium hover:bg-black/5">
             Done
           </button>
