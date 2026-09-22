@@ -11,18 +11,32 @@ import { allLinks, type CampaignLink } from '@/lib/links';
 export interface RaisedTotal {
   raised: number;
   donations: number;
+  /** Gifts in the last 24 hours — the campaign's momentum. */
+  giftsToday: number;
+  lastGiftAt: Date | null;
 }
+
+const DAY_MS = 24 * 60 * 60 * 1000;
 
 /** One aggregate for any number of campaigns, instead of a query each. */
 export async function raisedTotals(fundraiserIds: string[]): Promise<Map<string, RaisedTotal>> {
   const totals = new Map<string, RaisedTotal>();
   if (!fundraiserIds.length) return totals;
 
-  const rows: { _id: string; raised: number; donations: number }[] = await Transaction.aggregate([
+  const since = new Date(Date.now() - DAY_MS);
+  const rows: { _id: string; raised: number; donations: number; giftsToday: number; lastGiftAt: Date | null }[] = await Transaction.aggregate([
     { $match: { listingId: { $in: fundraiserIds }, status: 'success' } },
-    { $group: { _id: '$listingId', raised: { $sum: '$amount' }, donations: { $sum: 1 } } },
+    {
+      $group: {
+        _id: '$listingId',
+        raised: { $sum: '$amount' },
+        donations: { $sum: 1 },
+        giftsToday: { $sum: { $cond: [{ $gte: ['$createdAt', since] }, 1, 0] } },
+        lastGiftAt: { $max: '$createdAt' },
+      },
+    },
   ]);
-  for (const row of rows) totals.set(row._id, { raised: row.raised, donations: row.donations });
+  for (const row of rows) totals.set(row._id, { raised: row.raised, donations: row.donations, giftsToday: row.giftsToday, lastGiftAt: row.lastGiftAt });
   return totals;
 }
 

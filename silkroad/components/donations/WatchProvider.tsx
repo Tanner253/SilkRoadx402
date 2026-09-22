@@ -22,7 +22,7 @@ export interface Watch {
   donor: string;
   recipient: string;
   status: WatchStatus;
-  found: { txHash: string; amount: number }[];
+  found: { txHash: string; amount: number; giftId: string | null }[];
   expiresAt: string;
   createdAt: string;
 }

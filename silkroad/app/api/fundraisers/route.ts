@@ -42,7 +42,7 @@ export async function GET(req: NextRequest) {
     const fundraisers = docs
       .map(d => {
         const t = totals.get(d._id.toString());
-        return presentFundraiser({ ...d, raisedAmount: t?.raised ?? 0, donationCount: t?.donations ?? 0 });
+        return presentFundraiser({ ...d, raisedAmount: t?.raised ?? 0, donationCount: t?.donations ?? 0, giftsToday: t?.giftsToday ?? 0, lastGiftAt: t?.lastGiftAt ?? null });
       })
       // Pinned first (newest pin first), then newest campaigns.
       .sort((a, b) => {

@@ -39,7 +39,8 @@ export interface WatchView {
   donor: string;
   recipient: string;
   status: WatchStatus;
-  found: { txHash: string; amount: number }[];
+  /** giftId is the donation's record id, used for its public /gift share page. */
+  found: { txHash: string; amount: number; giftId: string | null }[];
   expiresAt: string;
   createdAt: string;
 }
@@ -190,10 +191,10 @@ export async function viewWatches(watches: IDonationWatch[]): Promise<WatchView[
   if (!watches.length) return [];
   const [campaigns, donations] = await Promise.all([
     Fundraiser.find({ _id: { $in: watches.map((w) => w.fundraiserId) } }).select('title').lean<{ _id: Types.ObjectId; title: string }[]>(),
-    Transaction.find({ txnHash: { $in: watches.flatMap((w) => w.foundTxHashes) } }).select('txnHash amount').lean<{ txnHash: string; amount: number }[]>(),
+    Transaction.find({ txnHash: { $in: watches.flatMap((w) => w.foundTxHashes) } }).select('txnHash amount').lean<{ _id: Types.ObjectId; txnHash: string; amount: number }[]>(),
   ]);
   const titles = new Map(campaigns.map((c) => [c._id.toString(), c.title]));
-  const amounts = new Map(donations.map((d) => [d.txnHash, d.amount]));
+  const byHash = new Map(donations.map((d) => [d.txnHash, d]));
 
   return watches.map((w) => ({
     id: String(w._id),
@@ -202,7 +203,7 @@ export async function viewWatches(watches: IDonationWatch[]): Promise<WatchView[
     donor: w.donor,
     recipient: w.recipient,
     status: w.status,
-    found: w.foundTxHashes.map((h) => ({ txHash: h, amount: amounts.get(h) ?? 0 })),
+    found: w.foundTxHashes.map((h) => ({ txHash: h, amount: byHash.get(h)?.amount ?? 0, giftId: byHash.get(h)?._id.toString() ?? null })),
     expiresAt: w.expiresAt.toISOString(),
     createdAt: w.createdAt.toISOString(),
   }));

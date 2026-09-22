@@ -17,6 +17,7 @@ import type { FundraiserView } from '@/types/fundraiser';
 import { ROBINHOOD_CHAIN_ID, ROBINHOOD_CHAIN_NAME, normalizeAddress } from '@/lib/chain/network';
 import { formatAmount, shortAddress } from '@/lib/format';
 import { useWatches } from '@/components/donations/WatchProvider';
+import { ShareGift } from '@/components/donations/ShareGift';
 import { CopyButton, Notice, Pill, inputClass, primaryButtonClass } from './ui';
 import { errorMessage } from '@/lib/errors';
 
@@ -49,6 +50,7 @@ export function DonatePanel({ fundraiser }: { fundraiser: FundraiserView }) {
   const open = mine.find((w) => w.status === 'watching' || w.status === 'needs_archive');
   const found = mine.filter((w) => w.status === 'found');
   const givenTotal = found.reduce((sum, w) => sum + w.found.reduce((s, d) => s + d.amount, 0), 0);
+  const latestGiftId = found.flatMap((w) => w.found).reverse().find((d) => d.giftId)?.giftId ?? null;
   const typed = address ?? (changing ? '' : lastDonor ?? '');
   const valid = normalizeAddress(typed);
 
@@ -127,9 +129,12 @@ export function DonatePanel({ fundraiser }: { fundraiser: FundraiserView }) {
   return (
     <form onSubmit={start} className="space-y-4">
       {found.length && !changing ? (
-        <Notice tone="success" className="flex items-start gap-2">
-          <CheckCircle2 size={16} className="mt-0.5 shrink-0" />
-          <span>You&rsquo;ve given {formatAmount(givenTotal, 'ETH')} to this campaign — thank you! You can give again below.</span>
+        <Notice tone="success" className="space-y-3">
+          <span className="flex items-start gap-2">
+            <CheckCircle2 size={16} className="mt-0.5 shrink-0" />
+            <span>You&rsquo;ve given {formatAmount(givenTotal, 'ETH')} to this campaign — thank you! You can give again below.</span>
+          </span>
+          {latestGiftId ? <ShareGift giftId={latestGiftId} amount={givenTotal} title={fundraiser.title} className="pl-6" /> : null}
         </Notice>
       ) : null}
 

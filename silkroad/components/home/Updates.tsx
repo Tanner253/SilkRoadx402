@@ -9,12 +9,14 @@ export function Updates() {
     {
       date: 'September 2026',
       version: 'v2.2',
-      title: 'Live gifts, top donors and coin campaigns',
+      title: 'Live gifts, gift cards and trending campaigns',
       items: [
         'A live tape of the latest gifts runs across the top of every page — every entry is a verified on-chain donation',
         'New Top donors leaderboard: the most generous wallets, ranked by verified ETH given. Give to climb',
         'Raising for a coin community? Paste its contract address and the campaign fills itself in from the chain — name, logo, story and socials',
         'Campaigns close to their goal now say exactly how little is left to go',
+        'Share your gift: once your donation is verified, post it to X with a card showing what you gave and to whom',
+        'Campaigns now sort by Trending — the ones people are giving to right now rise to the top',
       ],
     },
     {

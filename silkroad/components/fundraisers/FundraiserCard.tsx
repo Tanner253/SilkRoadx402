@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { Pin } from 'lucide-react';
+import { Flame, Pin } from 'lucide-react';
 import type { FundraiserView } from '@/types/fundraiser';
 import { goalOf } from '@/types/fundraiser';
 import { formatAmount, goalNudge, percentRaised } from '@/lib/format';
@@ -28,6 +28,11 @@ export function FundraiserCard({ fundraiser: f }: { fundraiser: FundraiserView }
             </Pill>
           ) : null}
           {legacy ? <Pill className="bg-muted text-muted-foreground">Solana · closed</Pill> : null}
+          {f.giftsToday ? (
+            <Pill className="bg-[#2c3a27] text-[#c9f07a]">
+              <Flame size={11} /> {f.giftsToday} gift{f.giftsToday === 1 ? '' : 's'} today
+            </Pill>
+          ) : null}
         </div>
         <h3 className="mb-2 line-clamp-2 text-lg font-medium leading-snug tracking-[-0.01em] text-foreground">{f.title}</h3>
         <p className="mb-5 line-clamp-2 text-sm leading-relaxed text-muted-foreground">{f.description}</p>

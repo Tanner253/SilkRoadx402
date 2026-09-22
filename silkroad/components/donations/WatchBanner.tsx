@@ -13,6 +13,7 @@ import { useState } from 'react';
 import { CheckCircle2, Clock, Loader2, RefreshCw, X } from 'lucide-react';
 import { formatAmount, shortAddress } from '@/lib/format';
 import { useWatches, type Watch } from './WatchProvider';
+import { ShareGift } from './ShareGift';
 
 function Row({ watch }: { watch: Watch }) {
   const { checkNow, dismiss, acknowledge } = useWatches();
@@ -20,6 +21,7 @@ function Row({ watch }: { watch: Watch }) {
   const pathname = usePathname();
   const onCampaign = pathname === `/fundraisers/${watch.fundraiserId}`;
   const total = watch.found.reduce((sum, d) => sum + d.amount, 0);
+  const latestGift = [...watch.found].reverse().find((d) => d.giftId);
   const campaign = onCampaign ? (
     <strong className="font-medium">{watch.fundraiserTitle}</strong>
   ) : (
@@ -35,9 +37,12 @@ function Row({ watch }: { watch: Watch }) {
         <p className="flex-1">
           Thank you — your {formatAmount(total, 'ETH')} donation to {campaign} is verified and counted.
         </p>
-        <button type="button" onClick={() => acknowledge(watch.id)} className="shrink-0 rounded-md px-2 py-1 text-xs font-medium hover:bg-black/5">
-          Done
-        </button>
+        <div className="flex shrink-0 flex-wrap items-center justify-end gap-1.5">
+          {latestGift?.giftId ? <ShareGift giftId={latestGift.giftId} amount={total} title={watch.fundraiserTitle} tone="dark" /> : null}
+          <button type="button" onClick={() => acknowledge(watch.id)} className="rounded-md px-2 py-1 text-xs font-medium hover:bg-black/5">
+            Done
+          </button>
+        </div>
       </div>
     );
   }

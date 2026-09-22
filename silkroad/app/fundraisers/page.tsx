@@ -5,11 +5,43 @@ import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { ArrowUpRight, Search } from 'lucide-react';
 import { FUNDRAISER_CATEGORIES } from '@/config/constants';
-import type { FundraiserView } from '@/types/fundraiser';
+import { goalOf, type FundraiserView } from '@/types/fundraiser';
+import { percentRaised } from '@/lib/format';
 import { FundraiserCard } from '@/components/fundraisers/FundraiserCard';
 import { Notice, PageIntro, inputClass, primaryButtonClass } from '@/components/fundraisers/ui';
 import { Reveal } from '@/components/motion/Reveal';
 import { errorMessage } from '@/lib/errors';
+
+const time = (value: string | null | undefined) => (value ? new Date(value).getTime() : 0);
+const progress = (f: FundraiserView) => percentRaised(f.raisedAmount, goalOf(f));
+const pinnedFirst = (a: FundraiserView, b: FundraiserView) => Number(!!b.pinned) - Number(!!a.pinned);
+
+/**
+ * Trending: campaigns people are giving to right now rise to the top —
+ * most gifts in the last 24 hours, then the most recent gift, then newest.
+ */
+const SORTS = {
+  trending: {
+    label: 'Trending',
+    compare: (a: FundraiserView, b: FundraiserView) =>
+      pinnedFirst(a, b) ||
+      (b.giftsToday ?? 0) - (a.giftsToday ?? 0) ||
+      time(b.lastGiftAt) - time(a.lastGiftAt) ||
+      time(b.createdAt) - time(a.createdAt),
+  },
+  newest: { label: 'Newest', compare: (a: FundraiserView, b: FundraiserView) => time(b.createdAt) - time(a.createdAt) },
+  raised: { label: 'Most raised', compare: (a: FundraiserView, b: FundraiserView) => (b.raisedAmount ?? 0) - (a.raisedAmount ?? 0) },
+  close: {
+    label: 'Almost funded',
+    // Closest to the goal first; campaigns already past it go last.
+    compare: (a: FundraiserView, b: FundraiserView) => {
+      const pa = progress(a) >= 100 ? -1 : progress(a);
+      const pb = progress(b) >= 100 ? -1 : progress(b);
+      return pb - pa;
+    },
+  },
+} as const;
+type SortKey = keyof typeof SORTS;
 
 function CampaignsContent() {
   const searchParams = useSearchParams();
@@ -18,6 +50,7 @@ function CampaignsContent() {
   const [error, setError] = useState<string | null>(null);
   const [category, setCategory] = useState<string>('All');
   const [query, setQuery] = useState(searchParams.get('wallet') ?? '');
+  const [sort, setSort] = useState<SortKey>('trending');
 
   useEffect(() => {
     let cancelled = false;
@@ -44,12 +77,13 @@ function CampaignsContent() {
 
   const visible = useMemo(() => {
     const q = query.trim().toLowerCase();
-    return fundraisers.filter(
+    const matches = fundraisers.filter(
       (f) =>
         (category === 'All' || f.category === category) &&
         (!q || f.title.toLowerCase().includes(q) || f.description.toLowerCase().includes(q) || f.wallet.toLowerCase().includes(q)),
     );
-  }, [fundraisers, category, query]);
+    return [...matches].sort(SORTS[sort].compare);
+  }, [fundraisers, category, query, sort]);
 
   return (
     <div className="mx-auto max-w-[1240px] px-6 pb-24 md:px-8">
@@ -87,16 +121,28 @@ function CampaignsContent() {
             );
           })}
         </div>
-        <label className="relative w-full md:w-72">
-          <Search size={15} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
-          <span className="sr-only">Search campaigns</span>
-          <input
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            placeholder="Search by title or address"
-            className={`${inputClass} pl-9`}
-          />
-        </label>
+        <div className="flex w-full gap-2 md:w-auto">
+          <label className="relative min-w-0 flex-1 md:w-64 md:flex-none">
+            <Search size={15} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+            <span className="sr-only">Search campaigns</span>
+            <input
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder="Search by title or address"
+              className={`${inputClass} pl-9`}
+            />
+          </label>
+          <label className="shrink-0">
+            <span className="sr-only">Sort campaigns</span>
+            <select value={sort} onChange={(e) => setSort(e.target.value as SortKey)} className={`${inputClass} w-auto pr-8`}>
+              {(Object.keys(SORTS) as SortKey[]).map((key) => (
+                <option key={key} value={key}>
+                  {SORTS[key].label}
+                </option>
+              ))}
+            </select>
+          </label>
+        </div>
       </div>
 
       {error ? (

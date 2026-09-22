@@ -13,6 +13,9 @@ export interface FundraiserView {
   price?: number;
   raisedAmount?: number;
   donationCount?: number;
+  /** Gifts in the last 24 hours (list endpoint only). */
+  giftsToday?: number;
+  lastGiftAt?: string | null;
   network: 'solana' | 'robinhood';
   currency: 'USDC' | 'ETH';
   state: 'in_review' | 'on_market' | 'pulled';
