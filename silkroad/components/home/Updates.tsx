@@ -4,8 +4,7 @@
  * Manually maintained list of platform updates
  */
 
-export function Updates() {
-  const updates = [
+export const UPDATES = [
     {
       date: 'September 2026',
       version: 'v2.2',
@@ -53,11 +52,15 @@ export function Updates() {
         'Campaigns from this era have been retired',
       ],
     },
-  ];
+];
 
+/** Newest release; the nav shows a "new" dot until the visitor has seen it. */
+export const LATEST_UPDATE = UPDATES[0].version;
+
+export function Updates() {
   return (
     <ol className="space-y-10">
-      {updates.map((update) => (
+      {UPDATES.map((update) => (
         <li key={update.version} className="grid gap-3 border-t border-border pt-8 md:grid-cols-[160px_minmax(0,1fr)] md:gap-10">
           <div>
             <p className="text-sm font-medium text-foreground">{update.version}</p>

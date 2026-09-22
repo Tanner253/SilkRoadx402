@@ -1,17 +1,61 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useSyncExternalStore } from 'react';
 import Link from 'next/link';
 import { useActiveUsers } from '@/hooks/useActiveUsers';
 import { usePathname } from 'next/navigation';
 import { DonationTicker } from '@/components/donations/DonationTicker';
+import { LATEST_UPDATE } from '@/components/home/Updates';
 
 const X_COMMUNITY_URL = process.env.NEXT_PUBLIC_X_COMMUNITY_URL || 'https://x.com/OpenFundPons';
+
+const SEEN_KEY = 'openfund.updatesSeen';
+const SEEN_EVENT = 'openfund:updates-seen';
+
+function subscribeSeen(onChange: () => void) {
+  window.addEventListener('storage', onChange);
+  window.addEventListener(SEEN_EVENT, onChange);
+  return () => {
+    window.removeEventListener('storage', onChange);
+    window.removeEventListener(SEEN_EVENT, onChange);
+  };
+}
+
+/** Last release this browser has seen; storage blocked counts as seen (no permanent dot). */
+function readSeen(): string | null {
+  try {
+    return localStorage.getItem(SEEN_KEY);
+  } catch {
+    return LATEST_UPDATE;
+  }
+}
+
+function NewDot() {
+  return (
+    <span className="absolute -right-2.5 -top-1 flex h-2 w-2" aria-label="New update">
+      <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-[#7fae3f] opacity-60 motion-reduce:hidden" />
+      <span className="relative inline-flex h-2 w-2 rounded-full bg-[#7fae3f]" />
+    </span>
+  );
+}
 
 export function Navbar() {
   const activeUsers = useActiveUsers();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const pathname = usePathname();
+
+  // "New" marker on Updates until this browser has seen the latest release.
+  const seenUpdate = useSyncExternalStore(subscribeSeen, readSeen, () => LATEST_UPDATE);
+  const hasNewUpdate = seenUpdate !== LATEST_UPDATE;
+  useEffect(() => {
+    if (pathname !== '/updates') return;
+    try {
+      localStorage.setItem(SEEN_KEY, LATEST_UPDATE);
+      window.dispatchEvent(new Event(SEEN_EVENT));
+    } catch {
+      /* storage blocked — readSeen already hides the marker */
+    }
+  }, [pathname]);
 
   // Close the mobile menu on navigation (adjusting state during render, per
   // React's guidance, instead of a setState-in-effect).
@@ -84,6 +128,10 @@ export function Navbar() {
             <Link href="/fundraisers/my" className={`text-sm font-medium transition-colors ${pathname === '/fundraisers/my' ? 'text-primary' : 'text-foreground hover:text-foreground'}`}>
               My fundraisers
             </Link>
+            <Link href="/updates" className={`relative text-sm font-medium transition-colors ${pathname === '/updates' ? 'text-primary' : 'text-foreground hover:text-foreground'}`}>
+              Updates
+              {hasNewUpdate ? <NewDot /> : null}
+            </Link>
           </div>
 
           {/* Right side */}
@@ -136,6 +184,7 @@ export function Navbar() {
                   { href: '/leaderboard', label: 'Leaderboard' },
                   { href: '/fundraisers/new', label: 'Start a fundraiser' },
                   { href: '/fundraisers/my', label: 'My fundraisers' },
+                  { href: '/updates', label: 'Updates' },
                 ].map(({ href, label }) => (
                   <Link
                     key={href}
@@ -147,6 +196,7 @@ export function Navbar() {
                     }`}
                   >
                     {label}
+                    {href === '/updates' && hasNewUpdate ? <span className="rounded-full bg-[#2c3a27] px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-[#c9f07a]">New</span> : null}
                   </Link>
                 ))}
               </nav>
@@ -155,7 +205,6 @@ export function Navbar() {
               <div className="pt-4 border-t border-border flex flex-col space-y-1">
                 {[
                   { href: '/faq', label: 'FAQ', external: false },
-                  { href: '/updates', label: 'Updates', external: false },
                   ...(X_COMMUNITY_URL ? [{ href: X_COMMUNITY_URL, label: 'Community (X)', external: true }] : []),
                 ].map(({ href, label, external }) => (
                   external ? (
